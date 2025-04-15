@@ -488,11 +488,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\ADPROJECT\\LibraryManagmentSystem\\server\\server.csproj",
+      "projectUniqueName": "D:\\LibraryMangementSystem\\server\\server.csproj",
       "projectName": "server",
-      "projectPath": "D:\\ADPROJECT\\LibraryManagmentSystem\\server\\server.csproj",
+      "projectPath": "D:\\LibraryMangementSystem\\server\\server.csproj",
       "packagesPath": "C:\\Users\\aayus\\.nuget\\packages\\",
-      "outputPath": "D:\\ADPROJECT\\LibraryManagmentSystem\\server\\obj\\",
+      "outputPath": "D:\\LibraryMangementSystem\\server\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
