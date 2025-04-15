@@ -482,23 +482,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\aayus\\.nuget\\packages\\": {},
+    "C:\\Users\\sameer\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\ADPROJECT\\LibraryManagmentSystem\\server\\server.csproj",
+      "projectUniqueName": "C:\\AD Retail Book Store\\LibraryMangementSystem\\server\\server.csproj",
       "projectName": "server",
-      "projectPath": "D:\\ADPROJECT\\LibraryManagmentSystem\\server\\server.csproj",
-      "packagesPath": "C:\\Users\\aayus\\.nuget\\packages\\",
-      "outputPath": "D:\\ADPROJECT\\LibraryManagmentSystem\\server\\obj\\",
+      "projectPath": "C:\\AD Retail Book Store\\LibraryMangementSystem\\server\\server.csproj",
+      "packagesPath": "C:\\Users\\sameer\\.nuget\\packages\\",
+      "outputPath": "C:\\AD Retail Book Store\\LibraryMangementSystem\\server\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\aayus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\sameer\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -560,7 +560,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
