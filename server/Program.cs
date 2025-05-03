@@ -4,7 +4,7 @@ using server.Entities;
 using server.Database;
 using server.Services.Interface;
 using server.Services;
-
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +31,8 @@ builder.Services.AddIdentityApiEndpoints<User>(opt =>
     opt.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
-
+Env.Load();
+builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
