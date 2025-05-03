@@ -400,4 +400,6 @@ server/.env
 *.sln.iml
 .vs
 .vscode
-server/obj
+server/obj/Debug
+server/obj/Debug/net8.0/server.AssemblyInfo.cs
+server/obj/Debug/net8.0/server.AssemblyInfoInputs.cache
