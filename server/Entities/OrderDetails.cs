@@ -9,22 +9,19 @@ using server.Entities.Enum;
 
 namespace server.Entities {
     public class OrderDetails {
-        [Required]
         [Key]
         public Guid OrderDetailsId {get; set;}
 
-        [Required]
         [ForeignKey("OrderId")]
-        public Guid OrderId {get; set;}
-
-        [Required]
+        [ValidateNever]
+        public Order Order {get; set;}
+        public Guid OrderId { get; set; }
+        
         [ForeignKey("BookId")]
-        public Guid BookId {get; set;}
-
-        [Required]
+        [ValidateNever]
+        public Book Book {get; set;}
+        public Guid BookId { get; set; }
         public int OrderQuantity {get; set;}
-
-        [Required]
-        public decimal OrderedPrice {get; set;}
+        public double Price {get; set;}
     }
 }

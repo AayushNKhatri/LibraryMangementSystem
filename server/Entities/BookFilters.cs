@@ -11,17 +11,16 @@ namespace server.Entities
 {
     public class BookFilters
     {
+        [Key]
+        public Guid BookFilterID { get; set; }
          public Guid BookId { get; set; }
         [ForeignKey("BookId")]
         [ValidateNever]
         public Book Book { get; set; }
-
         [Required]
         public Category Category {get; set;}
-
         [Required]
         public Genre Genre {get; set;}
-
         [Required]
         public Format Format {get; set;}
     }

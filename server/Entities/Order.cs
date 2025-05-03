@@ -9,13 +9,12 @@ using server.Entities.Enum;
 
 namespace server.Entities {
     public class Order {
-        [Required]
         [Key]
         public Guid OrderId {get; set;}
-
-        [Required]
         [ForeignKey("UserId")]
-        public Guid UserId {get; set;}
+        [ValidateNever]
+        public User User {get; set;}
+        public string UserId {get; set;}
 
         [Required]
         public DateTime OrderDate{get; set;}
@@ -24,12 +23,12 @@ namespace server.Entities {
         public int BookCount {get; set;}
 
         [Required]
-        public decimal TotalAmt {get; set;}
+        public double TotalAmount {get; set;}
 
         [Required]
         public OrderStatus OrderStatus {get; set;}
 
         [Required]
-        public decimal DiscountApplied {get; set;}
+        public int DiscountApplied {get; set;}
     }
 }

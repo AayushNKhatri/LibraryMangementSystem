@@ -19,5 +19,4 @@ namespace server.Database
         public DbSet<User> Users {get; set;}
         public DbSet<Announcement> Announcements {get; set;}
     }
-
 }

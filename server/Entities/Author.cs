@@ -9,11 +9,10 @@ using server.Entities.Enum;
 
 namespace server.Entities {
     public class Author {
-        [Required]
         [Key]
         public Guid AuthorId {get; set;}
 
         [Required]
-        public string AuthorName {get; set;} = string.Empty;
+        public string AuthorName {get; set;}
     }
 }

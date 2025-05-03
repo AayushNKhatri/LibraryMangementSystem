@@ -11,7 +11,6 @@ namespace server.Entities
 {
     public class Book
     {
-        [Required]
         [Key]
         public Guid BookId { get; set; } 
         [Required]
@@ -26,8 +25,11 @@ namespace server.Entities
         [Required]
         public BookLanguage Language { get; set; }
         [Required]
+        public double Price {get; set;}
+        [Required]
         public DateTime PublicationDate { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+        [Required]
         public Status Status { get; set; }
     }
 }

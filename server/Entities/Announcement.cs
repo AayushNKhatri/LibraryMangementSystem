@@ -9,10 +9,8 @@ using server.Entities.Enum;
 
 namespace server.Entities {
     public class Announcement {
-        [Required]
         [Key]
         public Guid AnnouncementId {get; set;}
-
         [Required]
         public AnnouncementType AnnouncementType {get; set;}
 

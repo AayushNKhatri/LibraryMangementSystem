@@ -1,24 +1,21 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using server.Entities.Enum;
-
 
 namespace server.Entities {
-    public class Cart {
-        [Required]
+    public class Cart 
+    {
+        [Key]
+        public Guid CartId { get; set; }
         [ForeignKey("UserId")]
-        public Guid UserId {get; set;}
-
-        [Required]
+        [ValidateNever]
+        public User User {get; set; }
+        public string UserId {get; set;}
         [ForeignKey("BookId")]
-
+        [ValidateNever]
+        public Book Book {get; set;}
         public Guid BookId {get; set;}
-        [Required]
-        public int CartQuantity {get; set;}
+        [Range(1,100,ErrorMessage =("Invalid: Enter number from 1 and 100"))]
+        public int Count {get; set;}
     }
 }

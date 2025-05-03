@@ -9,22 +9,23 @@ using server.Entities.Enum;
 
 namespace server.Entities {
     public class Review {
-        [Required]
         [Key]
         public Guid ReviewId {get; set;}
 
-        [Required]
         [ForeignKey("UserId")]
-        public Guid UserId {get; set;}
+        [ValidateNever]
+        public User User {get; set;}
+        public string UserId { get; set; }
 
-        [Required]
         [ForeignKey("BookId")]
-        public Guid BookId {get; set;}
+         [ValidateNever]
+        public Book Book {get; set;}
+        public Guid BookId { get; set; }
 
         [Required]
         public int Rating {get; set;}
 
         [Required]
-        public string Comment {get; set;} = string.Empty;
+        public string Comment {get; set;}
     }
 }
