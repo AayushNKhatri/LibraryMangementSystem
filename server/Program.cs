@@ -31,8 +31,8 @@ builder.Services.AddIdentityApiEndpoints<User>(opt =>
     opt.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
-Env.Load();
-builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
+// Env.Load();
+// builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
