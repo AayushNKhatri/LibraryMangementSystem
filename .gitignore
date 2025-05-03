@@ -395,6 +395,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-
+server/.env
 # JetBrains Rider
 *.sln.iml
+.vs
+.vscode
+server/obj
