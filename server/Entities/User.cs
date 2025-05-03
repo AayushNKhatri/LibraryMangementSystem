@@ -7,13 +7,18 @@ namespace server.Entities
     [Table("User")]
     public class User : IdentityUser
     {
+        [Key]
+        public Guid UserId {get; set;}
+        public string FirstName { get; set; } = string.Empty;
 
-        public string FirstName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
-        public string LastName { get; set; }
+        public string Contact { get; set; } = string.Empty;
 
-        public string Contact { get; set; }
+        public string City { get; set; } = string.Empty;
 
-        public string City { get; set; }
+        public int succesfullOrderCount {get; set; } = 0;
+
+        public double stackableDiscount {get; set; };
     }
 }
