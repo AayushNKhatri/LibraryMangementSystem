@@ -1,6 +1,6 @@
 ﻿namespace server.Dtos
 {
-    public class InsertUserDto
+    public class UpdateUserDto
     {
         public string UserName { get; set; }
         public string FirstName { get; set; }
