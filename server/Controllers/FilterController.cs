@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using server.Dtos;
 using server.Database;
@@ -20,13 +21,51 @@ namespace server.Controllers
             _db = db;
         }
 
-        [HttpGet("/filter/{bookLanguange}")]
-        public IActionResult FilterBooksByLanguage(BookLanguage language) {
-            var filterByLanguage = _db.Books.Where(b => b.Language == language);
+        // GET Method for filter the books based on language
+        [HttpGet("/filter/language/{bookLanguange}")]
+        public async Task<IActionResult> FilterBooksByLanguage(BookLanguage language) {
+            var filterByLanguage = await _db.Books.Where(b => b.Language == language).ToListAsync();
             
             if (filterByLanguage == null) return NotFound("Sorry, we miss the language you are asking for");
 
             return Ok(filterByLanguage);
+        }
+
+
+        // GET Method for filter the books based on status
+        [HttpGet("/filter/status/{status}")]
+        public async Task<IActionResult> FilterBooksByStatus(Status status) {
+            var filterByStatus = _db.Books.Where(b => b.Status == status).ToListAsync();
+
+            if (filterByStatus == null) return NotFound("Sorry, please input valid statuses");
+
+            return Ok(filterByStatus);
+        }
+
+        // GET Method for filter the books based on category
+        [HttpGet("/filter/category/{category}")]
+        public async Task<IActionResult> FilterBooksByCategory(Category Category) {
+            var filterByCategory = await _db.BookFilters.Where(b => b.Category == Category).ToListAsync();
+
+            if (filterByCategory == null) return NotFound("Sorry, we don't have that category");
+
+            return Ok(filterByCategory);
+        }
+
+        // GET Method for filter the books based on genre
+        [HttpGet("/filter/genre/{genre}")]
+        public async Task<IActionResult> FilterBooksByGenre(Genre Genre) {
+            var filterByGenre = await _db.BookFilters.Where(b => b.Genre == Genre).ToListAsync();
+            if(filterByGenre == null) return NotFound("Sorry, we do not contain that genre right now");
+            return Ok(filterByGenre);
+        }
+
+        //GET Method for filter the books based on formats
+        [HttpGet("/filter/filter/{format}")]
+        public async Task<IActionResult> FilterBooksByFormat(Format format) {
+            var filterByFormat = await _db.BookFilters.Where(b => b.Format == format).ToListAsync();
+            if(filterByFormat == null) return NotFound("Sorry, we don't own that format of book");
+            return Ok(filterByFormat);
         }
     }
 }
