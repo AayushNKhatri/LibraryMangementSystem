@@ -403,3 +403,4 @@ server/.env
 server/obj/Debug
 server/obj/Debug/net8.0/server.AssemblyInfo.cs
 server/obj/Debug/net8.0/server.AssemblyInfoInputs.cache
+server/obj
