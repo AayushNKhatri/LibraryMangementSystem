@@ -11,12 +11,10 @@ using server.Services.Interface;
 
 namespace server.Services
 {
-    public class AnnouncementService: IAnnouncementService
+    public class AnnouncementService(ApplicationDbContext dbContext) : IAnnouncementService
     {
-        private readonly ApplicationDbContext _dbContext;
-        public AnnouncementService(ApplicationDbContext dbContext){
-            _dbContext = dbContext;
-        }
+        private readonly ApplicationDbContext _dbContext = dbContext;
+
         public async Task<Announcement> CreateAnnouncement(Announcement announcement){
             await _dbContext.Announcements.AddAsync(announcement);
             await _dbContext.SaveChangesAsync();
@@ -25,9 +23,7 @@ namespace server.Services
 
         public async Task<bool> DeleteAnnouncement(Guid id)
         {
-            var announcement = await _dbContext.Announcements.FirstOrDefaultAsync(x => x.AnnouncementId == id);
-            if (announcement == null)
-                throw new Exception("No Announcment found by that id");
+            var announcement = await _dbContext.Announcements.FirstOrDefaultAsync(x => x.AnnouncementId == id) ?? throw new Exception("No Announcment found by that id");
             _dbContext.Announcements.Remove(announcement);
             _dbContext.SaveChanges();
             return true;
@@ -46,10 +42,7 @@ namespace server.Services
 
         public async Task<Announcement> UpdateAnnouncement(CreateAnnouncementDTO createAnnouncement, Guid Id)
         {
-            var updateAnnouncement = await _dbContext.Announcements.FirstOrDefaultAsync(x => x.AnnouncementId == Id);
-            if (updateAnnouncement == null)
-                throw new Exception("No announcement found");
-
+            var updateAnnouncement = await _dbContext.Announcements.FirstOrDefaultAsync(x => x.AnnouncementId == Id) ?? throw new Exception("No announcement found");
             if (!string.IsNullOrEmpty(createAnnouncement.AnnouncementDescription))
                 updateAnnouncement.AnnouncementDescription = createAnnouncement.AnnouncementDescription;
 

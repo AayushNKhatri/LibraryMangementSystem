@@ -44,7 +44,7 @@ builder.Services.AddSwaggerGen(option =>
                     Id =  "Bearer"
                 }
              },[]
-        } 
+        }
     });
 });
 
@@ -86,6 +86,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IUserInterface, UserService>();
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
@@ -94,7 +95,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await SeedRoleService.SeedRolesAsync(roleManager);
+    await SeedRoleService.SeedAdminAsync(userManager, roleManager);
 }
 
 // Configure the HTTP request pipeline.
