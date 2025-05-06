@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Entities;
 using server.Database;
+using Microsoft.AspNetCore.Mvc;
 using server.Services.Interface;
 using server.Services;
 using DotNetEnv;
+using Microsoft.AspNetCore.SignalR;
+using SignalR.hub;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +25,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
     }
 );
-
+builder.Services.AddSignalR();
 builder.Services.AddIdentityApiEndpoints<User>(opt =>
 {
     opt.Password.RequiredLength = 8;
@@ -48,5 +51,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<NotificationHub>("/notificationhub");
 app.Run();
