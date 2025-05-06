@@ -18,7 +18,7 @@ namespace server.Entities
         public string City { get; set; }
         [Required]
         public string Street {get; set;}
-        public int succesfullOrderCount {get; set; }
-        public double stackableDiscount {get; set; }
+        public int succesfullOrderCount {get; set; } = 0;
+        public double stackableDiscount {get; set; } = 0;
     }
 }
