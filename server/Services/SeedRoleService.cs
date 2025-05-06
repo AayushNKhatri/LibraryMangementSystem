@@ -5,9 +5,9 @@ namespace server.Services
 {
     public class SeedRoleService
     {
-        public static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+        public static async Task SeedRoleAsync(RoleManager<IdentityRole> roleManager)
         {
-            if (!await roleManager.RoleExistsAsync("Admin"))
+             if (!await roleManager.RoleExistsAsync("Admin"))
             {
                 await roleManager.CreateAsync(new IdentityRole("Admin"));
             }

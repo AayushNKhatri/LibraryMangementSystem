@@ -1,18 +1,19 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Entities;
 using server.Database;
 using server.Services.Interface;
 using server.Services;
-using Microsoft.OpenApi.Models;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
@@ -54,12 +55,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     }
 );
 
-builder.Services.AddIdentity<User,IdentityRole>(opt =>
+builder.Services.AddIdentityApiEndpoints<User>(opt =>
 {
     opt.Password.RequiredLength = 8;
     opt.User.RequireUniqueEmail = true;
     opt.Password.RequireNonAlphanumeric = false;
-    opt.SignIn.RequireConfirmedEmail = false;
+    opt.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
@@ -96,7 +97,7 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    await SeedRoleService.SeedRolesAsync(roleManager);
+    await SeedRoleService.SeedRoleAsync(roleManager);
     await SeedRoleService.SeedAdminAsync(userManager, roleManager);
 }
 
@@ -107,9 +108,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
-app.UseAuthentication();
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
