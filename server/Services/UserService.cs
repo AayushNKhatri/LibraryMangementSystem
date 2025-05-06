@@ -10,6 +10,8 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace server.Services
 {
@@ -95,7 +97,6 @@ namespace server.Services
                 throw new Exception($"Email sending failed: {ex.Message}");
             }
         }
-
         //JWT token creating method
         public async Task<string> CreateJwtToken(User user)
         {
@@ -185,17 +186,38 @@ namespace server.Services
             }).ToList();
             return result;
         }
-        public GetAllUserDto GetById(Guid id)
+        public async Task<bool> updateUser(string userId, UpdateUserDto updateUserDto)
         {
-            throw new NotImplementedException();
+            var userFromDb = await _context.Users.FirstOrDefaultAsync(u=>u.Id == userId);
+
+            if(userFromDb == null)
+            {
+                throw new Exception("User not found");
+            }
+            _context.Entry(userFromDb).CurrentValues.SetValues(updateUserDto);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<string> ForgotPassword(ForgetPasswordDto forgetPassword)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == forgetPassword.Email);
+            if(user == null){
+                throw new Exception("Email not found");
+            }
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var confirmationLink = $"http://localhost:5129/api/User/forgot-password?userId={user.Id}&token={encodedToken}";
+            _logger.LogInformation($"Confirmation Link: {confirmationLink}");
+            var emailMessage = $@"
+                                <h2>Hi {user.FirstName},</h2>
+                                <p>Please click the link to reset your password:</p>
+                                <a href='{confirmationLink}'>Reset Password</a>";
+
+                await _emailSender.SendEmailAsync(user.Email, "Reset Your Password", emailMessage);
+                return encodedToken;
         }
 
-        public void DeleteUser(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void updateUser(Guid id, UpdateUserDto updateUserDto)
+        public void DeleteUser(string userId)
         {
             throw new NotImplementedException();
         }

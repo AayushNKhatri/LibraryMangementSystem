@@ -1,4 +1,5 @@
-﻿using server.Dtos;
+﻿using Microsoft.AspNetCore.Mvc;
+using server.Dtos;
 using server.Entities;
 namespace server.Services.Interface
 {
@@ -9,8 +10,8 @@ namespace server.Services.Interface
         Task<string> Login(LoginDto request);
         Task<string> CreateJwtToken(User user);
         Task<List<GetAllUserDto>> GetAllUsers();
-        GetAllUserDto GetById(Guid id);
-        void DeleteUser(Guid id);
-        void updateUser(Guid id, UpdateUserDto updateUserDto);
+        void DeleteUser(string userId);
+        Task<bool> updateUser(string userId, UpdateUserDto updateUserDto);
+        Task<string> ForgotPassword([FromBody] ForgetPasswordDto forgetPassword);
     }
 }

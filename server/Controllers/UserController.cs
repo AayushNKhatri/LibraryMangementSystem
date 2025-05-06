@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace server.Controllers
 {
     [ApiController]
     [Route("api/User")]
-    public class UserController(IUserInterface userServices, UserManager<User> _userManager) : Controller
+    public class UserController(IUserInterface userServices, UserManager<User> _userManager, ILogger<User> _logger) : Controller
     {
         [HttpPost("Register-User")]
 
@@ -67,6 +68,70 @@ namespace server.Controllers
                 return Ok("Email confirmed successfully!");
             else
                 return BadRequest("Email confirmation failed.");
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Forgot-Password")]
+        public async Task<IActionResult> RequestPasswordReset([FromBody] ForgetPasswordDto forgetPassword)
+        {
+            try
+            {
+                await userServices.ForgotPassword(forgetPassword); 
+                return Ok("Password reset email sent.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPassword, [FromQuery] string token)
+        {
+            try
+            {
+                     var user = await _userManager.FindByEmailAsync(resetPassword.Email);
+            if(user == null)
+            {
+                return BadRequest("User not found! Invalid Email Address");
+            }
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPassword.NewPassword);
+            if(result.Succeeded)
+            {
+                return Ok("Password Successfully Reset");
+            }
+            else
+            {
+                return BadRequest($"Password Reset Failed");
+            }
+
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Password Reset Failed {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpPut("update-user/{userId}")]
+        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDto updateUser)
+        {
+            try
+            {
+            var user = _userManager.FindByIdAsync(userId);
+            if(user == null) return BadRequest("User not found");
+            var result = await userServices.updateUser(userId, updateUser);
+            if(result)
+            {
+                return Ok("User Updated Successfully");
+            }
+            return BadRequest("User not updated");
+            }
+            catch(Exception ex){
+                throw new Exception($"Update Failed {ex.Message}");
+            }
         }
     }
 }
