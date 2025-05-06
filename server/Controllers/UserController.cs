@@ -1,16 +1,19 @@
-﻿using System.Security.Claims;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using server.Dtos;
+using server.Entities;
 using server.Services.Interface;
 
 namespace server.Controllers
 {
     [ApiController]
     [Route("api/User")]
-    public class UserController(IUserInterface userServices) : Controller
+    public class UserController(IUserInterface userServices, UserManager<User> _userManager) : Controller
     {
-        [HttpPost("RegisterUser")]
+        [HttpPost("Register-User")]
 
         public async Task<IActionResult> AddUser([FromBody] InsertUserDto userDto)
         {
@@ -36,7 +39,7 @@ namespace server.Controllers
         }
 
         [Authorize]
-        [HttpPost("GetUser")]
+        [HttpPost("Get-User")]
         public async Task<IActionResult> GetAllUser()
         {   
             try{
@@ -50,6 +53,20 @@ namespace server.Controllers
             catch(Exception ex){
                 throw new Exception($"Error fetching User:{ex.Message}");
             }
+        }
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return BadRequest("Invalid user ID");
+
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (result.Succeeded)
+                return Ok("Email confirmed successfully!");
+            else
+                return BadRequest("Email confirmation failed.");
         }
     }
 }

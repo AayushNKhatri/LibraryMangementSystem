@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using SendGrid.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,7 +61,7 @@ builder.Services.AddIdentity<User,IdentityRole>(opt =>
     opt.Password.RequiredLength = 8;
     opt.User.RequireUniqueEmail = true;
     opt.Password.RequireNonAlphanumeric = false;
-    opt.SignIn.RequireConfirmedEmail = false;
+    opt.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
@@ -87,6 +89,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IUserInterface, UserService>();
 
+builder.Services.AddTransient<IEmailSender, EmailSenderService>();
+
+builder.Services.AddSendGrid(options =>
+    options.ApiKey = builder.Configuration["Sendgrid:SendGridKey"]!
+);
+
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
 var app = builder.Build();
@@ -94,7 +102,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    await SeedRoleService.SeedRolesAsync(roleManager);
+    await SeedRoleService.SeedRoleAsync(roleManager);
 }
 
 // Configure the HTTP request pipeline.

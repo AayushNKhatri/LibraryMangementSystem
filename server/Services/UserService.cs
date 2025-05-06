@@ -8,7 +8,8 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace server.Services
 {
@@ -19,17 +20,23 @@ namespace server.Services
         private readonly ILogger<User> _logger;
         private readonly ApplicationDbContext _context; 
         private readonly IConfiguration _configuration;
-
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, ApplicationDbContext context, IConfiguration configuration, ILogger<User> logger)
+        private readonly IEmailSender _emailSender;
+        public UserService(UserManager<User> userManager, 
+                           SignInManager<User> signInManager, 
+                           ApplicationDbContext context, 
+                           IConfiguration configuration, 
+                           ILogger<User> logger, 
+                           IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
             _logger = logger;
             _configuration = configuration;
+            _emailSender = emailSender;
         }
-
-        public async Task RegisterUser(InsertUserDto registerUser)
+        //user registration method
+        public async Task<string> RegisterUser(InsertUserDto registerUser)
         {
             try
             {
@@ -53,6 +60,8 @@ namespace server.Services
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(userModel,"User");
+                    var emailConformationToken =  await SendEmailConformation(userModel);
+                    return emailConformationToken;
                 }
                 else
                 {
@@ -64,7 +73,31 @@ namespace server.Services
                 throw new Exception("Registration Failed:" + ex.Message);
             } 
         }
-        public async Task<string> CreateToken(User user)
+        //send conformation email method
+        public async Task<string> SendEmailConformation(User user)
+        {
+            try
+            {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                var confirmationLink = $"http://localhost:5129/api/User/confirm-email?userId={user.Id}&token={encodedToken}";
+                _logger.LogInformation($"Confirmation Link: {confirmationLink}");
+                var emailMessage = $@"
+                                    <h2>Hi {user.FirstName},</h2>
+                                    <p>Thank you for registering. Please confirm your email by clicking the link below:</p>
+                                    <a href='{confirmationLink}'>Confirm Email</a>";
+
+                await _emailSender.SendEmailAsync(user.Email, "Confirm Your Email", emailMessage);
+                return encodedToken;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Email sending failed: {ex.Message}");
+            }
+        }
+
+        //JWT token creating method
+        public async Task<string> CreateJwtToken(User user)
         {
             if (string.IsNullOrEmpty(user.Id))
             {
@@ -106,7 +139,8 @@ namespace server.Services
             );
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
-              public async Task<string> Login(LoginDto request)
+        //user login method
+        public async Task<string> Login(LoginDto request)
         {
             try
             {
@@ -119,7 +153,7 @@ namespace server.Services
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in successfully.");
-                    return await CreateToken(user);
+                    return await CreateJwtToken(user);
                 }
                 else
                 {
@@ -131,6 +165,7 @@ namespace server.Services
                 throw new Exception("Login failed: " + ex.Message);
             }
         }
+        //get all user method
         public async Task<List<GetAllUserDto>> GetAllUsers()
         {
             var users = await _context.Users.ToListAsync();
