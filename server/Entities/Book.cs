@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using server.Entities.Enum;
 
 namespace server.Entities
@@ -31,5 +25,10 @@ namespace server.Entities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         [Required]
         public Status Status { get; set; }
+
+ // Prevent back-reference from being serialized
+        public virtual ICollection<BookInventory> Inventories { get; set; }
+
+        public virtual ICollection<BookFilters> Filters { get; set; }
     }
 }
