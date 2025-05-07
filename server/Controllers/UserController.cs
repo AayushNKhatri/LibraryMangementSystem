@@ -91,21 +91,21 @@ namespace server.Controllers
         {
             try
             {
-                     var user = await _userManager.FindByEmailAsync(resetPassword.Email);
-            if(user == null)
-            {
-                return BadRequest("User not found! Invalid Email Address");
-            }
-            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
-            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPassword.NewPassword);
-            if(result.Succeeded)
-            {
-                return Ok("Password Successfully Reset");
-            }
-            else
-            {
-                return BadRequest($"Password Reset Failed");
-            }
+                var user = await _userManager.FindByEmailAsync(resetPassword.Email);
+                if(user == null)
+                {
+                    return BadRequest("User not found! Invalid Email Address");
+                }
+                var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPassword.NewPassword);
+                if(result.Succeeded)
+                {
+                    return Ok("Password Successfully Reset");
+                }
+                else
+                {
+                    return BadRequest($"Password Reset Failed");
+                }
 
             }
             catch(Exception ex)

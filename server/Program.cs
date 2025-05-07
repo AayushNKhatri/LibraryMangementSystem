@@ -89,7 +89,10 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IUserInterface, UserService>();
 
+builder.Services.AddScoped<IOrederInterface, OrderService>();
+
 builder.Services.AddTransient<IEmailSender, EmailSenderService>();
+
 
 builder.Services.AddSendGrid(options =>
     options.ApiKey = builder.Configuration["Sendgrid:SendGridKey"]!

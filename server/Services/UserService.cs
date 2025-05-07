@@ -10,8 +10,6 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace server.Services
 {
@@ -189,7 +187,6 @@ namespace server.Services
         public async Task<bool> updateUser(string userId, UpdateUserDto updateUserDto)
         {
             var userFromDb = await _context.Users.FirstOrDefaultAsync(u=>u.Id == userId);
-
             if(userFromDb == null)
             {
                 throw new Exception("User not found");
