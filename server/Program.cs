@@ -1,20 +1,16 @@
-using Microsoft.EntityFrameworkCore;
 using server.Entities;
 using server.Database;
-using Microsoft.AspNetCore.Mvc;
 using server.Services.Interface;
 using server.Services;
-
-using DotNetEnv;
-using Microsoft.AspNetCore.SignalR;
 using SignalR.hub;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -59,9 +55,6 @@ builder.Services.AddControllers()
     .AddJsonOptions(x =>
         x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddScoped<IUserInterface, UserService>();
-builder.Services.AddScoped<IBookInterface, BookService>();
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -103,6 +96,7 @@ builder.Services.AddScoped<IUserInterface, UserService>();
 builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IBookInterface, BookService>();
+
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
 var app = builder.Build();
@@ -121,12 +115,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationhub");
 app.Run();
