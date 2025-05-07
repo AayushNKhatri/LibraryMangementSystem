@@ -89,13 +89,13 @@ builder.Services.AddAuthentication(options =>{
     });
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IUserInterface, UserService>();
 builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IBookInterface, BookService>();
+builder.Services.AddScoped<IOrederInterface,OrderService>();
 
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
