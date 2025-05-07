@@ -1,20 +1,19 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Entities;
 using server.Database;
 using server.Services.Interface;
 using server.Services;
-using Microsoft.OpenApi.Models;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
-using SendGrid.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(option =>
@@ -46,7 +45,7 @@ builder.Services.AddSwaggerGen(option =>
                     Id =  "Bearer"
                 }
              },[]
-        } 
+        }
     });
 });
 
@@ -56,7 +55,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     }
 );
 
-builder.Services.AddIdentity<User,IdentityRole>(opt =>
+builder.Services.AddIdentityApiEndpoints<User>(opt =>
 {
     opt.Password.RequiredLength = 8;
     opt.User.RequireUniqueEmail = true;
@@ -88,6 +87,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IUserInterface, UserService>();
+<<<<<<< HEAD
 
 builder.Services.AddScoped<IOrederInterface, OrderService>();
 
@@ -97,6 +97,9 @@ builder.Services.AddTransient<IEmailSender, EmailSenderService>();
 builder.Services.AddSendGrid(options =>
     options.ApiKey = builder.Configuration["Sendgrid:SendGridKey"]!
 );
+=======
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+>>>>>>> aefc9c6d08b52442925a0e04a97b3c7ed2019597
 
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
@@ -105,7 +108,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await SeedRoleService.SeedRoleAsync(roleManager);
+    await SeedRoleService.SeedAdminAsync(userManager, roleManager);
 }
 
 // Configure the HTTP request pipeline.
@@ -115,9 +120,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
-app.UseAuthentication();
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
