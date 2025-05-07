@@ -54,5 +54,34 @@ namespace server.Controllers
             var book = await bookService.GetBooks();
             return Ok(book);
         }
+
+        [HttpDelete("{bookId:guid}")]
+        public async Task <IActionResult> DeleteBook(Guid bookId)
+        {
+            try
+            {
+                await bookService.DeleteBook(bookId);
+                return Ok("Book Deleted");
+            }
+            catch (Exception ex)
+            { 
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{bookId:guid}")]
+
+        public async Task <IActionResult> UpdateBook(Guid bookId, [FromBody] UpdateBookDto updateBookDto)
+        {
+            try
+            {
+                await bookService.UpdateBook(bookId, updateBookDto);
+                return Ok("Book Updated Successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
