@@ -3,20 +3,16 @@
   "WorkspaceRootPath": "E:\\AD Project\\LibraryMangementSystem\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\services\\bookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\bookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\controllers\\bookcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\controllers\\bookcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\services\\interface\\ibookinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\interface\\ibookinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\services\\bookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\bookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\dtos\\updatebookdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\dtos\\updatebookdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\services\\interface\\ibookinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\interface\\ibookinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\entities\\bookinventory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -46,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 53,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -58,7 +54,46 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
+              "Title": "BookController.cs",
+              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
+              "RelativeDocumentMoniker": "server\\Controllers\\BookController.cs",
+              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
+              "RelativeToolTip": "server\\Controllers\\BookController.cs",
+              "ViewState": "AgIAAEEAAAAAAAAAAAAgwGMAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-11T06:18:50.266Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IBookInterface.cs",
+              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
+              "RelativeDocumentMoniker": "server\\Services\\Interface\\IBookInterface.cs",
+              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
+              "RelativeToolTip": "server\\Services\\Interface\\IBookInterface.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAMwA8AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-11T06:07:52.406Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BookService.cs",
+              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\BookService.cs",
+              "RelativeDocumentMoniker": "server\\Services\\BookService.cs",
+              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\BookService.cs",
+              "RelativeToolTip": "server\\Services\\BookService.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAowDoAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-11T06:06:48.546Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "BookInventory.cs",
               "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\BookInventory.cs",
               "RelativeDocumentMoniker": "server\\Entities\\BookInventory.cs",
@@ -71,33 +106,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "BookService.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\BookService.cs",
-              "RelativeDocumentMoniker": "server\\Services\\BookService.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\BookService.cs",
-              "RelativeToolTip": "server\\Services\\BookService.cs",
-              "ViewState": "AgIAAEQAAAAAAAAAAAAswFwAAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T07:23:55.412Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "UpdateBookDto.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Dtos\\UpdateBookDto.cs",
-              "RelativeDocumentMoniker": "server\\Dtos\\UpdateBookDto.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Dtos\\UpdateBookDto.cs",
-              "RelativeToolTip": "server\\Dtos\\UpdateBookDto.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAowBAAAAA1AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-06T15:52:03.72Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 6,
               "Title": "User.cs",
               "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\User.cs",
               "RelativeDocumentMoniker": "server\\Entities\\User.cs",
@@ -109,7 +118,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 7,
               "Title": "Enum.cs",
               "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\Enum\\Enum.cs",
               "RelativeDocumentMoniker": "server\\Entities\\Enum\\Enum.cs",
@@ -121,33 +130,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IBookInterface.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
-              "RelativeDocumentMoniker": "server\\Services\\Interface\\IBookInterface.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
-              "RelativeToolTip": "server\\Services\\Interface\\IBookInterface.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T08:02:51.623Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "BookController.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
-              "RelativeDocumentMoniker": "server\\Controllers\\BookController.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
-              "RelativeToolTip": "server\\Controllers\\BookController.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAYwE8AAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T07:40:42.128Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "UserService.cs",
               "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\UserService.cs",
               "RelativeDocumentMoniker": "server\\Services\\UserService.cs",
@@ -159,7 +142,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Program.cs",
               "RelativeDocumentMoniker": "server\\Program.cs",

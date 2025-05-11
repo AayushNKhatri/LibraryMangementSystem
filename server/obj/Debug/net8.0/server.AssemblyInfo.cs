@@ -15,11 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-<<<<<<< HEAD
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aefc9c6d08b52442925a0e04a97b3c7ed2019597")]
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+03be6579981d35829230361c7bc2af611c77c0d2")]
->>>>>>> Rajdip
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+99cefe2341d5d306e90ab7db673eae00633a8d82")]
 [assembly: System.Reflection.AssemblyProductAttribute("server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

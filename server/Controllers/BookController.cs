@@ -83,5 +83,20 @@ namespace server.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("{bookId:guid}")]
+
+        public async Task<IActionResult> GetById(Guid bookId)
+        {
+            try
+            {
+                await bookService.GetById(bookId);
+                return Ok("Book Getted Successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

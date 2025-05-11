@@ -1,19 +1,6 @@
 {
   "format": 1,
   "restore": {
-<<<<<<< HEAD
-    "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj": {}
-  },
-  "projects": {
-    "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
-        "projectName": "server",
-        "projectPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
-        "packagesPath": "/home/midas/.nuget/packages/",
-        "outputPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/obj/",
-=======
     "E:\\AD Project\\LibraryMangementSystem\\server\\server.csproj": {}
   },
   "projects": {
@@ -25,21 +12,21 @@
         "projectPath": "E:\\AD Project\\LibraryMangementSystem\\server\\server.csproj",
         "packagesPath": "C:\\Users\\rajdi\\.nuget\\packages\\",
         "outputPath": "E:\\AD Project\\LibraryMangementSystem\\server\\obj\\",
->>>>>>> Rajdip
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-<<<<<<< HEAD
-          "/home/midas/.nuget/NuGet/NuGet.Config"
-=======
           "C:\\Users\\rajdi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
->>>>>>> Rajdip
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -52,9 +39,6 @@
           "warnAsError": [
             "NU1605"
           ]
-<<<<<<< HEAD
-        }
-=======
         },
         "restoreAuditProperties": {
           "enableAudit": "true",
@@ -62,7 +46,6 @@
           "auditMode": "direct"
         },
         "SdkAnalysisLevel": "9.0.100"
->>>>>>> Rajdip
       },
       "frameworks": {
         "net8.0": {
@@ -152,11 +135,7 @@
               "privateAssets": "all"
             }
           },
-<<<<<<< HEAD
-          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
-=======
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
->>>>>>> Rajdip
         }
       }
     }
