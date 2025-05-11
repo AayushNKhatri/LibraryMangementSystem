@@ -12,5 +12,7 @@ namespace server.Services.Interface
         Task DeleteBook(Guid bookID);
 
         Task UpdateBook(Guid bookID, UpdateBookDto updateBookDto);
+
+        Task <List<Book>> GetById(Guid bookID);
     }
 }

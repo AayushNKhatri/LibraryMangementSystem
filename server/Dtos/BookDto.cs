@@ -19,8 +19,6 @@ namespace server.Dtos
 
         public Status Status { get; set; }
 
-        public Guid BookId { get; set; }
-
         public Category Category { get; set; }
 
         public Genre Genre { get; set; }

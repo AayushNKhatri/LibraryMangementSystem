@@ -1,0 +1,157 @@
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+    position: relative;
+}
+
+.navbar-brand-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.brand-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 300;
+    font-size: 1.8rem;
+    color: #1e3c72;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    color: #333 !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #1e3c72 !important;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1.5rem;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #1e3c72;
+}
+
+.search-container {
+    position: relative;
+}
+
+.search-icon {
+    font-size: 1.2rem;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.search-icon:hover {
+    color: #1e3c72;
+}
+
+.search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 100px;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.search-content {
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1rem 3rem 1rem 1.5rem;
+    font-size: 1.2rem;
+    border-radius: 30px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.close-search {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.nav-icons {
+    display: flex;
+    align-items: center;
+}
+
+.nav-icon {
+    font-size: 1.2rem;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.nav-icon:hover {
+    color: #1e3c72;
+}
+
+.nav-icon-link {
+    text-decoration: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 991px) {
+    .navbar-brand-container {
+        position: static;
+        transform: none;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .brand-text {
+        font-size: 1.5rem;
+    }
+
+    .search-overlay {
+        padding-top: 50px;
+    }
+
+    .nav-icons {
+        margin-top: 1rem;
+        justify-content: center;
+    }
+} 
