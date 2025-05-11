@@ -10,6 +10,7 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = server
 build_property.RootNamespace = server
 <<<<<<< HEAD
+<<<<<<< HEAD
 build_property.ProjectDir = C:\Ad retail book store\LibraryMangementSystem\server\
 =======
 <<<<<<< HEAD
@@ -18,11 +19,15 @@ build_property.ProjectDir = /home/midas/Code/Clz/AppDev/LibraryMangementSystem/s
 build_property.ProjectDir = E:\AD Project\LibraryMangementSystem\server\
 >>>>>>> Rajdip
 >>>>>>> 99cefe2341d5d306e90ab7db673eae00633a8d82
+=======
+build_property.ProjectDir = C:\Ad retail book store\LibraryMangementSystem\server\
+>>>>>>> c0d7019be20a04847302ff53f8974fc0975bcffd
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+<<<<<<< HEAD
 <<<<<<< HEAD
 build_property.MSBuildProjectDirectory = C:\Ad retail book store\LibraryMangementSystem\server
 build_property._RazorSourceGeneratorDebug = 
@@ -36,3 +41,9 @@ build_property.MSBuildProjectDirectory = E:\AD Project\LibraryMangementSystem\se
 >>>>>>> Rajdip
 build_property._RazorSourceGeneratorDebug = 
 >>>>>>> 99cefe2341d5d306e90ab7db673eae00633a8d82
+=======
+build_property.MSBuildProjectDirectory = C:\Ad retail book store\LibraryMangementSystem\server
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 
+>>>>>>> c0d7019be20a04847302ff53f8974fc0975bcffd
