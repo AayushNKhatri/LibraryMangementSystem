@@ -157,6 +157,15 @@ namespace server.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
+        public async Task<bool> StacableOrderCount(string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == userId);
+            var orderComplete = await _context.Orders.AnyAsync(u=>u.UserId == userId && u.OrderStatus == OrderStatus.Pending);
+            if(user == null) throw new Exception("User not found");
+            if(orderComplete == null) throw new Exception ("Order not found");
+            user.succesfullOrderCount = (user.succesfullOrderCount < 10) ? user.succesfullOrderCount + 1 : 0;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
