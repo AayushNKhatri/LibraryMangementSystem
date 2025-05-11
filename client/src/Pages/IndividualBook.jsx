@@ -1,13 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaStar, FaShoppingCart, FaHeart, FaComment } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './IndividualBook.css';
+import bookService from '../api/bookService';
 
 const IndividualBook = () => {
     const navigate = useNavigate();
     const { bookId } = useParams();
     const [feedback, setFeedback] = useState('');
+    const [book, setBook] = useState(null);
+    const [similarBooks, setSimilarBooks] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetchBookDetails();
+        fetchSimilarBooks();
+    }, [bookId]);
+
+    const fetchBookDetails = async () => {
+        try {
+            setLoading(true);
+            const data = await bookService.getBookById(bookId);
+            setBook(data);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching book details:', error);
+            setError('Failed to load book details. Please try again later.');
+            setLoading(false);
+        }
+    };
+
+    const fetchSimilarBooks = async () => {
+        try {
+            const data = await bookService.getAllBooks();
+            // Filter out current book and limit to 4 books
+            const filtered = data
+                .filter(b => b.bookId !== bookId)
+                .slice(0, 4);
+            setSimilarBooks(filtered);
+        } catch (error) {
+            console.error('Error fetching similar books:', error);
+        }
+    };
 
     const handleSimilarBookClick = (bookId) => {
         navigate(`/book/${bookId}`);
@@ -20,51 +56,36 @@ const IndividualBook = () => {
         setFeedback(''); // Clear the text area after submission
     };
 
-    const book = {
-        id: bookId,
-        title: "The Great Adventure",
-        author: "John Smith",
-        price: 29.99,
-        rating: 4.5,
-        genre: "Adventure",
-        description: "Embark on an epic journey through uncharted territories in this thrilling adventure novel. Follow the protagonist as they face numerous challenges, discover hidden treasures, and encounter fascinating characters along the way. A masterpiece of storytelling that will keep you on the edge of your seat from beginning to end.",
-        image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-        publishedDate: "2023",
-        pages: 320,
-        language: "English",
-        isbn: "978-3-16-148410-0"
-    };
+    // Display loading message
+    if (loading) {
+        return (
+            <div className="container py-5 text-center">
+                <h2>Loading book details...</h2>
+            </div>
+        );
+    }
 
-    const similarBooks = [
-        {
-            id: 1,
-            title: "Mystery House",
-            price: 24.99,
-            rating: 4.2,
-            image: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-        },
-        {
-            id: 2,
-            title: "Future World",
-            price: 34.99,
-            rating: 4.8,
-            image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-        },
-        {
-            id: 3,
-            title: "Lost in Time",
-            price: 27.99,
-            rating: 4.0,
-            image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-        },
-        {
-            id: 4,
-            title: "The Hidden Truth",
-            price: 31.99,
-            rating: 4.7,
-            image: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-        }
-    ];
+    // Display error message
+    if (error) {
+        return (
+            <div className="container py-5 text-center">
+                <h2 className="text-danger">{error}</h2>
+                <button className="btn btn-primary mt-3" onClick={fetchBookDetails}>Try Again</button>
+            </div>
+        );
+    }
+
+    // If book is not found
+    if (!book) {
+        return (
+            <div className="container py-5 text-center">
+                <h2>Book not found</h2>
+                <button className="btn btn-primary mt-3" onClick={() => navigate('/books')}>
+                    Back to Books
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="container py-5">
@@ -73,7 +94,7 @@ const IndividualBook = () => {
                 <div className="col-md-4">
                     <div className="book-image-container mb-4">
                         <img 
-                            src={book.image} 
+                            src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"} 
                             alt={book.title} 
                             className="img-fluid rounded shadow"
                         />
@@ -82,28 +103,28 @@ const IndividualBook = () => {
                 <div className="col-md-8">
                     <div className="book-details">
                         <h1 className="book-title mb-3">{book.title}</h1>
-                        <h4 className="book-author text-muted mb-4">by {book.author}</h4>
+                        <h4 className="book-author text-muted mb-4">by {book.author || 'Unknown Author'}</h4>
                         
                         <div className="book-meta mb-4">
                             <div className="d-flex align-items-center mb-2">
-                                <span className="price me-4">${book.price}</span>
+                                <span className="price me-4">${book.price || 'N/A'}</span>
                                 <div className="rating d-flex align-items-center">
                                     <FaStar className="text-warning me-1" />
-                                    <span>{book.rating}</span>
+                                    <span>{book.rating || 'N/A'}</span>
                                 </div>
                             </div>
                             <div className="book-info">
-                                <p><strong>Genre:</strong> {book.genre}</p>
-                                <p><strong>Published:</strong> {book.publishedDate}</p>
-                                <p><strong>Pages:</strong> {book.pages}</p>
-                                <p><strong>Language:</strong> {book.language}</p>
-                                <p><strong>ISBN:</strong> {book.isbn}</p>
+                                <p><strong>Genre:</strong> {book.genre || 'N/A'}</p>
+                                <p><strong>Published:</strong> {new Date(book.publicationDate).getFullYear() || 'N/A'}</p>
+                                <p><strong>Pages:</strong> {book.pages || 'N/A'}</p>
+                                <p><strong>Language:</strong> {book.language || 'N/A'}</p>
+                                <p><strong>ISBN:</strong> {book.isbn || 'N/A'}</p>
                             </div>
                         </div>
 
                         <div className="book-description mb-4">
                             <h5>Description</h5>
-                            <p>{book.description}</p>
+                            <p>{book.description || 'No description available'}</p>
                         </div>
 
                         <div className="book-actions d-flex gap-3">
@@ -121,38 +142,40 @@ const IndividualBook = () => {
             </div>
 
             {/* Similar Books Section */}
-            <div className="similar-books mt-5">
-                <h2 className="mb-4">Similar Books</h2>
-                <div className="row g-4">
-                    {similarBooks.map(book => (
-                        <div key={book.id} className="col-md-3">
-                            <div 
-                                className="card h-100 book-card"
-                                onClick={() => handleSimilarBookClick(book.id)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <div className="book-image-container">
-                                    <img 
-                                        src={book.image} 
-                                        alt={book.title} 
-                                        className="book-image"
-                                    />
-                                </div>
-                                <div className="card-body">
-                                    <h5 className="card-title">{book.title}</h5>
-                                    <div className="d-flex justify-content-between align-items-center mt-3">
-                                        <span className="price">${book.price}</span>
-                                        <div className="rating">
-                                            <FaStar className="text-warning" />
-                                            <span className="ms-1">{book.rating}</span>
+            {similarBooks.length > 0 && (
+                <div className="similar-books mt-5">
+                    <h2 className="mb-4">Similar Books</h2>
+                    <div className="row g-4">
+                        {similarBooks.map(book => (
+                            <div key={book.bookId} className="col-md-3">
+                                <div 
+                                    className="card h-100 book-card"
+                                    onClick={() => handleSimilarBookClick(book.bookId)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <div className="book-image-container">
+                                        <img 
+                                            src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"} 
+                                            alt={book.title} 
+                                            className="book-image"
+                                        />
+                                    </div>
+                                    <div className="card-body">
+                                        <h5 className="card-title">{book.title}</h5>
+                                        <div className="d-flex justify-content-between align-items-center mt-3">
+                                            <span className="price">${book.price || 'N/A'}</span>
+                                            <div className="rating">
+                                                <FaStar className="text-warning" />
+                                                <span className="ms-1">{book.rating || 'N/A'}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Feedback Section */}
             <div className="feedback-section mt-5">
