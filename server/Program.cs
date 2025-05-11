@@ -1,30 +1,21 @@
-using Microsoft.EntityFrameworkCore;
 using server.Entities;
 using server.Database;
-using Microsoft.AspNetCore.Mvc;
 using server.Services.Interface;
 using server.Services;
-<<<<<<< HEAD
-using DotNetEnv;
-<<<<<<< HEAD
-using Microsoft.AspNetCore.SignalR;
 using SignalR.hub;
-=======
+using System.Text;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Text;
->>>>>>> 56457f2c5bc3f1c91dc567425236213742a0d62f
-=======
-using System.Text.Json.Serialization;
->>>>>>> Rajdip
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-<<<<<<< HEAD
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -58,16 +49,11 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
-=======
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 builder.Services.AddControllers()
     .AddJsonOptions(x =>
         x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
-builder.Services.AddScoped<IUserInterface, UserService>();
-builder.Services.AddScoped<IBookInterface, BookService>();
->>>>>>> Rajdip
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
@@ -75,7 +61,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     }
 );
 builder.Services.AddSignalR();
-builder.Services.AddIdentityApiEndpoints<User>(opt =>
+builder.Services.AddIdentity<User, IdentityRole>(opt =>
 {
     opt.Password.RequiredLength = 8;
     opt.User.RequireUniqueEmail = true;
@@ -108,6 +94,8 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IUserInterface, UserService>();
 builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+builder.Services.AddScoped<IEmailSender, EmailSenderService>();
+builder.Services.AddScoped<IBookInterface, BookService>();
 
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
@@ -127,12 +115,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationhub");
 app.Run();

@@ -90,8 +90,8 @@ namespace server.Controllers
         {
             try
             {
-                await bookService.GetById(bookId);
-                return Ok("Book Getted Successfully");
+                var book = await bookService.GetById(bookId);
+                return Ok(book);
             }
             catch (Exception ex)
             {
