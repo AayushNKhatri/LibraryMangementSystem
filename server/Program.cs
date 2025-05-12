@@ -5,16 +5,13 @@ using server.Database;
 using Microsoft.AspNetCore.Mvc;
 using server.Services.Interface;
 using server.Services;
+using System.Text;
 using DotNetEnv;
-<<<<<<< HEAD
 using Microsoft.AspNetCore.SignalR;
 using SignalR.hub;
-=======
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
-using System.Text;
->>>>>>> 56457f2c5bc3f1c91dc567425236213742a0d62f
 
 var builder = WebApplication.CreateBuilder(args);
 
