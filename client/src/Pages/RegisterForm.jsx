@@ -1,26 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaEnvelope, FaPhone, FaUserPlus } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './RegisterForm.css';
+import registerService from '../api/Register';
 
 const RegisterForm = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [register, conformRegister] = useState([]);
+    const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
+        username: '',
         firstName: '',
         lastName: '',
         email: '',
-        phone: '',
-        username: '',
+        contact: '',
+        street: '',
+        city: '',
         password: '',
         confirmPassword: ''
     });
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Here you would typically handle registration logic
-        console.log('Registration attempt:', formData);
-    };
+    useEffect(()=>{
+        handleSubmit();
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -28,6 +31,24 @@ const RegisterForm = () => {
             [e.target.name]: e.target.value
         });
     };
+    const handleSubmit = async (e) => 
+        {
+            e.preventDefault();
+            try
+            {
+                setLoading(true);
+                const data = await registerService.registerUser(formData);
+                conformRegister(data);
+                setLoading(false);
+            }
+            catch(error)
+            {
+                console.error("User not registered", error);
+                setError("Failed to register. Register user");
+                setLoading(false);
+            }
+        }
+
 
     return (
         <div className="register-container">
@@ -38,6 +59,7 @@ const RegisterForm = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="register-form">
+                    
                     <div className="row g-3">
                         {/* First Column */}
                         <div className="col-md-6">
@@ -53,6 +75,24 @@ const RegisterForm = () => {
                                         className="form-control"
                                         placeholder="Enter first name"
                                         value={formData.firstName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">City</label>
+                                <div className="input-group">
+                                    <span className="input-group-text">
+                                        <FaEnvelope />
+                                    </span>
+                                    <input
+                                        type="text"
+                                        name="city"
+                                        className="form-control"
+                                        placeholder="Enter your city"
+                                        value={formData.city}
                                         onChange={handleChange}
                                         required
                                     />
@@ -117,17 +157,17 @@ const RegisterForm = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Phone Number</label>
+                                <label className="form-label">Street</label>
                                 <div className="input-group">
                                     <span className="input-group-text">
-                                        <FaPhone />
+                                        <FaEnvelope />
                                     </span>
                                     <input
-                                        type="tel"
-                                        name="phone"
+                                        type="text"
+                                        name="street"
                                         className="form-control"
-                                        placeholder="Enter phone number"
-                                        value={formData.phone}
+                                        placeholder="Enter your street"
+                                        value={formData.street}
                                         onChange={handleChange}
                                         required
                                     />
@@ -135,17 +175,35 @@ const RegisterForm = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Confirm Password</label>
+                                <label className="form-label">username</label>
                                 <div className="input-group">
                                     <span className="input-group-text">
-                                        <FaLock />
+                                        <FaEnvelope />
                                     </span>
                                     <input
-                                        type="password"
-                                        name="confirmPassword"
+                                        type="text"
+                                        name="username"
                                         className="form-control"
-                                        placeholder="Confirm password"
-                                        value={formData.confirmPassword}
+                                        placeholder="Enter your username"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Phone Number</label>
+                                <div className="input-group">
+                                    <span className="input-group-text">
+                                        <FaPhone />
+                                    </span>
+                                    <input
+                                        type="tel"
+                                        name="contact"
+                                        className="form-control"
+                                        placeholder="Enter phone number"
+                                        value={formData.contact}
                                         onChange={handleChange}
                                         required
                                     />

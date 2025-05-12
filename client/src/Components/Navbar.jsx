@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaUser, FaShoppingCart } from 'react-icons/fa';
+import { FaSearch, FaUser, FaShoppingCart, FaBullhorn } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './Navbar.css';
@@ -54,6 +54,12 @@ const Navbar = () => {
                                 <li><Link className="dropdown-item" to="/publishers">Publishers</Link></li>
                                 <li><Link className="dropdown-item" to="/events">Events</Link></li>
                             </ul>
+                        </li>
+                        
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/announcements">
+                                <FaBullhorn className="nav-icon-small me-1" /> Announcements
+                            </Link>
                         </li>
                     </ul>
 

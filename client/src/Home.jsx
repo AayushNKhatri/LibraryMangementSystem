@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaBook, FaUsers, FaExchangeAlt, FaSearch, FaArrowRight } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Home.css';
+import AnnouncementWidget from './Components/AnnouncementWidget';
 
 function Home() {
     const navigate = useNavigate();
@@ -37,6 +38,11 @@ function Home() {
                     </div>
                 </div>
             </header>
+            
+            {/* Announcements Widget */}
+            <div className="container">
+                <AnnouncementWidget />
+            </div>
 
             {/* Features Section */}
             <section className="features-section py-5">
