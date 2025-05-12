@@ -125,6 +125,11 @@
     text-decoration: none;
 }
 
+.nav-icon-small {
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

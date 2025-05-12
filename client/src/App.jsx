@@ -7,6 +7,7 @@ import IndividualBook from './Pages/IndividualBook'
 import Home from './Home.jsx';
 import LoginForm from './Pages/LoginForm.jsx'
 import RegisterForm from './Pages/RegisterForm.jsx'
+import Announcement from './Pages/Announcement.jsx'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,6 +22,7 @@ function App() {
           <Route path="/book/:bookId" element={<IndividualBook />} />
           <Route path='/login' element={<LoginForm />}/>
           <Route path="/register" element={<RegisterForm />}/>
+          <Route path="/announcements" element={<Announcement />}/>
         </Routes>
       </BrowserRouter>
     </>
