@@ -216,7 +216,6 @@ namespace server.Services
                 await _emailSender.SendEmailAsync(user.Email, "Reset Your Password", emailMessage);
                 return encodedToken;
         }
-
         public void DeleteUser(string userId)
         {
             throw new NotImplementedException();

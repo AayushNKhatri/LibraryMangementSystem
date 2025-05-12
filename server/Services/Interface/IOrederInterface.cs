@@ -13,5 +13,6 @@ namespace server.Services.Interface
         Task<bool> AddCartItem(string userId,Guid bookId);
         Task<bool> DecreaseCartItem(string userId,Guid bookId);
         Task<bool> RemoveCartItem(string userId,Guid bookId);
+        Task<bool> StacableOrderCount(string userId);
     }
 }

@@ -62,7 +62,6 @@ namespace server.Controllers
             {
                 throw new Exception($"Order summary not fetched {ex.Message}");
             }
-
         }
         [Authorize]
         [HttpPost("Add-order")]
@@ -74,6 +73,7 @@ namespace server.Controllers
                 if(string.IsNullOrEmpty(userId)) return Unauthorized("User not found");
                 var req = await orderService.OrderConformation(userId);
                 if(req == null) return NotFound("Order not made");
+                await orderService.StacableOrderCount(userId);
                 return Ok(req);
             }
             catch(Exception ex)

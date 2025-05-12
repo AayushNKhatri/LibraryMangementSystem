@@ -9457,19 +9457,38 @@
     ]
   },
   "packageFolders": {
+<<<<<<< HEAD
     "/home/midas/.nuget/packages/": {}
+=======
+    "C:\\Users\\sameer\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+>>>>>>> sameerparajuli
   },
   "project": {
     "version": "1.0.0",
     "restore": {
+<<<<<<< HEAD
       "projectUniqueName": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
       "projectName": "server",
       "projectPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
       "packagesPath": "/home/midas/.nuget/packages/",
       "outputPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/obj/",
+=======
+      "projectUniqueName": "C:\\Ad retail book store\\LibraryMangementSystem\\server\\server.csproj",
+      "projectName": "server",
+      "projectPath": "C:\\Ad retail book store\\LibraryMangementSystem\\server\\server.csproj",
+      "packagesPath": "C:\\Users\\sameer\\.nuget\\packages\\",
+      "outputPath": "C:\\Ad retail book store\\LibraryMangementSystem\\server\\obj\\",
+>>>>>>> sameerparajuli
       "projectStyle": "PackageReference",
       "configFilePaths": [
+<<<<<<< HEAD
         "/home/midas/.nuget/NuGet/NuGet.Config"
+=======
+        "C:\\Users\\sameer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+>>>>>>> sameerparajuli
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -9487,7 +9506,17 @@
         "warnAsError": [
           "NU1605"
         ]
+<<<<<<< HEAD
       }
+=======
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.200"
+>>>>>>> sameerparajuli
     },
     "frameworks": {
       "net8.0": {
@@ -9577,7 +9606,11 @@
             "privateAssets": "all"
           }
         },
+<<<<<<< HEAD
         "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
+=======
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+>>>>>>> sameerparajuli
       }
     }
   },
