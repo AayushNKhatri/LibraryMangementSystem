@@ -1,5 +1,6 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "lVjuuKJhD2QQjS7rtXAuuAYR5WHLhZ4dFaF9i41enG1MIOigGBNEBZJqBKCHnRa2yBkrlO6uUMwzXNV79EgOrg==",
   "success": true,
   "projectFilePath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
@@ -184,4 +185,18 @@
     "/home/midas/.nuget/packages/system.xml.xdocument/4.3.0/system.xml.xdocument.4.3.0.nupkg.sha512"
   ],
   "logs": []
+=======
+  "dgSpecHash": "cboKvx0SFSM=",
+  "success": false,
+  "projectFilePath": "D:\\LibraryManagement\\LibraryMangementSystem\\server\\server.csproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.",
+      "libraryId": "Microsoft.AspNetCore.Authentication.JwtBearer"
+    }
+  ]
+>>>>>>> Aryan
 }

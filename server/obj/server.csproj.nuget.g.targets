@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<<<<<<< HEAD
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)system.text.json/9.0.4/buildTransitive/net8.0/System.Text.Json.targets" Condition="Exists('$(NuGetPackageRoot)system.text.json/9.0.4/buildTransitive/net8.0/System.Text.Json.targets')" />
@@ -8,3 +9,6 @@
     <Import Project="$(NuGetPackageRoot)microsoft.aspnetcore.identity.ui/8.0.10/buildTransitive/Microsoft.AspNetCore.Identity.UI.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.aspnetcore.identity.ui/8.0.10/buildTransitive/Microsoft.AspNetCore.Identity.UI.targets')" />
   </ImportGroup>
 </Project>
+=======
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
+>>>>>>> Aryan

@@ -8,10 +8,16 @@ import Home from './Home.jsx';
 import LoginForm from './Pages/LoginForm.jsx'
 import RegisterForm from './Pages/RegisterForm.jsx'
 import Announcement from './Pages/Announcement.jsx'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Admin from './Pages/Admin';
+import UserProfile from './Pages/UserProfile';
+import Cart from './Pages/Cart';
+import OrderSummary from './Pages/OrderSummary';
+import Verify from './Pages/Verify';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
       <BrowserRouter>
@@ -27,6 +33,18 @@ function App() {
       </BrowserRouter>
     </>
   )
+    <Router>
+      <div className="app">
+        <Routes>
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/account" element={<UserProfile />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/order-summary" element={<OrderSummary />} />
+          <Route path="/verify" element={<Verify />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;
