@@ -18,5 +18,6 @@ namespace server.Database
         public DbSet<Review> Reviews {get; set;}
         public DbSet<User> Users {get; set;}
         public DbSet<Announcement> Announcements {get; set;}
+        public DbSet<Bookmark> Bookmarks{get; set;}
     }
 }
