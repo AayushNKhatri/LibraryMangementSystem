@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API URL for reviews
-const API_URL = 'http://localhost:5129/api/ReviewController';
+const API_URL = 'http://localhost:5129/api/ReviewContoller';
 
 // Helper function to get auth header
 const getAuthHeader = () => {
@@ -31,13 +31,24 @@ const reviewService = {
       throw error;
     }
   },
-  
+  getReviewByBook: async (bookId) => {
+    try{
+      const response = await axios.get(`${API_URL}/GetReviewByBookId?bookID=${bookId}`);
+      console.log(response)
+      return response.data;
+    }
+    catch(error){
+      console.error(`Error fetching review with ID ${reviewId}:`, error);
+      throw error;
+    }
+  },
+
 
   // Create a new review
   createReview: async (bookId, reviewData) => {
     try {
       const response = await axios.post(
-        `${API_URL}?bookId=${bookId}`, 
+        `${API_URL}?bookId=${bookId}`,
         reviewData,
         { headers: getAuthHeader() }
       );
@@ -78,4 +89,4 @@ const reviewService = {
   }
 };
 
-export default reviewService; 
+export default reviewService;

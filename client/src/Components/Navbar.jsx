@@ -157,25 +157,6 @@ const Navbar = () => {
                     </ul>
 
                     <div className="d-flex align-items-center gap-4">
-                        <div className="search-container">
-                            <FaSearch
-                                className="search-icon"
-                                onClick={() => setShowSearch(!showSearch)}
-                            />
-                            {showSearch && (
-                                <div className="search-overlay">
-                                    <div className="search-content">
-                                        <input
-                                            type="search"
-                                            className="form-control search-input"
-                                            placeholder="Search By Author, ISBN"
-                                            autoFocus
-                                        />
-                                        <button className="close-search" onClick={() => setShowSearch(false)}>×</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
 
                         <div className="d-flex align-items-center gap-3">
                             {isAuthenticated && (
