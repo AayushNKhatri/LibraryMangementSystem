@@ -13,12 +13,18 @@ namespace server.Services
          private readonly UserManager<User> _userManager;
         private readonly ILogger<OrderService> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public OrderService(UserManager<User> userManager, ILogger<OrderService> logger, ApplicationDbContext context)
+        public OrderService(
+            UserManager<User> userManager, 
+            ILogger<OrderService> logger, 
+            ApplicationDbContext context,
+            INotificationService notificationService)
         {
             _userManager = userManager;
             _logger = logger;
             _context = context;
+            _notificationService = notificationService;
         }
         public async Task<CreateCartDto> CreateCart(string userId, Guid bookId, CreateCartDto createCart)
         {
@@ -43,6 +49,11 @@ namespace server.Services
                 existingCartItem.Count += createCart.Count;
                 await _context.SaveChangesAsync();
 
+                // Send notification that item quantity was updated
+                await _notificationService.CreateNotification(
+                    userId, 
+                    $"You've updated {book.Title} quantity in your cart to {existingCartItem.Count}");
+
                 return new CreateCartDto
                 {
                     Count = existingCartItem.Count
@@ -59,6 +70,11 @@ namespace server.Services
 
             _context.Carts.Add(newCartItem);
             await _context.SaveChangesAsync();
+
+            // Send notification that item was added to cart
+            await _notificationService.CreateNotification(
+                userId, 
+                $"You've added {book.Title} to your cart");
 
             return new CreateCartDto
             {
@@ -125,6 +141,12 @@ namespace server.Services
             //remove cart items
             _context.Carts.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
+
+            // Send order confirmation notification
+            await _notificationService.CreateNotification(
+                userId, 
+                $"Your order #{order.OrderId.ToString().Substring(0, 8)} has been confirmed and is now {order.OrderStatus}");
+
             return order;
         }
         public async Task<bool> AddCartItem(string userId, Guid bookId)
@@ -133,6 +155,16 @@ namespace server.Services
             if(cartItems == null) throw new Exception("Cart item not found");
             cartItems.Count += 1;
             await _context.SaveChangesAsync();
+
+            // Get book title for the notification
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.BookId == bookId);
+            var bookTitle = book?.Title ?? "Selected book";
+
+            // Send notification that item quantity was increased
+            await _notificationService.CreateNotification(
+                userId, 
+                $"You've increased the quantity of {bookTitle} in your cart");
+
             return true;
 
 
@@ -141,30 +173,72 @@ namespace server.Services
         {
             var cartItem = await _context.Carts.FirstOrDefaultAsync(u=>u.BookId == bookId && u.UserId == userId);
             if(cartItem == null) throw new Exception("Cart item not found");
+            
+            // Get book title for the notification
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.BookId == bookId);
+            var bookTitle = book?.Title ?? "Selected book";
+
             if(cartItem.Count <=1)
             {
                 _context.Carts.Remove(cartItem);
+                await _context.SaveChangesAsync();
+                
+                // Send notification that item was removed
+                await _notificationService.CreateNotification(
+                    userId, 
+                    $"You've removed {bookTitle} from your cart");
+                
+                return true;
             }
+            
             cartItem.Count -= 1;
             await _context.SaveChangesAsync();
+            
+            // Send notification that item quantity was decreased
+            await _notificationService.CreateNotification(
+                userId, 
+                $"You've decreased the quantity of {bookTitle} in your cart to {cartItem.Count}");
+            
             return true;
         }
         public async Task<bool> RemoveCartItem(string userId,Guid bookId)
         {
             var cartItem = await _context.Carts.FirstOrDefaultAsync(u=>u.UserId == userId && u.BookId == bookId);
             if(cartItem == null) throw new Exception("Cart item not found");
+            
+            // Get book title for the notification
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.BookId == bookId);
+            var bookTitle = book?.Title ?? "Selected book";
+            
             _context.Carts.Remove(cartItem);
             await _context.SaveChangesAsync();
+            
+            // Send notification that item was removed
+            await _notificationService.CreateNotification(
+                userId, 
+                $"You've removed {bookTitle} from your cart");
+            
             return true;
         }
+        
         public async Task<bool> StacableOrderCount(string userId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == userId);
             var orderComplete = await _context.Orders.AnyAsync(u=>u.UserId == userId && u.OrderStatus == OrderStatus.Pending);
             if(user == null) throw new Exception("User not found");
             if(orderComplete == null) throw new Exception ("Order not found");
+            
+            var oldCount = user.succesfullOrderCount;
             user.succesfullOrderCount = (user.succesfullOrderCount < 10) ? user.succesfullOrderCount + 1 : 0;
             await _context.SaveChangesAsync();
+            
+            // Check if user reached 10 successful orders for reward
+            if (oldCount == 9 && user.succesfullOrderCount == 10) {
+                await _notificationService.CreateNotification(
+                    userId, 
+                    "Congratulations! You've completed 10 orders and earned a loyalty reward!");
+            }
+            
             return true;
         }
     }

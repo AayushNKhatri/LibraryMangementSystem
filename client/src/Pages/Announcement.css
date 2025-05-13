@@ -124,17 +124,45 @@
 }
 
 .announcement-page {
-    padding: 2rem 0;
+    min-height: 70vh;
 }
 
 .announcement-card {
-    position: relative;
     height: 100%;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s ease;
     border: none;
-    border-radius: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.announcement-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 4px;
+}
+
+.announcement-card.active::before {
+    background: linear-gradient(45deg, #3498db, #5352ed);
+}
+
+.announcement-card.expired::before {
+    background: #f1c40f;
+}
+
+.announcement-card.deal::before {
+    background: #2ecc71;
+}
+
+.announcement-card.new-arrival::before {
+    background: #3498db;
+}
+
+.announcement-card.information::before {
+    background: #f39c12;
 }
 
 .announcement-card:hover {
@@ -142,45 +170,39 @@
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-.announcement-card.deal {
-    border-top: 4px solid #28a745;
-}
-
-.announcement-card.new-arrival {
-    border-top: 4px solid #007bff;
-}
-
-.announcement-card.information {
-    border-top: 4px solid #17a2b8;
-}
-
 .announcement-icon {
     font-size: 1.5rem;
-    margin-right: 0.5rem;
+    margin-right: 10px;
 }
 
 .announcement-icon.deal {
-    color: #28a745;
+    color: #2ecc71;
 }
 
 .announcement-icon.new-arrival {
-    color: #007bff;
+    color: #3498db;
 }
 
 .announcement-icon.info {
-    color: #17a2b8;
+    color: #f39c12;
 }
 
 .announcement-content {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-    color: #333;
+    margin-top: 10px;
+    margin-bottom: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #2c3e50;
 }
 
 .announcement-dates {
-    font-size: 0.9rem;
-    color: #6c757d;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.badge {
+    padding: 0.35em 0.65em;
+    font-weight: 500;
 }
 
 .announcement-actions {
@@ -223,12 +245,8 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .announcement-page {
-        padding: 1rem 0;
-    }
-    
     .announcement-card {
-        margin-bottom: 1.5rem;
+        margin-bottom: 20px;
     }
 }
 

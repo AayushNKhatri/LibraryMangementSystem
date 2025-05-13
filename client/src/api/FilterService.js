@@ -4,6 +4,65 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5129';
 
 const filterService = {
+    getFilteredBooks: async (filterType, filterValue = null) => {
+        try {
+            let endpoint;
+            
+            switch(filterType) {
+                case 'language':
+                    endpoint = `/filter/language/${filterValue}`;
+                    break;
+                case 'status':
+                    endpoint = `/filter/status/${filterValue}`;
+                    break;
+                case 'category':
+                    endpoint = `/filter/category/${filterValue}`;
+                    break;
+                case 'genre':
+                    endpoint = `/filter/genre/${filterValue}`;
+                    break;
+                case 'format':
+                    endpoint = `/filter/format/${filterValue}`;
+                    break;
+                case 'author':
+                    endpoint = `/filter/author`;
+                    break;
+                case 'new-arrivals':
+                    endpoint = `/filter/new-arrivals`;
+                    break;
+                case 'collectors':
+                    endpoint = `/filter/collectors`;
+                    break;
+                case 'paperbacks':
+                    endpoint = `/filter/paperbacks`;
+                    break;
+                case 'fantasy':
+                    endpoint = `/filter/fantasy`;
+                    break;
+                case 'adventure':
+                    endpoint = `/filter/adventure`;
+                    break;
+                case 'science':
+                    endpoint = `/filter/science`;
+                    break;
+                case 'fiction':
+                    endpoint = `/filter/fiction`;
+                    break;
+                case 'non-fiction':
+                    endpoint = `/filter/nonfiction`;
+                    break;
+                default:
+                    throw new Error(`Unknown filter type: ${filterType}`);
+            }
+            
+            const response = await axios.get(`${API_URL}${endpoint}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching filtered books for ${filterType}:`, error);
+            throw error;
+        }
+    },
+
     getFilteredAuthors : async () => {
         try {
             // Using direc

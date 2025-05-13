@@ -1,0 +1,27 @@
+.about-us-page {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 76px); /* Adjust for navbar height */
+}
+
+.about-us-page h1 {
+  color: #3182ce;
+}
+
+.about-us-page .card {
+  transition: transform 0.3s ease;
+  border-radius: 10px;
+}
+
+.about-us-page .card:hover {
+  transform: translateY(-5px);
+}
+
+.about-us-page .text-primary {
+  color: #3182ce !important;
+}
+
+@media (max-width: 768px) {
+  .about-us-page .card-body {
+    padding: 2rem !important;
+  }
+} 

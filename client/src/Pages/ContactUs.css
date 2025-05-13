@@ -1,0 +1,62 @@
+.contact-us-page {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 76px); /* Adjust for navbar height */
+}
+
+.contact-us-page h1 {
+  color: #3182ce;
+}
+
+.contact-us-page .card {
+  transition: transform 0.3s ease;
+  border-radius: 10px;
+}
+
+.contact-us-page .card:hover {
+  transform: translateY(-5px);
+}
+
+.contact-us-page .text-primary {
+  color: #3182ce !important;
+}
+
+.contact-item {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+  background-color: rgba(49, 130, 206, 0.05);
+}
+
+.icon-wrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: rgba(49, 130, 206, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.contact-icon {
+  color: #3182ce;
+  font-size: 28px;
+}
+
+.social-icons a {
+  color: #3182ce;
+  transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #1a56db;
+  transform: translateY(-3px);
+}
+
+@media (max-width: 768px) {
+  .contact-us-page .card-body {
+    padding: 2rem !important;
+  }
+} 

@@ -15,6 +15,8 @@ import OrderSummary from './Pages/OrderSummary';
 import Verify from './Pages/Verify';
 import Authors from './Pages/Authors';
 import FilteredBooks from './Pages/FilteredBooks';
+import AboutUs from './Pages/AboutUs';
+import ContactUs from './Pages/ContactUs';
 import Home from './Home';
 import './App.css';
 
@@ -36,6 +38,8 @@ function App() {
         <Route path="/order-summary" element={<OrderSummary />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

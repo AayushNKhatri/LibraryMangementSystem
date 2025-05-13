@@ -130,4 +130,61 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
   }
+}
+
+/* Connection status indicator */
+.connection-status {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  color: white;
+  opacity: 0.8;
+}
+
+.connection-status.connected {
+  background-color: #198754; /* Bootstrap green color */
+}
+
+.connection-status.disconnected {
+  background-color: #dc3545; /* Bootstrap red color */
+}
+
+.connection-status.reconnecting {
+  background-color: #ffc107; /* Bootstrap yellow color */
+  color: #212529;
+}
+
+.connection-status.error {
+  background-color: #dc3545; /* Bootstrap red color */
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+  100% { opacity: 0.8; }
+}
+
+/* Notification styling */
+.notification-item {
+  transition: background-color 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.notification-item.unread {
+  background-color: rgba(13, 110, 253, 0.05);
+  border-left-color: #0d6efd; /* Bootstrap primary color */
+}
+
+.notification-date {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.toast-container {
+  z-index: 1070;
 } 

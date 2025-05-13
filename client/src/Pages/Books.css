@@ -122,3 +122,38 @@
         height: 250px; /* Slightly shorter on mobile */
     }
 }
+
+.active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 5px 15px;
+    margin: 5px;
+    font-size: 0.9rem;
+}
+
+.active-filter-badge span {
+    text-transform: capitalize;
+    font-weight: 500;
+}
+
+.active-filter-badge .btn {
+    padding: 0;
+    margin-left: 5px;
+    border: none;
+    background: transparent;
+    line-height: 1;
+}
+
+.filters-wrapper {
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .filters-wrapper .dropdown {
+        margin-bottom: 10px;
+    }
+}

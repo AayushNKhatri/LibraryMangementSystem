@@ -33,11 +33,12 @@ namespace server.Controllers
         public async Task<IActionResult> UpdateReview([FromBody] ReviewDTO reviewDTO, Guid reviewId)
         {
             try{
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var model = new Review{
                     Rating = reviewDTO.Rating,
                     Comment = reviewDTO.Comment
                 };
-                await _review.UpdateReview(model, reviewId);
+                await _review.UpdateReview(model, reviewId, userId);
                 return Ok("Review sucessfully updated");
             }
             catch(Exception ex){
@@ -47,7 +48,8 @@ namespace server.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteReview(Guid reviewId){
             try{
-                bool delete = _review.DeleteReview(reviewId).Result;
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                bool delete = _review.DeleteReview(reviewId, userId).Result;
                 if(!delete)
                     throw new Exception("Error deleting");
                 return Ok("Sucessfylly Deleted");
@@ -74,6 +76,17 @@ namespace server.Controllers
             }
             catch(Exception ex){
                 throw new Exception($"{ex.Message}");
+            }
+        }
+        [HttpGet("GetReviewByBookId")]
+        public async Task<IActionResult> GetReviewByBookID(Guid bookID)
+        {
+            try{
+                var review = await _review.GetReviewByBookId(bookID);
+                return Ok(review);
+            }
+            catch(Exception ex){
+                throw new Exception(ex.Message);
             }
         }
     }

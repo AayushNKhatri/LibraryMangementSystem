@@ -8,7 +8,7 @@ import reviewService from '../api/reviewService';
 import bookmarkService from '../api/bookmarkService';
 import { Modal, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
 import { BookLanguage, Genre } from '../utils/enums';
-import { isAdmin } from '../utils/tokenUtils';
+
 
 const IndividualBook = () => {
     const navigate = useNavigate();
@@ -42,7 +42,7 @@ const IndividualBook = () => {
         }
         
         // Check if user is admin
-        setIsUserAdmin(isAdmin());
+        // setIsUserAdmin(isAdmin());
         
         fetchBookDetails();
         fetchSimilarBooks();
@@ -87,24 +87,24 @@ const IndividualBook = () => {
             // Filter out current book and limit to 4 books
             // Try to match by genre if possible
             const currentBookGenre = book?.filters?.[0]?.genre;
-            
+
             let filtered = data.filter(b => b.bookId !== bookId);
-            
+
             // If we have the current book's genre, prioritize books with the same genre
             if (currentBookGenre !== undefined) {
-                const sameGenreBooks = filtered.filter(b => 
-                    b.filters && 
-                    b.filters.length > 0 && 
+                const sameGenreBooks = filtered.filter(b =>
+                    b.filters &&
+                    b.filters.length > 0 &&
                     b.filters[0].genre === currentBookGenre
                 );
-                
+
                 if (sameGenreBooks.length >= 4) {
                     filtered = sameGenreBooks.slice(0, 4);
                 } else {
                     // Not enough books in the same genre, add others
-                    const otherBooks = filtered.filter(b => 
-                        !b.filters || 
-                        b.filters.length === 0 || 
+                    const otherBooks = filtered.filter(b =>
+                        !b.filters ||
+                        b.filters.length === 0 ||
                         b.filters[0].genre !== currentBookGenre
                     );
                     filtered = [...sameGenreBooks, ...otherBooks].slice(0, 4);
@@ -123,6 +123,7 @@ const IndividualBook = () => {
                 return book;
             });
             
+
             setSimilarBooks(filtered);
         } catch (error) {
             console.error('Error fetching similar books:', error);
@@ -133,11 +134,31 @@ const IndividualBook = () => {
         try {
             // Use the new endpoint to get reviews for this specific book
             const bookReviews = await reviewService.getReviewsByBook(bookId);
-            setReviews(bookReviews);
+            console.log('Book reviews:', bookReviews);
+            
+            // Ensure we're handling both array and single object responses correctly
+            if (bookReviews) {
+                // If it's already an array, use it directly
+                if (Array.isArray(bookReviews)) {
+                    setReviews(bookReviews);
+                } 
+                // If it's a single review object (not an array), convert to array
+                else if (bookReviews.reviewId) {
+                    setReviews([bookReviews]);
+                }
+                // Otherwise, set empty array
+                else {
+                    setReviews([]);
+                }
+            } else {
+                setReviews([]);
+            }
         } catch (error) {
             console.error('Error fetching book reviews:', error);
+            setReviews([]);
         }
     };
+
 
     const checkIfBookmarked = async () => {
         try {
@@ -163,7 +184,7 @@ const IndividualBook = () => {
                 // Find the bookmark ID
                 const bookmarks = await bookmarkService.getAllBookmarks();
                 const bookmark = bookmarks.find(b => b.bookId === bookId);
-                
+
                 if (bookmark) {
                     await bookmarkService.removeBookmark(bookmark.bookmarkId);
                     setIsBookmarked(false);
@@ -194,7 +215,7 @@ const IndividualBook = () => {
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!userId) {
             alert('Please log in to submit a review');
             return;
@@ -208,9 +229,9 @@ const IndividualBook = () => {
                 rating: parseInt(reviewRating),
                 comment: reviewText
             };
-            
+
             await reviewService.createReview(bookId, reviewData);
-            
+
             // Clear form and refresh reviews
             setReviewText('');
             setReviewRating(5);
@@ -236,7 +257,7 @@ const IndividualBook = () => {
                 rating: parseInt(editReviewRating),
                 comment: editReviewText
             };
-            
+
             await reviewService.updateReview(currentReviewId, reviewData);
             setShowEditModal(false);
             fetchBookReviews();
@@ -262,10 +283,19 @@ const IndividualBook = () => {
     const calculateAverageRating = (reviews) => {
         if (!reviews || reviews.length === 0) return 'N/A';
         
-        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-        const averageRating = (totalRating / reviews.length).toFixed(1);
-        return averageRating;
+        // Check if reviews is an array or an object with rating property
+        if (Array.isArray(reviews)) {
+            const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+            const averageRating = (totalRating / reviews.length).toFixed(1);
+            return averageRating;
+        } else if (reviews.rating !== undefined) {
+            // Handle case where reviews is an object with rating property
+            return reviews.rating.toFixed(1);
+        }
+        
+        return 'N/A';
     };
+
 
     // Display loading message
     if (loading) {
@@ -302,10 +332,10 @@ const IndividualBook = () => {
         <div className="container py-5">
             {/* Toast Notification */}
             <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1 }}>
-                <Toast 
-                    onClose={() => setShowToast(false)} 
-                    show={showToast} 
-                    delay={3000} 
+                <Toast
+                    onClose={() => setShowToast(false)}
+                    show={showToast}
+                    delay={3000}
                     autohide
                     bg={toastType}
                 >
@@ -322,30 +352,22 @@ const IndividualBook = () => {
                 {/* Book Details Section */}
                 <div className="col-md-4">
                     <div className="book-image-container mb-4 position-relative">
-                        {book.image ? (
-                            <img 
-                                src={book.image} 
-                                alt={book.title} 
-                                className="img-fluid rounded shadow"
-                                onError={(e) => {
-                                    e.target.onerror = null; 
-                                    e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
-                                }}
-                            />
-                        ) : (
-                            <img 
-                                src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                                alt={book.title} 
-                                className="img-fluid rounded shadow"
-                            />
-                        )}
+                        <img 
+                            src={book.image || book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"} 
+                            alt={book.title} 
+                            className="img-fluid rounded shadow"
+                            onError={(e) => {
+                                e.target.onerror = null; 
+                                e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+                            }}
+                        />
                     </div>
                 </div>
                 <div className="col-md-8">
                     <div className="book-details">
                         <h1 className="book-title mb-3">{book.title}</h1>
                         <h4 className="book-author text-muted mb-4">by {book.author || 'Unknown Author'}</h4>
-                        
+
                         <div className="book-meta mb-4">
                             <div className="d-flex align-items-center mb-2">
                                 <span className="price me-4">
@@ -382,7 +404,7 @@ const IndividualBook = () => {
                                 <FaShoppingCart className="me-2" />
                                 Add to Cart
                             </button>
-                            <button 
+                            <button
                                 className={`btn ${isBookmarked ? 'btn-danger' : 'btn-outline-danger'}`}
                                 onClick={handleBookmark}
                                 disabled={bookmarkLoading}
@@ -405,7 +427,7 @@ const IndividualBook = () => {
                     <FaStar className="me-2 text-warning" />
                     Customer Reviews
                 </h2>
-                
+
                 {reviews.length > 0 ? (
                     <div className="reviews-list">
                         {reviews.map(review => (
@@ -419,17 +441,17 @@ const IndividualBook = () => {
                                             </div>
                                             <div className="mb-2">
                                                 {[...Array(5)].map((_, i) => (
-                                                    <FaStar 
-                                                        key={i} 
+                                                    <FaStar
+                                                        key={i}
                                                         className={i < review.rating ? "text-warning" : "text-muted"}
                                                     />
                                                 ))}
                                             </div>
                                         </div>
-                                        
+
                                         {review.userId === userId && (
                                             <div>
-                                                <Button 
+                                                <Button
                                                     variant="outline-primary"
                                                     size="sm"
                                                     className="me-2"
@@ -437,7 +459,7 @@ const IndividualBook = () => {
                                                 >
                                                     <FaEdit />
                                                 </Button>
-                                                <Button 
+                                                <Button
                                                     variant="outline-danger"
                                                     size="sm"
                                                     onClick={() => handleDeleteReview(review.reviewId)}
@@ -475,14 +497,14 @@ const IndividualBook = () => {
                                     <Form.Label>Rating</Form.Label>
                                     <div className="d-flex">
                                         {[1, 2, 3, 4, 5].map(rating => (
-                                            <div 
-                                                key={rating} 
+                                            <div
+                                                key={rating}
                                                 className="rating-star p-2"
                                                 style={{cursor: 'pointer'}}
                                                 onClick={() => setReviewRating(rating)}
                                             >
-                                                <FaStar 
-                                                    size={24} 
+                                                <FaStar
+                                                    size={24}
                                                     className={rating <= reviewRating ? "text-warning" : "text-muted"}
                                                 />
                                             </div>
@@ -505,8 +527,8 @@ const IndividualBook = () => {
                                     <div className="alert alert-danger">{reviewSubmitError}</div>
                                 )}
                                 <div className="d-flex justify-content-end">
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
                                         variant="primary"
                                         disabled={!reviewText.trim() || isReviewSubmitting || !userId}
                                     >
@@ -526,15 +548,15 @@ const IndividualBook = () => {
                     <div className="row g-4">
                         {similarBooks.map(book => (
                             <div key={book.bookId} className="col-md-3">
-                                <div 
+                                <div
                                     className="card h-100 book-card"
                                     onClick={() => handleSimilarBookClick(book.bookId)}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <div className="book-image-container">
-                                        <img 
-                                            src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"} 
-                                            alt={book.title} 
+                                        <img
+                                            src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"}
+                                            alt={book.title}
                                             className="book-image"
                                             onError={(e) => {
                                                 e.target.onerror = null; 
@@ -570,14 +592,14 @@ const IndividualBook = () => {
                             <Form.Label>Rating</Form.Label>
                             <div className="d-flex">
                                 {[1, 2, 3, 4, 5].map(rating => (
-                                    <div 
-                                        key={rating} 
+                                    <div
+                                        key={rating}
                                         className="rating-star p-2"
                                         style={{cursor: 'pointer'}}
                                         onClick={() => setEditReviewRating(rating)}
                                     >
-                                        <FaStar 
-                                            size={24} 
+                                        <FaStar
+                                            size={24}
                                             className={rating <= editReviewRating ? "text-warning" : "text-muted"}
                                         />
                                     </div>
@@ -600,8 +622,8 @@ const IndividualBook = () => {
                     <Button variant="secondary" onClick={() => setShowEditModal(false)}>
                         Cancel
                     </Button>
-                    <Button 
-                        variant="primary" 
+                    <Button
+                        variant="primary"
                         onClick={handleUpdateReview}
                         disabled={!editReviewText.trim()}
                     >

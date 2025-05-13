@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaSearch, FaShoppingCart, FaBullhorn, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaShoppingCart, FaBullhorn, FaSignOutAlt, FaUserCircle, FaBook } from 'react-icons/fa';
 import { isAdmin, getCurrentUser, logout } from '../utils/tokenUtils';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './Navbar.css';
 
 const Navbar = () => {
-    const [showSearch, setShowSearch] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userIsAdmin, setUserIsAdmin] = useState(false);
     const [user, setUser] = useState(null);
@@ -38,6 +37,7 @@ const Navbar = () => {
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
+    
     const handleLogout = () => {
         logout();
         updateAuthState(); // Update immediately
@@ -53,7 +53,7 @@ const Navbar = () => {
                        role="button"
                        data-bs-toggle="dropdown">
                         <FaUserCircle className="nav-icon" />
-                        <span>{user?.username || 'Profile'}</span>
+                        <span className="d-none d-md-inline">{user?.username || 'Profile'}</span>
                     </a>
                     <ul className="dropdown-menu dropdown-menu-end">
                         {userIsAdmin && (
@@ -90,11 +90,11 @@ const Navbar = () => {
             );
         }
         return (
-            <div className="d-flex gap-3">
-                <Link to="/login" className="btn btn-outline-primary btn-sm">
+            <div className="d-flex gap-2">
+                <Link to="/login" className="btn btn-outline-primary btn-sm rounded-pill px-3">
                     Login
                 </Link>
-                <Link to="/register" className="btn btn-primary btn-sm">
+                <Link to="/register" className="btn btn-primary btn-sm rounded-pill px-3">
                     Register
                 </Link>
             </div>
@@ -102,90 +102,51 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <nav className="navbar navbar-expand-lg navbar-light shadow-sm sticky-top bg-white py-3">
             <div className="container">
-                <div className="navbar-brand-container">
-                    <Link className="navbar-brand" to="/">
-                        <h1 className="brand-text">Kitaab Mitra</h1>
-                    </Link>
-                </div>
+                <Link className="navbar-brand d-flex align-items-center" to="/">
+                    <FaBook className="me-2 text-primary" size={24} />
+                    <h1 className="brand-text m-0">Kitaab Mitra</h1>
+                </Link>
 
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
                 <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav me-auto">
-                        <li className="nav-item dropdown">
-                            <a className="nav-link dropdown-toggle" href="/books" role="button" data-bs-toggle="dropdown">
+                    <ul className="navbar-nav mx-auto">
+                        <li className="nav-item mx-2">
+                            <Link className="nav-link fw-medium" to="/books">
                                 Shop
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li><Link className="dropdown-item" to="/new-arrivals">New Arrivals</Link></li>
-                                <li><Link className="dropdown-item" to="/collectors">Collectors</Link></li>
-                                <li><Link className="dropdown-item" to="/paperbacks">Paperbacks</Link></li>
-                            </ul>
+                            </Link>
                         </li>
 
-                        <li className="nav-item dropdown">
-                            <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Collections
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li><Link className="dropdown-item" to="/fiction">Fiction</Link></li>
-                                <li><Link className="dropdown-item" to="/non-fiction">Non-Fiction</Link></li>
-                                <li><Link className="dropdown-item" to="/science">Science</Link></li>
-                            </ul>
+                        <li className="nav-item mx-2">
+                            <Link className="nav-link fw-medium" to="/about">
+                                About Us
+                            </Link>
                         </li>
 
-                        <li className="nav-item dropdown">
-                            <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Explore
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li><Link className="dropdown-item" to="/authors">Authors</Link></li>
-                                <li><Link className="dropdown-item" to="/fantasy">Fantasy</Link></li>
-                                <li><Link className="dropdown-item" to="/adventure">Adventure</Link></li>
-                            </ul>
+                        <li className="nav-item mx-2">
+                            <Link className="nav-link fw-medium" to="/contact">
+                                Contact Us
+                            </Link>
                         </li>
 
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/announcements">
+                        <li className="nav-item mx-2">
+                            <Link className="nav-link fw-medium" to="/announcements">
                                 <FaBullhorn className="nav-icon-small me-1" /> Announcements
                             </Link>
                         </li>
                     </ul>
 
-                    <div className="d-flex align-items-center gap-4">
-                        <div className="search-container">
-                            <FaSearch
-                                className="search-icon"
-                                onClick={() => setShowSearch(!showSearch)}
-                            />
-                            {showSearch && (
-                                <div className="search-overlay">
-                                    <div className="search-content">
-                                        <input
-                                            type="search"
-                                            className="form-control search-input"
-                                            placeholder="Search By Author, ISBN"
-                                            autoFocus
-                                        />
-                                        <button className="close-search" onClick={() => setShowSearch(false)}>×</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="d-flex align-items-center gap-3">
-                            {isAuthenticated && (
-                                <Link to="/cart" className="nav-icon-link position-relative">
-                                    <FaShoppingCart className="nav-icon" />
-                                    <span className="cart-badge">0</span>
-                                </Link>
-                            )}
-                            <AuthButtons />
-                        </div>
+                    <div className="d-flex align-items-center gap-3">
+                        {isAuthenticated && (
+                            <Link to="/cart" className="nav-icon-link me-2 position-relative">
+                                <FaShoppingCart className="nav-icon fs-5" />
+                            </Link>
+                        )}
+                        <AuthButtons />
                     </div>
                 </div>
             </div>

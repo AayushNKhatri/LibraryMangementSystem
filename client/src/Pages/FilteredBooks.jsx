@@ -36,45 +36,45 @@ const FilteredBooks = () => {
             setLoading(true);
             let data;
 
-            // Select the appropriate endpoint based on the active filter
-            switch(activeFilter) {
-                case 'new-arrivals':
-                    data = await filterService.getFilteredNewArrivals();
-                    setFilterTitle('New Arrivals');
-                    break;
-                case 'collectors':
-                    data = await filterService.getFilteredCollectors();
-                    setFilterTitle('Collector\'s Editions');
-                    break;
-                case 'paperbacks':
-                    data = await filterService.getFilteredPapaerbacks();
-                    setFilterTitle('Paperbacks');
-                    break;
-                case 'fantasy':
-                    data = await filterService.getFilteredFantasy();
-                    setFilterTitle('Fantasy Books');
-                    break;
-                case 'adventure':
-                    data = await filterService.getFilteredAdventure();
-                    setFilterTitle('Adventure Books');
-                    break;
-                case 'science':
-                    data = await filterService.getFilteredScience();
-                    setFilterTitle('Science Books');
-                    break;
-                case 'fiction':
-                    data = await filterService.getFilteredFiction();
-                    setFilterTitle('Fiction Books');
-                    break;
-                case 'non-fiction':
-                    data = await filterService.getFilteredNonFiction();
-                    setFilterTitle('Non-Fiction Books');
-                    break;
-                default:
-                    // Default to getting all books
-                    data = await bookService.getAllBooks();
-                    setFilterTitle('All Books');
-                    break;
+            // Use the new dynamic filterService method
+            if (activeFilter === 'all') {
+                // Default to getting all books
+                data = await bookService.getAllBooks();
+                setFilterTitle('All Books');
+            } else {
+                // Use the dynamic filter method for all other filters
+                data = await filterService.getFilteredBooks(activeFilter);
+                
+                // Set filter title based on active filter
+                switch(activeFilter) {
+                    case 'new-arrivals':
+                        setFilterTitle('New Arrivals');
+                        break;
+                    case 'collectors':
+                        setFilterTitle('Collector\'s Editions');
+                        break;
+                    case 'paperbacks':
+                        setFilterTitle('Paperbacks');
+                        break;
+                    case 'fantasy':
+                        setFilterTitle('Fantasy Books');
+                        break;
+                    case 'adventure':
+                        setFilterTitle('Adventure Books');
+                        break;
+                    case 'science':
+                        setFilterTitle('Science Books');
+                        break;
+                    case 'fiction':
+                        setFilterTitle('Fiction Books');
+                        break;
+                    case 'non-fiction':
+                        setFilterTitle('Non-Fiction Books');
+                        break;
+                    default:
+                        setFilterTitle(`${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Books`);
+                        break;
+                }
             }
 
             setBooks(data);
