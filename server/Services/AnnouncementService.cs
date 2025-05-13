@@ -11,14 +11,30 @@ using server.Services.Interface;
 
 namespace server.Services
 {
-    public class AnnouncementService(ApplicationDbContext dbContext) : IAnnouncementService
+    public class AnnouncementService(ApplicationDbContext dbContext, INotificationService _notificationService) : IAnnouncementService
     {
         private readonly ApplicationDbContext _dbContext = dbContext;
 
         public async Task<Announcement> CreateAnnouncement(Announcement announcement){
             await _dbContext.Announcements.AddAsync(announcement);
             await _dbContext.SaveChangesAsync();
-            return announcement;
+            var notification = new Notification{
+                Id = Guid.NewGuid(),
+                NotificationDescription = announcement.AnnouncementDescription,
+                Type = announcement.AnnouncementType.ToString(),
+                NotificationDate = DateTime.UtcNow,
+                IsRead = false,
+                };
+                
+                // Get all users from the database to send notifications
+                var users = await _dbContext.Users.ToListAsync();
+                foreach (var user in users)
+                {
+                    // Create notification for each user
+                    await _notificationService.CreateNotification(user.Id, announcement.AnnouncementDescription);
+                }
+                
+                return announcement;
         }
 
         public async Task<bool> DeleteAnnouncement(Guid id)

@@ -21,8 +21,8 @@ public class NotificationService : INotificationService
         var notification = new Notification
         {
             UserId = userId,
-            Message = message,
-            CreatedAt = DateTime.UtcNow,
+            NotificationDescription = message,
+            NotificationDate = DateTime.UtcNow,
             IsRead = false,
             Type = "AddOrder"
         };
@@ -34,8 +34,8 @@ public class NotificationService : INotificationService
         {
             id = notification.Id,
             title = "Order Update",
-            message = notification.Message,
-            date = notification.CreatedAt,
+            message = notification.NotificationDescription,
+            date = notification.NotificationDate,
             read = notification.IsRead
         });
     }
@@ -44,7 +44,29 @@ public class NotificationService : INotificationService
     {
         return await _context.Notifications
             .Where(n => n.UserId == userId)
-            .OrderByDescending(n => n.CreatedAt)
+            .OrderByDescending(n => n.NotificationDate)
             .ToListAsync();
+    }
+    
+    public async Task<Notification> GetNotificationById(Guid notificationId)
+    {
+        return await _context.Notifications
+            .FirstOrDefaultAsync(n => n.Id == notificationId);
+    }
+    
+    public async Task MarkAsRead(Guid notificationId)
+    {
+        var notification = await _context.Notifications.FindAsync(notificationId);
+        if (notification != null)
+        {
+            notification.IsRead = true;
+            await _context.SaveChangesAsync();
+            
+            // Send real-time update to the user
+            if (!string.IsNullOrEmpty(notification.UserId))
+            {
+                await _hubContext.Clients.Group(notification.UserId).SendAsync("NotificationRead", notificationId);
+            }
+        }
     }
 }

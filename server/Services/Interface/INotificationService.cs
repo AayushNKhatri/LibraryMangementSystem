@@ -7,5 +7,7 @@ namespace server.Services.Interface
     {
         Task CreateNotification(string userId, string message);
         Task<IEnumerable<Notification>> GetNotifications(string userId);
+        Task<Notification> GetNotificationById(Guid notificationId);
+        Task MarkAsRead(Guid notificationId);
     }
 }

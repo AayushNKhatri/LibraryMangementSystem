@@ -113,6 +113,7 @@ namespace server.Services
                 TotalAmount = cartItems.Sum(c=>c.Count * (c.Book?.Price??0)),
                 OrderStatus = OrderStatus.Pending,
                 DiscountApplied = (int)discount*100,
+                ClaimsCode = Guid.NewGuid()
             };
             await _context.Orders.AddAsync(order);
             var OrderDetails = cartItems.Select(item => new OrderDetails{
@@ -146,8 +147,6 @@ namespace server.Services
             var bookTitle = book?.Title ?? "Selected book";
 
             return true;
-
-
         }
         public async Task<bool> DecreaseCartItem(string userId, Guid bookId )
         {

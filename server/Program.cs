@@ -75,7 +75,7 @@ builder.Services.AddIdentity<User, IdentityRole>(opt =>
     opt.Password.RequiredLength = 8;
     opt.User.RequireUniqueEmail = true;
     opt.Password.RequireNonAlphanumeric = false;
-    opt.SignIn.RequireConfirmedEmail = true;
+    opt.SignIn.RequireConfirmedEmail = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();

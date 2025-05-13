@@ -33,7 +33,7 @@ namespace server.Controllers
 
         [HttpPost("markAsRead/{notificationId}")]
         [Authorize]
-        public async Task<IActionResult> MarkAsRead(int notificationId)
+        public async Task<IActionResult> MarkAsRead(Guid notificationId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -41,9 +41,31 @@ namespace server.Controllers
                 return Unauthorized("User not authenticated");
             }
 
-            // Implementation for marking notification as read would go here
-            // For now, just return a success response
-            return Ok(new { success = true });
+            try
+            {
+                // Get the notification from the database
+                var notification = await _notificationService.GetNotificationById(notificationId);
+                
+                // Check if notification exists and belongs to the user
+                if (notification == null)
+                {
+                    return NotFound("Notification not found");
+                }
+                
+                if (notification.UserId != userId)
+                {
+                    return Forbid("You do not have permission to mark this notification as read");
+                }
+                
+                // Mark notification as read
+                await _notificationService.MarkAsRead(notificationId);
+                
+                return Ok(new { success = true, message = "Notification marked as read" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 } 

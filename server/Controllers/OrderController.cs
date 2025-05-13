@@ -113,7 +113,7 @@ namespace server.Controllers
             return Ok(req);
         }
         [Authorize]
-        [HttpPatch("decrease-cartitem/bookId")]
+        [HttpPatch("decrease-cartitem/{bookId}")]
         public async Task<IActionResult>DecreaseCartItem([FromRoute] Guid bookId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -123,7 +123,7 @@ namespace server.Controllers
             return Ok(req);
         }
         [Authorize]
-        [HttpPatch("remove-cartitem/bookId")]
+        [HttpDelete("remove-cartitem/{bookId}")]
         public async Task<IActionResult>RemoveCartItem([FromRoute] Guid bookId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -132,7 +132,15 @@ namespace server.Controllers
             if(req == false) return NotFound("Cart Item not removed");
             return Ok(req);
         }
-        [Authorize]
+        [HttpPatch("confirm-order")]
+        public async Task<IActionResult>ConfirmOrder()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(string.IsNullOrEmpty(userId)) return Unauthorized("User not found");
+            var req = await orderService.OrderConformation(userId);
+            return Ok(req);
+        }
+        [Authorize(Roles = "Admin")]
         [HttpPatch("complete-Order")]
         public async Task<IActionResult>ManageOrderComplete(Guid claimsCode, Guid orderId)
         {

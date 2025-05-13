@@ -135,12 +135,13 @@ namespace server.Controllers
         }
 
         [Authorize]
-        [HttpPut("update-user/{userId}")]
-        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDto updateUser)
+        [HttpPut("update-user")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto updateUser)
         {
             try
             {
-                var user = _userManager.FindByIdAsync(userId);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var user = await _userManager.FindByIdAsync(userId);
                 if(user == null) return BadRequest("User not found");
                 var result = await userServices.updateUser(userId, updateUser);
                 if(result)
