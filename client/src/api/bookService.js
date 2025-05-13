@@ -92,6 +92,46 @@ const bookService = {
       console.error(`Error deleting book with ID ${bookId}:`, error);
       throw error;
     }
+  },
+
+  // Add book image
+  addBookImage: async (bookId, imageData) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/Books/BookImage/${bookId}`,
+        imageData,
+        { 
+          headers: {
+            ...getAuthHeader(),
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error adding image for book with ID ${bookId}:`, error);
+      throw error;
+    }
+  },
+
+  // Update book image
+  updateBookImage: async (bookId, imageData) => {
+    try {
+      const response = await axios.patch(
+        `${API_URL}/Books/BookImage/${bookId}`,
+        imageData,
+        { 
+          headers: {
+            ...getAuthHeader(),
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating image for book with ID ${bookId}:`, error);
+      throw error;
+    }
   }
 };
 

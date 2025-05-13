@@ -20,13 +20,11 @@ export const isAdmin = () => {
   if (!decoded) return false;
 
   const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-  console.log("Role:", role);
-  return role === "Admin";
+  return role;
 };
 
 export const getCurrentUser = () => {
   const decoded = tokenDecoder();
-  console.log("Current User:", decoded);
   return decoded;
 };
 

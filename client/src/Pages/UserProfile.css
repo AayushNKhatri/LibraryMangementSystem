@@ -17,6 +17,23 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Avatar placeholder */
+.avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #4a90e2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  margin: 0 auto;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .profile-sidebar .list-group-item {
   border: none;
   padding: 1rem 1.25rem;
@@ -187,4 +204,53 @@
 
 .toast-container {
   z-index: 1070;
+}
+
+/* Notifications styling */
+.notification-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 15px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.notification-item.unread {
+  border-left-color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.notification-message {
+  color: #555;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.notification-actions .btn-link {
+  padding: 2px 5px;
+  color: #6c757d;
+}
+
+.notification-actions .btn-link:hover {
+  color: #0d6efd;
+}
+
+.notification-actions .btn-link.text-danger:hover {
+  color: #dc3545 !important;
 } 

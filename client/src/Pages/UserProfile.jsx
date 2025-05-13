@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Row,
@@ -12,88 +12,177 @@ import {
   Alert,
   Toast,
   ToastContainer,
+  Spinner
 } from "react-bootstrap";
-import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit, FaCheckCircle } from "react-icons/fa";
+import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit, FaCheckCircle, FaTimes, FaTrash, FaCheck } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
 import "./UserProfile.css";
 import userService from "../api/userService";
 import orderService from "../api/OrderServer";
+import notificationService from "../api/notificationService";
+import signalRService from "../api/signalRService";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState([]);
+  const [userProfile, setUserProfile] = useState({
+    userName: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    contact: '',
+    city: '',
+    street: ''
+  });
+  const [formData, setFormData] = useState({
+    userName: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    contact: '',
+    city: '',
+    street: ''
+  });
   const [orderData, setOrderData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [updateError, setUpdateError] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const [toastType, setToastType] = useState('success');
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
+  // Helper function to get user ID from token using jwt-decode
+  const getUserId = () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return null;
+    
+    try {
+      // Use jwt-decode to properly decode the token
+      const decodedToken = jwtDecode(token);
+      return decodedToken.nameid || decodedToken.sub; // nameid is where .NET stores the user ID
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  };
+
+  // Handler for receiving real-time notifications
+  const handleNewNotification = useCallback((notification) => {
+    setNotifications(prev => {
+      // Add the new notification to the beginning of the array
+      const updated = [notification, ...prev];
+      // Update unread count
+      setUnreadCount(updated.filter(n => !n.read).length);
+      return updated;
+    });
+    
+    // Show toast notification
+    showToastMessage(notification.message, "info");
+  }, []);
+
+  // Handler for notification read events
+  const handleNotificationRead = useCallback((notificationId) => {
+    setNotifications(prev => {
+      const updated = prev.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      );
+      // Update unread count
+      setUnreadCount(updated.filter(n => !n.read).length);
+      return updated;
+    });
+  }, []);
+
+  // Initialize SignalR connection
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    // Start SignalR connection
+    const initializeSignalR = async () => {
+      try {
+        await signalRService.startConnection(token);
+        
+        // Register callbacks
+        signalRService.onNotification('userProfile-notification', handleNewNotification);
+        signalRService.onNotification('userProfile-read', handleNotificationRead);
+      } catch (error) {
+        console.error('Failed to initialize SignalR:', error);
+      }
+    };
+
+    initializeSignalR();
+
+    // Cleanup on unmount
+    return () => {
+      signalRService.removeNotificationCallback('userProfile-notification');
+      signalRService.removeNotificationCallback('userProfile-read');
+    };
+  }, [handleNewNotification, handleNotificationRead]);
+
+  // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setIsLoading(true);
-        const data = await orderService.getCartItems();
-        // Handle the case when data is an empty array
-        setUserData(data || []);
+        // Get user by ID - this endpoint uses the token to identify the user
+        const userData = await userService.getUserById();
+        setUserProfile(userData);
+        setFormData(userData);
       } catch (error) {
-        console.error("Error loading fetched cart items:", error);
-        // Set userData to empty array in case of error
-        setUserData([]);
+        console.error("Error loading user data:", error);
+        showToastMessage("Failed to load user profile", "danger");
       } finally {
         setIsLoading(false);
       }
     };
+    
     fetchUserData();
   }, []);
 
+  // Fetch order data
   useEffect(() => {
-    const fetchOrderData = async (userId) => {
+    const fetchOrderData = async () => {
       try {
         setIsLoading(true);
-        const data = await orderService.getOrderById(userId);
-        // Handle the case when data is an empty array
+        const data = await orderService.getOrderById();
         setOrderData(data || []);
       } catch (error) {
         console.error("Error loading orders:", error);
-        // Set orderData to empty array in case of error
         setOrderData([]);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchOrderData();
-  }, []);
-
-  const handleSaveChanges = async () => {
-    try {
-      setIsLoading(true);
-      const updatedUserData = {
-        firstName: userInfo.firstName,
-        lastName: userInfo.lastName,
-        email: userInfo.email,
-        contact: userInfo.contact,
-        city: userInfo.city,
-        userId: userInfo.userId, // Ensure user ID is included
-      };
-
-      const response = await userService.updateUser(updatedUserData);
-      setUserData(response.data);
-      setIsEditing(false); // Disable editing after saving
-    } catch (error) {
-      console.error("Error updating user data:", error);
-    } finally {
-      setIsLoading(false);
+    
+    if (activeTab === 'orders') {
+      fetchOrderData();
     }
-  };
+  }, [activeTab]);
 
-  const statusMap = {
-    0: "Pending",
-    1: "Completed",
-    2: "Cancelled",
-  };
-  const userInfo = userData.length > 0 ? userData[0].user : {};
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (activeTab === 'notifications') {
+        try {
+          setNotificationsLoading(true);
+          const data = await notificationService.getNotifications();
+          setNotifications(data || []);
+          setUnreadCount(data.filter(n => !n.read).length);
+        } catch (error) {
+          console.error("Error loading notifications:", error);
+          setNotifications([]);
+        } finally {
+          setNotificationsLoading(false);
+        }
+      }
+    };
+
+    fetchNotifications();
+  }, [activeTab]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -145,8 +234,8 @@ const UserProfile = () => {
     setUpdateSuccess(false);
     
     try {
-      const userId = tokenUtils.getUserIdFromToken();
-      if (!userId) {
+      // No need to get userId from token - backend identifies user from token
+      if (!localStorage.getItem('authToken')) {
         throw new Error('You must be logged in to update your profile');
       }
       
@@ -161,8 +250,8 @@ const UserProfile = () => {
         street: formData.street
       };
       
-      // Make the API call to update the user
-      await userService.updateUserProfile(userId, updateData);
+      // Make the API call to update the user - userId not needed as parameter
+      await userService.updateUserProfile(updateData);
       
       // Update was successful
       setUserProfile({
@@ -171,12 +260,21 @@ const UserProfile = () => {
       });
       setUpdateSuccess(true);
       setIsEditing(false);
+      showToastMessage("Profile updated successfully!", "success");
     } catch (error) {
       console.error('Failed to update profile:', error);
       setUpdateError(error.response?.data || 'Failed to update profile. Please try again.');
+      showToastMessage("Failed to update profile. Please try again.", "danger");
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  // Display toast message
+  const showToastMessage = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
   };
 
   // Display full name
@@ -199,12 +297,40 @@ const UserProfile = () => {
     return parts.join(', ');
   };
 
-  if (isLoading) {
+  const statusMap = {
+    0: "Pending",
+    1: "Completed",
+    2: "Cancelled",
+  };
+
+  // Mark notification as read
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await notificationService.markAsRead(notificationId);
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, isRead: true } 
+            : notification
+        )
+      );
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      showToastMessage("Failed to mark notification as read", "danger");
+    }
+  };
+
+  if (isLoading && !userProfile.userName) {
     return (
       <Container className="py-5 text-center">
-        <div className="spinner-border text-primary" role="status">
+        <Spinner animation="border" role="status" variant="primary">
           <span className="visually-hidden">Loading...</span>
-        </div>
+        </Spinner>
         <p className="mt-3">Loading profile information...</p>
       </Container>
     );
@@ -214,7 +340,14 @@ const UserProfile = () => {
     <Container className="user-profile py-4">
       {/* Toast Notification for real-time updates */}
       <ToastContainer position="top-end" className="p-3">
-        <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
+        <Toast 
+          onClose={() => setShowToast(false)} 
+          show={showToast} 
+          delay={3000} 
+          autohide
+          bg={toastType}
+          text={toastType === 'danger' ? 'white' : 'dark'}
+        >
           <Toast.Header closeButton>
             <strong className="me-auto">Notification</strong>
             <small>Just now</small>
@@ -223,21 +356,17 @@ const UserProfile = () => {
         </Toast>
       </ToastContainer>
 
-      {/* Connection Status Indicator (can be removed in production) */}
-      <div className={`connection-status ${connectionStatus}`}>
-        SignalR: {connectionStatus}
-      </div>
-
       <Row>
         <Col lg={3}>
           <Card className="profile-sidebar mb-4">
             <Card.Body className="text-center">
               <div className="profile-avatar mb-3">
-                <img alt="Profile" className="rounded-circle" />
+                <div className="avatar-placeholder">
+                  {userProfile.firstName?.charAt(0) || userProfile.userName?.charAt(0) || 'U'}
+                </div>
               </div>
-              <h4>{`${userInfo.firstName || ""} ${
-                userInfo.lastName || ""
-              }`}</h4>
+              <h4>{getFullName()}</h4>
+              <p className="text-muted">{userProfile.email}</p>
             </Card.Body>
             <ListGroup variant="flush">
               <ListGroup.Item
@@ -255,9 +384,11 @@ const UserProfile = () => {
               >
                 <FaShoppingBag className="me-2" />
                 My Orders
-                <Badge bg="primary" className="ms-2">
-                  3
-                </Badge>
+                {orderData.length > 0 && (
+                  <Badge bg="primary" className="ms-2">
+                    {orderData.length}
+                  </Badge>
+                )}
               </ListGroup.Item>
               <ListGroup.Item
                 action
@@ -266,9 +397,11 @@ const UserProfile = () => {
               >
                 <FaBell className="me-2" />
                 Notifications
-                <Badge bg="danger" className="ms-2">
-                  1
-                </Badge>
+                {unreadCount > 0 && (
+                  <Badge bg="danger" className="ms-2">
+                    {unreadCount}
+                  </Badge>
+                )}
               </ListGroup.Item>
               <ListGroup.Item
                 action
@@ -277,9 +410,6 @@ const UserProfile = () => {
               >
                 <FaHeart className="me-2" />
                 Wishlist
-                <Badge bg="primary" className="ms-2">
-                  3
-                </Badge>
               </ListGroup.Item>
             </ListGroup>
           </Card>
@@ -292,15 +422,36 @@ const UserProfile = () => {
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h4>Profile Information</h4>
-                    <Button
-                      variant={isEditing ? "success" : "primary"}
-                      onClick={
-                        isEditing ? handleSaveChanges : () => setIsEditing(true)
-                      }
-                    >
-                      <FaEdit className="me-2" />
-                      {isEditing ? "Save Changes" : "Edit Profile"}
-                    </Button>
+                    {!isEditing ? (
+                      <Button variant="primary" onClick={handleEditProfile}>
+                        <FaEdit className="me-2" />
+                        Edit Profile
+                      </Button>
+                    ) : (
+                      <div>
+                        <Button variant="secondary" onClick={handleCancelEdit} className="me-2">
+                          <FaTimes className="me-2" />
+                          Cancel
+                        </Button>
+                        <Button 
+                          variant="success" 
+                          onClick={handleSubmitProfile}
+                          disabled={isUpdating}
+                        >
+                          {isUpdating ? (
+                            <>
+                              <Spinner as="span" size="sm" animation="border" className="me-2" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <FaCheckCircle className="me-2" />
+                              Save Changes
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   
                   {updateSuccess && (
@@ -320,10 +471,12 @@ const UserProfile = () => {
                     <Row>
                       <Col md={6}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Full Name</Form.Label>
+                          <Form.Label>Username</Form.Label>
                           <Form.Control
                             type="text"
-                            defaultValue={userInfo.firstName || ""}
+                            name="userName"
+                            value={isEditing ? formData.userName : userProfile.userName || ''}
+                            onChange={handleInputChange}
                             disabled={!isEditing}
                           />
                         </Form.Group>
@@ -333,7 +486,35 @@ const UserProfile = () => {
                           <Form.Label>Email</Form.Label>
                           <Form.Control
                             type="email"
-                            defaultValue={userInfo.email || ""}
+                            name="email"
+                            value={isEditing ? formData.email : userProfile.email || ''}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>First Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="firstName"
+                            value={isEditing ? formData.firstName : userProfile.firstName || ''}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Last Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="lastName"
+                            value={isEditing ? formData.lastName : userProfile.lastName || ''}
+                            onChange={handleInputChange}
                             disabled={!isEditing}
                           />
                         </Form.Group>
@@ -345,64 +526,194 @@ const UserProfile = () => {
                           <Form.Label>Phone</Form.Label>
                           <Form.Control
                             type="tel"
-                            defaultValue={userInfo.contact || ""}
+                            name="contact"
+                            value={isEditing ? formData.contact : userProfile.contact || ''}
+                            onChange={handleInputChange}
                             disabled={!isEditing}
                           />
                         </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Address</Form.Label>
+                          <Form.Label>City</Form.Label>
                           <Form.Control
                             type="text"
-                            defaultValue={userInfo.city}
+                            name="city"
+                            value={isEditing ? formData.city : userProfile.city || ''}
+                            onChange={handleInputChange}
                             disabled={!isEditing}
                           />
                         </Form.Group>
                       </Col>
                     </Row>
+                    <Row>
+                      <Col md={12}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Street Address</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="street"
+                            value={isEditing ? formData.street : userProfile.street || ''}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    {isEditing && (
+                      <div className="form-text text-muted mb-3">
+                        Your personal information is securely stored and will not be shared with third parties.
+                      </div>
+                    )}
                   </Form>
                 </div>
               )}
+
               {activeTab === "orders" && (
                 <div>
-                <h4 className="mb-4">My Orders</h4>
-                <Table responsive hover>
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Date</th>
-                      <th>Total</th>
-                      <th>Status</th>
-                      <th>Claim Code</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderData.map((order) => (
-                      <tr key={order.orderId}>
-                        <td>{order.orderId}</td>
-                        <td>{new Date(order.orderDate).toLocaleDateString()}</td>
-                        <td>${order.totalAmount}</td>
-                        <td>
-                          <Badge
-                            bg={
-                              statusMap[order.orderStatus] === "Completed"
-                                ? "success"
-                                : statusMap[order.orderStatus] === "Pending"
-                                ? "warning"
-                                : "danger"
-                            }
-                          >
-                            {statusMap[order.orderStatus] || "Unknown"}
-                          </Badge>
-                        </td>
-                        <td>{order.claimsCode}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
+                  <h4 className="mb-4">My Orders</h4>
+                  {isLoading ? (
+                    <div className="text-center py-4">
+                      <Spinner animation="border" role="status" variant="primary">
+                        <span className="visually-hidden">Loading orders...</span>
+                      </Spinner>
+                      <p className="mt-3">Loading your orders...</p>
+                    </div>
+                  ) : orderData.length === 0 ? (
+                    <Alert variant="info">
+                      You don't have any orders yet. Start shopping to see your orders here!
+                    </Alert>
+                  ) : (
+                    <Table responsive hover>
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Date</th>
+                          <th>Total</th>
+                          <th>Status</th>
+                          <th>Claim Code</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orderData.map((order) => (
+                          <tr key={order.orderId}>
+                            <td>{order.orderId.substring(0, 8)}</td>
+                            <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+                            <td>${order.totalAmount.toFixed(2)}</td>
+                            <td>
+                              <Badge
+                                bg={
+                                  statusMap[order.orderStatus] === "Completed"
+                                    ? "success"
+                                    : statusMap[order.orderStatus] === "Pending"
+                                    ? "warning"
+                                    : "danger"
+                                }
+                              >
+                                {statusMap[order.orderStatus] || "Unknown"}
+                              </Badge>
+                            </td>
+                            <td>
+                              <code>{order.claimsCode}</code>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </div>
+              )}
 
+              {activeTab === "notifications" && (
+                <div>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h4 className="mb-0">Notifications</h4>
+                    {unreadCount > 0 && (
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm"
+                        onClick={() => {
+                          // Mark all as read functionality would go here
+                          showToastMessage("This feature is coming soon!", "info");
+                        }}
+                      >
+                        <FaCheck className="me-1" />
+                        Mark all as read
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {notificationsLoading ? (
+                    <div className="text-center py-4">
+                      <Spinner animation="border" role="status" variant="primary">
+                        <span className="visually-hidden">Loading notifications...</span>
+                      </Spinner>
+                      <p className="mt-3">Loading your notifications...</p>
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <Alert variant="info">
+                      <FaBell className="me-2" />
+                      You have no notifications at this time.
+                    </Alert>
+                  ) : (
+                    <ListGroup variant="flush" className="notification-list">
+                      {notifications.map((notification) => (
+                        <ListGroup.Item 
+                          key={notification.id}
+                          className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+                        >
+                          <div className="d-flex justify-content-between align-items-start">
+                            <div>
+                              <div className="notification-header">
+                                <strong>{notification.title || 'Notification'}</strong>
+                                {!notification.isRead && (
+                                  <Badge bg="danger" pill className="ms-2">
+                                    New
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="notification-message mb-1">
+                                {notification.notificationDescription || notification.message}
+                              </p>
+                              <small className="text-muted">
+                                {new Date(notification.notificationDate || notification.date).toLocaleString()}
+                              </small>
+                            </div>
+                            <div className="notification-actions">
+                              {!notification.isRead && (
+                                <Button 
+                                  variant="link" 
+                                  size="sm" 
+                                  onClick={() => handleMarkAsRead(notification.id)}
+                                  title="Mark as read"
+                                >
+                                  <FaCheck />
+                                </Button>
+                              )}
+                              <Button 
+                                variant="link" 
+                                size="sm" 
+                                className="text-danger"
+                                title="Delete"
+                              >
+                                <FaTrash />
+                              </Button>
+                            </div>
+                          </div>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "wishlist" && (
+                <div>
+                  <h4 className="mb-4">My Wishlist</h4>
+                  <Alert variant="info">
+                    Your wishlist is empty. Browse our book collection and add items to your wishlist!
+                  </Alert>
+                </div>
               )}
             </Card.Body>
           </Card>

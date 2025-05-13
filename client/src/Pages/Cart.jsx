@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button, Table } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Table, Toast, ToastContainer } from "react-bootstrap";
 import { FaTrash, FaArrowRight, FaPlus, FaMinus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./Cart.css";
@@ -9,76 +9,164 @@ const Cart = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [completedOrders, setCompletedOrders] = useState(0);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [processingItemId, setProcessingItemId] = useState(null);
+
+  // Show toast notification
+  const showNotification = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   // Fetch cart items on component mount
   useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        setLoading(true);
-        const data = await orderService.getCartItems();
-        setCartItems(data);
-      } catch (error) {
-        console.error("Error loading fetched cart items:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCartItems();
   }, []);
+
+  const fetchCartItems = async () => {
+    try {
+      setLoading(true);
+      const data = await orderService.getCartItems();
+      setCartItems(data || []);
+      
+      // Fetch order history to calculate discount
+      try {
+        const orders = await orderService.getOrderById();
+        const completed = orders ? orders.filter(order => order.orderStatus === 2).length : 0;
+        setCompletedOrders(completed);
+      } catch (error) {
+        console.error("Error fetching order history:", error);
+      }
+    } catch (error) {
+      console.error("Error loading fetched cart items:", error);
+      setCartItems([]);
+      showNotification("Failed to load cart items", "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle quantity increase
   const handleIncreaseChange = async (itemId) => {
     try {
-      setLoading(true);
-      const data = await orderService.increaseCartItems(itemId);
-      setCartItems(data);
+      setProcessingItemId(itemId);
+      await orderService.increaseCartItems(itemId);
+      // Refresh cart items after update
+      await fetchCartItems();
+      showNotification("Quantity updated successfully");
     } catch (error) {
       console.error("Error increasing cart item quantity:", error);
+      showNotification("Failed to update quantity", "danger");
     } finally {
-      setLoading(false);
+      setProcessingItemId(null);
     }
   };
 
   // Handle quantity decrease
   const handleDecreaseChange = async (itemId) => {
     try {
-      setLoading(true);
-      const data = await orderService.decreaseCartItems(itemId);
-      setCartItems(data);
+      setProcessingItemId(itemId);
+      await orderService.decreaseCartItems(itemId);
+      // Refresh cart items after update
+      await fetchCartItems();
+      showNotification("Quantity updated successfully");
     } catch (error) {
       console.error("Error decreasing cart item quantity:", error);
+      showNotification("Failed to update quantity", "danger");
     } finally {
-      setLoading(false);
+      setProcessingItemId(null);
     }
   };
 
   // Remove item from cart
   const handleRemoveItem = async (itemId) => {
-    try {
-      setLoading(true);
-      const data = await orderService.removeCartItems(itemId);
-      setCartItems(data);
-    } catch (error) {
-      console.error("Error removing cart item:", error);
-    } finally {
-      setLoading(false);
+    if (window.confirm("Are you sure you want to remove this item from your cart?")) {
+      try {
+        setProcessingItemId(itemId);
+        await orderService.removeCartItems(itemId);
+        // Refresh cart items after removal
+        await fetchCartItems();
+        showNotification("Item removed from cart successfully");
+      } catch (error) {
+        console.error("Error removing cart item:", error);
+        showNotification("Failed to remove item from cart", "danger");
+      } finally {
+        setProcessingItemId(null);
+      }
     }
+  };
+
+  // Calculate discount based on server logic
+  const calculateDiscount = () => {
+    // Get total number of books
+    const totalBooks = cartItems.reduce((sum, item) => sum + item.count, 0);
+    
+    let discountRate = 0;
+    
+    // Apply 5% discount if 5 or more books
+    if (totalBooks >= 5) {
+      discountRate += 0.05;
+    }
+    
+    // Apply additional 10% discount if 10 or more completed orders
+    if (completedOrders >= 10) {
+      discountRate += 0.10;
+    }
+    
+    return discountRate;
   };
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.book?.price * item.count || 0),
     0
   );
-  const discount = 100; // 10% discount or fixed value
-  const total = subtotal - discount;
+  
+  const discountRate = calculateDiscount();
+  const discountAmount = subtotal * discountRate;
+  const total = subtotal - discountAmount;
 
   // Proceed to checkout
-  const handleCheckout = () => {
-    navigate("/order-summary");
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      showNotification("Your cart is empty", "danger");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await orderService.addOrder();
+      // Navigate to order confirmation page with the order data
+      navigate("/order-confirmation", { state: { order: response } });
+    } catch (error) {
+      console.error("Error creating order:", error);
+      showNotification("Failed to create order. Please try again.", "danger");
+      setLoading(false);
+    }
   };
 
   return (
     <Container className="cart-page py-4">
+      {/* Toast notification */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          onClose={() => setShowToast(false)} 
+          show={showToast} 
+          delay={3000} 
+          autohide
+          bg={toastType}
+          className="text-white"
+        >
+          <Toast.Header>
+            <strong className="me-auto">Cart</strong>
+          </Toast.Header>
+          <Toast.Body>{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       <h2 className="mb-4">Shopping Cart</h2>
       <Row>
         <Col lg={8}>
@@ -99,53 +187,73 @@ const Cart = () => {
                   </thead>
                   <tbody>
                     {cartItems.map((item) => (
-                      <tr key={item.id}>
+                      <tr key={item.cartId || item.id}>
                         <td>
                           <div className="d-flex align-items-center">
                             <img
-                              src={item.image}
-                              alt={item.book.title}
+                              src={item.book?.imageUrl || item.image}
+                              alt={item.book?.title}
                               className="cart-item-image me-3"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100";
+                              }}
                             />
                             <div>
+                              <p className="mb-0 fw-bold">{item.book?.title}</p>
                               <small className="text-muted">
-                                {item.book.author}
+                                {item.book?.author}
                               </small>
                             </div>
                           </div>
                         </td>
-                        <td>${item.book.price}</td>
+                        <td>${item.book?.price}</td>
                         <td>
                           <div className="d-flex align-items-center">
                             <Button
                               variant="outline-secondary"
                               size="sm"
                               onClick={() =>
-                                handleDecreaseChange(item.book.bookId)
+                                handleDecreaseChange(item.book?.bookId)
                               }
+                              disabled={processingItemId === item.book?.bookId}
                             >
-                              <FaMinus />
+                              {processingItemId === item.book?.bookId ? (
+                                <span className="spinner-border spinner-border-sm" />
+                              ) : (
+                                <FaMinus />
+                              )}
                             </Button>
                             <span className="mx-2">{item.count}</span>
                             <Button
                               variant="outline-secondary"
                               size="sm"
                               onClick={() =>
-                                handleIncreaseChange(item.book.bookId)
+                                handleIncreaseChange(item.book?.bookId)
                               }
+                              disabled={processingItemId === item.book?.bookId}
                             >
-                              <FaPlus />
+                              {processingItemId === item.book?.bookId ? (
+                                <span className="spinner-border spinner-border-sm" />
+                              ) : (
+                                <FaPlus />
+                              )}
                             </Button>
                           </div>
                         </td>
-                        <td>${item.book.price * item.count}</td>
+                        <td>${(item.book?.price * item.count).toFixed(2)}</td>
                         <td>
                           <Button
                             variant="outline-danger"
                             size="sm"
-                            onClick={() => handleRemoveItem(item.book.bookId)}
+                            onClick={() => handleRemoveItem(item.book?.bookId)}
+                            disabled={processingItemId === item.book?.bookId}
                           >
-                            <FaTrash />
+                            {processingItemId === item.book?.bookId ? (
+                              <span className="spinner-border spinner-border-sm" />
+                            ) : (
+                              <FaTrash />
+                            )}
                           </Button>
                         </td>
                       </tr>
@@ -155,7 +263,7 @@ const Cart = () => {
               ) : (
                 <div className="text-center py-4">
                   <p>Your cart is empty</p>
-                  <Button variant="primary" onClick={() => navigate("/")}>
+                  <Button variant="primary" onClick={() => navigate("/books")}>
                     Continue Shopping
                   </Button>
                 </div>
@@ -175,8 +283,8 @@ const Cart = () => {
               </div>
 
               <div className="summary-item d-flex justify-content-between mb-3">
-                <span>Discount (10%)</span>
-                <span>${discount}</span>
+                <span>Discount ({(discountRate * 100).toFixed(0)}%)</span>
+                <span>${discountAmount.toFixed(2)}</span>
               </div>
 
               <hr />

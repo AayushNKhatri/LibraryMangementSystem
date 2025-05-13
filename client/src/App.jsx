@@ -12,6 +12,7 @@ import Announcement from './Pages/Announcement';
 import UserProfile from './Pages/UserProfile';
 import Cart from './Pages/Cart';
 import OrderSummary from './Pages/OrderSummary';
+import OrderConfirmation from './Pages/OrderConfirmation';
 import Verify from './Pages/Verify';
 import Authors from './Pages/Authors';
 import FilteredBooks from './Pages/FilteredBooks';
@@ -36,6 +37,7 @@ function App() {
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/order-summary" element={<OrderSummary />} />
+        <Route path="/order-confirmation" element={<OrderConfirmation />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/about" element={<AboutUs />} />

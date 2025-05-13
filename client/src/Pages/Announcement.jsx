@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Card, Badge, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { FaBullhorn, FaCalendarAlt, FaTag, FaInfoCircle } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Card, Badge, Row, Col, Alert, Spinner, Toast, ToastContainer } from 'react-bootstrap';
+import { FaBullhorn, FaCalendarAlt, FaTag, FaInfoCircle, FaBell } from 'react-icons/fa';
 import announcementService, { AnnouncementType } from '../api/announcementService';
+import signalRService from '../api/signalRService';
 import './Announcement.css';
 
 const Announcement = () => {
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     // Fetch active announcements from API
     useEffect(() => {
@@ -43,6 +46,55 @@ const Announcement = () => {
 
         fetchAnnouncements();
     }, []);
+
+    // Handler for new notification/announcement
+    const handleNewAnnouncement = useCallback((notification) => {
+        // Show toast notification
+        setToastMessage(notification.message || 'New announcement has been posted!');
+        setShowToast(true);
+        
+        // Refresh the announcements list
+        announcementService.getAllAnnouncements()
+            .then(data => {
+                if (data && data.length > 0) {
+                    const transformedData = data.map(item => ({
+                        id: item.announcementId,
+                        type: item.announcementType,
+                        content: item.announcementDescription,
+                        startDate: new Date(item.startDate).toLocaleDateString(),
+                        endDate: new Date(item.endDate).toLocaleDateString(),
+                        isActive: new Date() <= new Date(item.endDate)
+                    }));
+                    setAnnouncements(transformedData);
+                }
+            })
+            .catch(err => console.error('Error refreshing announcements:', err));
+    }, []);
+
+    // Initialize SignalR connection
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        // Start SignalR connection
+        const initializeSignalR = async () => {
+            try {
+                await signalRService.startConnection(token);
+                
+                // Register for announcement notifications
+                signalRService.onNotification('announcement-notification', handleNewAnnouncement);
+            } catch (error) {
+                console.error('Failed to initialize SignalR:', error);
+            }
+        };
+
+        initializeSignalR();
+
+        // Cleanup on unmount
+        return () => {
+            signalRService.removeNotificationCallback('announcement-notification');
+        };
+    }, [handleNewAnnouncement]);
 
     // Function to get announcement type icon
     const getAnnouncementIcon = (type) => {
@@ -88,6 +140,24 @@ const Announcement = () => {
 
     return (
         <Container className="announcement-page py-5">
+            {/* Toast Notification for new announcements */}
+            <ToastContainer position="top-end" className="p-3">
+                <Toast 
+                    onClose={() => setShowToast(false)} 
+                    show={showToast} 
+                    delay={3000} 
+                    autohide
+                    bg="info"
+                >
+                    <Toast.Header closeButton>
+                        <FaBell className="me-2" />
+                        <strong className="me-auto">New Announcement</strong>
+                        <small>Just now</small>
+                    </Toast.Header>
+                    <Toast.Body>{toastMessage}</Toast.Body>
+                </Toast>
+            </ToastContainer>
+
             <div className="text-center mb-5">
                 <h1 className="display-4">Announcements</h1>
                 <p className="lead text-muted">Stay updated with the latest news and offers from our library</p>

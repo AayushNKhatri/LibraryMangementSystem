@@ -6,6 +6,7 @@ import './IndividualBook.css';
 import bookService from '../api/bookService';
 import reviewService from '../api/reviewService';
 import bookmarkService from '../api/bookmarkService';
+import orderService from '../api/OrderServer';
 import { Modal, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
 import { BookLanguage, Genre } from '../utils/enums';
 
@@ -33,6 +34,8 @@ const IndividualBook = () => {
     const [toastType, setToastType] = useState('success');
     const [bookmarkLoading, setBookmarkLoading] = useState(false);
     const [isUserAdmin, setIsUserAdmin] = useState(false);
+    const [addingToCart, setAddingToCart] = useState(false);
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         // Set user ID from local storage
@@ -296,6 +299,27 @@ const IndividualBook = () => {
         return 'N/A';
     };
 
+    const handleAddToCart = async () => {
+        if (!userId) {
+            showToastNotification('Please log in to add this book to your cart', 'warning');
+            return;
+        }
+
+        setAddingToCart(true);
+        try {
+            const cartData = {
+                count: quantity
+            };
+            
+            await orderService.createCart(bookId, cartData);
+            showToastNotification('Book added to your cart successfully!', 'success');
+        } catch (error) {
+            console.error('Error adding book to cart:', error);
+            showToastNotification('Failed to add book to cart. Please try again.', 'danger');
+        } finally {
+            setAddingToCart(false);
+        }
+    };
 
     // Display loading message
     if (loading) {
@@ -400,10 +424,43 @@ const IndividualBook = () => {
                         </div>
 
                         <div className="book-actions d-flex gap-3">
-                            <button className="btn btn-primary">
-                                <FaShoppingCart className="me-2" />
-                                Add to Cart
-                            </button>
+                            <div className="d-flex align-items-center">
+                                <div className="input-group me-2" style={{ width: '100px' }}>
+                                    <button 
+                                        className="btn btn-outline-secondary" 
+                                        type="button"
+                                        onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                                    >-</button>
+                                    <input 
+                                        type="text" 
+                                        className="form-control text-center" 
+                                        value={quantity}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            if (!isNaN(val) && val > 0) {
+                                                setQuantity(val);
+                                            }
+                                        }}
+                                    />
+                                    <button 
+                                        className="btn btn-outline-secondary" 
+                                        type="button"
+                                        onClick={() => setQuantity(prev => prev + 1)}
+                                    >+</button>
+                                </div>
+                                <button 
+                                    className="btn btn-primary"
+                                    onClick={handleAddToCart}
+                                    disabled={addingToCart || (book.inventories?.[0]?.quantity <= 0)}
+                                >
+                                    {addingToCart ? (
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    ) : (
+                                        <FaShoppingCart className="me-2" />
+                                    )}
+                                    {book.inventories?.[0]?.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                                </button>
+                            </div>
                             <button
                                 className={`btn ${isBookmarked ? 'btn-danger' : 'btn-outline-danger'}`}
                                 onClick={handleBookmark}

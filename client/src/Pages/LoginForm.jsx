@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { FaUser, FaLock, FaSignInAlt } from 'react-icons/fa';
+import { FaUser, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import { parseApiError, logError } from '../utils/errorHandler';
 import { setAuthToken, isAdmin, isAuthenticated } from '../utils/tokenUtils';
@@ -18,6 +18,12 @@ const LoginForm = () => {
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    // Toggle password visibility
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
 
     // Redirect if already logged in
     useEffect(() => {
@@ -148,7 +154,7 @@ const LoginForm = () => {
                                 <FaLock />
                             </span>
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
                                 className="form-control"
                                 placeholder="Password"
@@ -156,6 +162,13 @@ const LoginForm = () => {
                                 onChange={handleChange}
                                 required
                             />
+                            <button 
+                                type="button" 
+                                className="btn btn-outline-secondary" 
+                                onClick={togglePasswordVisibility}
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
                         </div>
                     </div>
 

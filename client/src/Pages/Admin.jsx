@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Container, Row, Col, Card, Button, Table, Form, Modal, Nav, Tab, Badge, Pagination } from 'react-bootstrap';
-import { FaBook, FaShoppingCart, FaTag, FaBullhorn, FaBox, FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaUsers, FaDollarSign, FaExclamationTriangle } from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Table, Form, Modal, Nav, Tab, Badge, Pagination, Alert } from 'react-bootstrap';
+import { FaBook, FaShoppingCart, FaTag, FaBullhorn, FaBox, FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaUsers, FaDollarSign, FaExclamationTriangle, FaCheck, FaTimes } from 'react-icons/fa';
 import './Admin.css';
 import bookService from '../api/bookService';
 import announcementService, { AnnouncementType } from '../api/announcementService';
+import orderService from '../api/OrderServer';
 import { BookLanguage, Status, Category, Genre, Format } from '../utils/enums';
 
 const Admin = () => {
@@ -33,8 +34,13 @@ const Admin = () => {
     isOnSale: false,
     discountPercent: 0,
     discountStartDate: '',
-    discountEndDate: ''
+    discountEndDate: '',
+    authorName1: '',
+    authorName2: '',
+    authorName3: ''
   });
+  const [bookImage, setBookImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const itemsPerPage = 10;
 
   // Handle announcement functionality
@@ -45,6 +51,14 @@ const Admin = () => {
     type: 0, // Default to Deal
     endDate: ''
   });
+
+  // Handle order functionality
+  const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false);
+  const [claimCode, setClaimCode] = useState('');
+  const [processingOrder, setProcessingOrder] = useState(false);
+  const [orderMessage, setOrderMessage] = useState({ show: false, text: '', type: '' });
 
   // Fetch books data
   useEffect(() => {
@@ -110,6 +124,27 @@ const Admin = () => {
     fetchAnnouncements();
   }, []);
 
+  // Fetch orders data
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await orderService.getAllOrders();
+        setOrders(data);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+        // Fall back to sample data if API call fails
+        setOrders([
+          { id: 1, customer: "John Doe", total: 28.98, status: "Pending", date: "2024-03-10" },
+          { id: 2, customer: "Jane Smith", total: 15.99, status: "Completed", date: "2024-03-12" },
+        ]);
+      }
+    };
+
+    if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
+
   // Handle book form input change
   const handleBookInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -137,10 +172,29 @@ const Admin = () => {
       isOnSale: false,
       discountPercent: 0,
       discountStartDate: '',
-      discountEndDate: ''
+      discountEndDate: '',
+      authorName1: '',
+      authorName2: '',
+      authorName3: ''
     });
+    setBookImage(null);
+    setImagePreview('');
     setIsEditing(false);
     setCurrentBookId(null);
+  };
+
+  // Handle image upload
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBookImage(file);
+      // Create a preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Open book edit modal
@@ -165,16 +219,23 @@ const Admin = () => {
       isOnSale: book.inventories?.[0]?.isOnSale || false,
       discountPercent: book.inventories?.[0]?.discountPercent || 0,
       discountStartDate: book.inventories?.[0]?.discoundStartDate?.split('T')[0] || '',
-      discountEndDate: book.inventories?.[0]?.discoundEndDate?.split('T')[0] || ''
+      discountEndDate: book.inventories?.[0]?.discoundEndDate?.split('T')[0] || '',
+      authorName1: book.authorNamePrimary || '',
+      authorName2: book.authorNameSecondary || '',
+      authorName3: book.additionalAuthorName || ''
     });
 
+    // Reset image preview
+    setBookImage(null);
+    setImagePreview('');
+    
     setShowAddBookModal(true);
   };
 
   // Handle book form submission
   const handleSubmitBook = async () => {
     // Validate required fields
-    const requiredFields = ['title', 'isbn', 'publisher', 'publicationDate'];
+    const requiredFields = ['title', 'isbn', 'publisher', 'publicationDate', 'authorName1'];
     const missingFields = requiredFields.filter(field => !bookForm[field]);
 
     if (missingFields.length > 0) {
@@ -223,6 +284,10 @@ const Admin = () => {
       publicationDate: new Date(bookForm.publicationDate).toISOString(),
       createdDate: new Date().toISOString(),
       status: parseInt(bookForm.status),
+      // Author fields
+      authorName1: bookForm.authorName1,
+      authorName2: bookForm.authorName2 || '',
+      authorName3: bookForm.authorName3 || '',
       // These fields will be mapped to BookFilters
       category: parseInt(bookForm.category),
       genre: parseInt(bookForm.genre),
@@ -244,9 +309,24 @@ const Admin = () => {
       if (isEditing && currentBookId) {
         // Update existing book
         await bookService.updateBook(currentBookId, bookData);
+        
+        // Upload image if provided
+        if (bookImage) {
+          const formData = new FormData();
+          formData.append('image', bookImage);
+          await bookService.updateBookImage(currentBookId, formData);
+        }
       } else {
         // Add new book
-        await bookService.addBook(bookData);
+        const result = await bookService.addBook(bookData);
+        
+        // Upload image if provided and book was created successfully
+        if (bookImage && result) {
+          const bookId = result.bookId || currentBookId;
+          const formData = new FormData();
+          formData.append('image', bookImage);
+          await bookService.addBookImage(bookId, formData);
+        }
       }
 
       // Refresh books list
@@ -386,13 +466,115 @@ const Admin = () => {
     }
   };
 
-  // Sample data - replace with actual data from your backend
-  const orders = [
-    { id: 1, customer: "John Doe", total: 28.98, status: "Pending", date: "2024-03-10" },
-    { id: 2, customer: "Jane Smith", total: 15.99, status: "Completed", date: "2024-03-12" },
-    // Add more sample orders...
-  ];
+  // View order details
+  const handleViewOrderDetails = (order) => {
+    setSelectedOrder(order);
+    setClaimCode('');
+    setOrderMessage({ show: false, text: '', type: '' });
+    setShowOrderDetailsModal(true);
+  };
 
+  // Handle claim code input change
+  const handleClaimCodeChange = (e) => {
+    setClaimCode(e.target.value);
+  };
+
+  // Mark order as complete
+  const handleCompleteOrder = async () => {
+    if (!selectedOrder || !claimCode) {
+      setOrderMessage({ 
+        show: true, 
+        text: 'Please enter the claim code to complete this order.', 
+        type: 'warning' 
+      });
+      return;
+    }
+
+    try {
+      setProcessingOrder(true);
+      const result = await orderService.completeOrder(selectedOrder.orderId, claimCode);
+      
+      if (result) {
+        setOrderMessage({ 
+          show: true, 
+          text: 'Order has been successfully marked as complete!', 
+          type: 'success' 
+        });
+        
+        // Refresh orders list
+        const updatedOrders = await orderService.getAllOrders();
+        setOrders(updatedOrders);
+        
+        // Close modal after a delay
+        setTimeout(() => {
+          setShowOrderDetailsModal(false);
+        }, 2000);
+      } else {
+        setOrderMessage({ 
+          show: true, 
+          text: 'Failed to complete order. Invalid claim code or order status.', 
+          type: 'danger' 
+        });
+      }
+    } catch (error) {
+      console.error('Error completing order:', error);
+      setOrderMessage({ 
+        show: true, 
+        text: 'An error occurred while completing the order.', 
+        type: 'danger' 
+      });
+    } finally {
+      setProcessingOrder(false);
+    }
+  };
+
+  // Cancel order
+  const handleCancelOrder = async () => {
+    if (!selectedOrder) return;
+
+    if (!window.confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setProcessingOrder(true);
+      const result = await orderService.cancelOrder(selectedOrder.orderId);
+      
+      if (result) {
+        setOrderMessage({ 
+          show: true, 
+          text: 'Order has been successfully cancelled!', 
+          type: 'success' 
+        });
+        
+        // Refresh orders list
+        const updatedOrders = await orderService.getAllOrders();
+        setOrders(updatedOrders);
+        
+        // Close modal after a delay
+        setTimeout(() => {
+          setShowOrderDetailsModal(false);
+        }, 2000);
+      } else {
+        setOrderMessage({ 
+          show: true, 
+          text: 'Failed to cancel order.', 
+          type: 'danger' 
+        });
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      setOrderMessage({ 
+        show: true, 
+        text: 'An error occurred while cancelling the order.', 
+        type: 'danger' 
+      });
+    } finally {
+      setProcessingOrder(false);
+    }
+  };
+
+  // Sample data - replace with actual data from your backend
   const users = [
     { id: 1, name: "John Doe", email: "john@example.com", role: "Admin", status: "Active" },
     { id: 2, name: "Jane Smith", email: "jane@example.com", role: "Staff", status: "Active" },
@@ -830,23 +1012,45 @@ const Admin = () => {
                   </thead>
                   <tbody>
                     {orders.map(order => (
-                      <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>{order.customer}</td>
-                        <td>${order.total}</td>
+                      <tr key={order.orderId || order.id}>
+                        <td>{order.orderId ? order.orderId.substring(0, 8) : order.id}</td>
+                        <td>{order.userName || order.customer}</td>
+                        <td>${order.totalAmount?.toFixed(2) || order.total}</td>
                         <td>
-                          <Badge bg={order.status === 'Completed' ? 'success' : 'warning'}>
-                            {order.status}
+                          <Badge bg={
+                            order.orderStatus === 0 || order.status === 'Pending' 
+                              ? 'warning' 
+                              : order.orderStatus === 1 || order.status === 'Completed' 
+                                ? 'success' 
+                                : 'danger'
+                          }>
+                            {order.orderStatus === 0 || order.status === 'Pending' 
+                              ? 'Pending' 
+                              : order.orderStatus === 1 || order.status === 'Completed' 
+                                ? 'Completed' 
+                                : 'Cancelled'}
                           </Badge>
                         </td>
-                        <td>{order.date}</td>
+                        <td>{order.orderDate 
+                            ? new Date(order.orderDate).toLocaleDateString() 
+                            : order.date}
+                        </td>
                         <td>
-                          <Button variant="outline-primary" size="sm" className="me-2">
+                          <Button 
+                            variant="outline-primary" 
+                            size="sm" 
+                            className="me-2"
+                            onClick={() => handleViewOrderDetails(order)}
+                          >
                             View Details
                           </Button>
-                          {order.status === 'Pending' && (
-                            <Button variant="outline-success" size="sm">
-                              Mark Complete
+                          {(order.orderStatus === 0 || order.status === 'Pending') && (
+                            <Button 
+                              variant="outline-success" 
+                              size="sm"
+                              onClick={() => handleViewOrderDetails(order)}
+                            >
+                              <FaCheck className="me-1" /> Complete
                             </Button>
                           )}
                         </td>
@@ -1070,8 +1274,8 @@ const Admin = () => {
             <Row>
               <Col md={6}>
                 <h5 className="mb-3">Book Details</h5>
-            <Form.Group className="mb-3">
-              <Form.Label>Title</Form.Label>
+                <Form.Group className="mb-3">
+                  <Form.Label>Title</Form.Label>
                   <Form.Control
                     type="text"
                     name="title"
@@ -1079,8 +1283,8 @@ const Admin = () => {
                     onChange={handleBookInputChange}
                     placeholder="Enter book title"
                   />
-            </Form.Group>
-            <Form.Group className="mb-3">
+                </Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>ISBN</Form.Label>
                   <Form.Control
                     type="text"
@@ -1089,8 +1293,8 @@ const Admin = () => {
                     onChange={handleBookInputChange}
                     placeholder="Enter ISBN"
                   />
-            </Form.Group>
-            <Form.Group className="mb-3">
+                </Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>Publisher</Form.Label>
                   <Form.Control
                     type="text"
@@ -1099,7 +1303,7 @@ const Admin = () => {
                     onChange={handleBookInputChange}
                     placeholder="Enter publisher"
                   />
-            </Form.Group>
+                </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Language</Form.Label>
                   <Form.Select
@@ -1132,11 +1336,43 @@ const Admin = () => {
                     placeholder="Enter book description"
                   />
                 </Form.Group>
+                
+                <h5 className="mb-3 mt-4">Authors</h5>
+                <Form.Group className="mb-3">
+                  <Form.Label>Primary Author *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="authorName1"
+                    value={bookForm.authorName1}
+                    onChange={handleBookInputChange}
+                    placeholder="Enter primary author name"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Secondary Author (Optional)</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="authorName2"
+                    value={bookForm.authorName2}
+                    onChange={handleBookInputChange}
+                    placeholder="Enter secondary author name"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Additional Author (Optional)</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="authorName3"
+                    value={bookForm.authorName3}
+                    onChange={handleBookInputChange}
+                    placeholder="Enter additional author name"
+                  />
+                </Form.Group>
               </Col>
               <Col md={6}>
                 <h5 className="mb-3">Categories & Inventory</h5>
-            <Form.Group className="mb-3">
-              <Form.Label>Category</Form.Label>
+                <Form.Group className="mb-3">
+                  <Form.Label>Category</Form.Label>
                   <Form.Select
                     name="category"
                     value={bookForm.category}
@@ -1145,9 +1381,9 @@ const Admin = () => {
                     {Object.entries(Category).map(([key, value]) => (
                       <option key={key} value={key}>{value}</option>
                     ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>Genre</Form.Label>
                   <Form.Select
                     name="genre"
@@ -1158,7 +1394,7 @@ const Admin = () => {
                       <option key={key} value={key}>{value}</option>
                     ))}
                   </Form.Select>
-            </Form.Group>
+                </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Format</Form.Label>
                   <Form.Select
@@ -1203,6 +1439,30 @@ const Admin = () => {
                     placeholder="Enter quantity"
                   />
                 </Form.Group>
+                
+                <Form.Group className="mb-4">
+                  <Form.Label>Book Cover Image</Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                  <Form.Text className="text-muted">
+                    Upload a cover image for the book (JPG, PNG)
+                  </Form.Text>
+                  
+                  {imagePreview && (
+                    <div className="mt-2 text-center">
+                      <img 
+                        src={imagePreview} 
+                        alt="Cover preview" 
+                        style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} 
+                        className="border rounded"
+                      />
+                    </div>
+                  )}
+                </Form.Group>
+                
                 <hr />
                 <Form.Group className="mb-3">
                   <Form.Check
@@ -1397,6 +1657,131 @@ const Admin = () => {
           <Button variant="primary" onClick={() => setShowAddUserModal(false)}>
             Add User
           </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Order Details Modal */}
+      <Modal 
+        show={showOrderDetailsModal} 
+        onHide={() => setShowOrderDetailsModal(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Order Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedOrder && (
+            <>
+              <Row className="mb-4">
+                <Col md={6}>
+                  <h5>Order Information</h5>
+                  <p><strong>Order ID:</strong> {selectedOrder.orderId 
+                    ? selectedOrder.orderId.substring(0, 8) 
+                    : selectedOrder.id}</p>
+                  <p><strong>Date:</strong> {selectedOrder.orderDate 
+                    ? new Date(selectedOrder.orderDate).toLocaleDateString() 
+                    : selectedOrder.date}</p>
+                  <p><strong>Customer:</strong> {selectedOrder.userName || selectedOrder.customer}</p>
+                  <p><strong>Total Amount:</strong> ${selectedOrder.totalAmount?.toFixed(2) || selectedOrder.total}</p>
+                  <p><strong>Status:</strong> 
+                    <Badge 
+                      className="ms-2"
+                      bg={
+                        selectedOrder.orderStatus === 0 || selectedOrder.status === 'Pending' 
+                          ? 'warning' 
+                          : selectedOrder.orderStatus === 1 || selectedOrder.status === 'Completed' 
+                            ? 'success' 
+                            : 'danger'
+                      }
+                    >
+                      {selectedOrder.orderStatus === 0 || selectedOrder.status === 'Pending' 
+                        ? 'Pending' 
+                        : selectedOrder.orderStatus === 1 || selectedOrder.status === 'Completed' 
+                          ? 'Completed' 
+                          : 'Cancelled'}
+                    </Badge>
+                  </p>
+                </Col>
+                <Col md={6}>
+                  <h5>Books</h5>
+                  <ul className="list-group">
+                    {selectedOrder.books ? (
+                      selectedOrder.books.map((book, index) => (
+                        <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                          <span>{book.title || 'Book'}</span>
+                          <span>Qty: {book.quantity || 1}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="list-group-item">No detailed book information available</li>
+                    )}
+                  </ul>
+                </Col>
+              </Row>
+
+              {orderMessage.show && (
+                <Alert variant={orderMessage.type} className="mb-3">
+                  {orderMessage.text}
+                </Alert>
+              )}
+
+              {(selectedOrder.orderStatus === 0 || selectedOrder.status === 'Pending') && (
+                <Row className="mb-3">
+                  <Col>
+                    <Form.Group>
+                      <Form.Label>Enter Claim Code to Complete Order</Form.Label>
+                      <Form.Control 
+                        type="text" 
+                        placeholder="Enter claim code"
+                        value={claimCode}
+                        onChange={handleClaimCodeChange}
+                      />
+                      <Form.Text className="text-muted">
+                        Verify the claim code provided by the customer before completing the order.
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+              )}
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="secondary" 
+            onClick={() => setShowOrderDetailsModal(false)}
+          >
+            Close
+          </Button>
+          
+          {(selectedOrder?.orderStatus === 0 || selectedOrder?.status === 'Pending') && (
+            <>
+              <Button 
+                variant="danger" 
+                onClick={handleCancelOrder}
+                disabled={processingOrder}
+              >
+                {processingOrder ? (
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                ) : (
+                  <FaTimes className="me-2" />
+                )}
+                Cancel Order
+              </Button>
+              <Button 
+                variant="success" 
+                onClick={handleCompleteOrder}
+                disabled={processingOrder || !claimCode}
+              >
+                {processingOrder ? (
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                ) : (
+                  <FaCheck className="me-2" />
+                )}
+                Complete Order
+              </Button>
+            </>
+          )}
         </Modal.Footer>
       </Modal>
     </Container>

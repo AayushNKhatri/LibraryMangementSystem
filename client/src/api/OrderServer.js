@@ -31,12 +31,12 @@ const orderService = {
   },
   addOrder: async () => {
     try {
-      const response = await axios.post(`${API_URL}/Add Order`, {
+      const response = await axios.post(`${API_URL}/Add-order`, {}, {
         headers: getAuthHeader(),
       });
       return response.data;
     } catch (error) {
-      console.error("Error adding items in cart", error);
+      console.error("Error creating order", error);
       throw error;
     }
   },
@@ -62,7 +62,7 @@ const orderService = {
       throw error;
     }
   },
-  increaseCartItmes: async (bookId) => {
+  increaseCartItems: async (bookId) => {
     try {
       const response = await axios.patch(
         `${API_URL}/Increase-cartitem/${bookId}`,
@@ -80,6 +80,7 @@ const orderService = {
     try {
       const response = await axios.patch(
         `${API_URL}/decrease-cartitem/${bookId}`,
+        {},
         {
           headers: getAuthHeader(),
         }
@@ -92,7 +93,7 @@ const orderService = {
   },
   removeCartItems: async (bookId) => {
     try {
-      const response = await axios.patch(
+      const response = await axios.delete(
         `${API_URL}/remove-cartitem/${bookId}`,
         {
           headers: getAuthHeader(),
@@ -104,35 +105,81 @@ const orderService = {
       throw error;
     }
   },
-  completeOrder: async () => {
+  completeOrder: async (orderId, claimCode) => {
     try {
-      const response = await axios.patch(`${API_URL}/complete-Order`, {
-        headers: getAuthHeader(),
-      });
+      const response = await axios.patch(
+        `${API_URL}/complete-Order?claimsCode=${claimCode}&orderId=${orderId}`, 
+        {},
+        { headers: getAuthHeader() }
+      );
       return response.data;
     } catch (error) {
       console.error("Error completing order", error);
-      throw error;
+      return false;
     }
   },
-  cancelOrder: async () => {
+  cancelOrder: async (orderId) => {
     try {
-      const response = await axios.patch(`${API_URL}/cancel-order`, {
-        headers: getAuthHeader(),
-      });
+      const response = await axios.patch(
+        `${API_URL}/cancel-order?orderId=${orderId}`, 
+        { },
+        { headers: getAuthHeader() }
+      );
       return response.data;
     } catch (error) {
       console.error("Error cancelling order", error);
+      return false;
     }
   },
-  addCartItems: async (BookId) => {
+  confirmOrder: async () => {
     try {
-      const response = await axios.post(`${API_URL}/Add-To-Cart/${BookId}`, {
-        headers: getAuthHeader(),
-      });
+      const response = await axios.patch(
+        `${API_URL}/confirm-order`,
+        {},
+        { headers: getAuthHeader() }
+      );
       return response.data;
     } catch (error) {
-      console.error(error);
+      console.error("Error confirming order", error);
+      return null;
+    }
+  },
+  getAllOrders: async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/Get-orders`,
+        { headers: getAuthHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching all orders", error);
+      return [];
+    }
+  },
+  createCart: async (bookId, cartData) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/Add-To-Cart/${bookId}`, 
+        cartData,
+        { headers: getAuthHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error adding item to cart", error);
+      throw error;
+    }
+  },
+  addCartItems: async (bookId) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/Add-To-Cart/${bookId}`, 
+        { count: 1 },
+        { headers: getAuthHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error adding item to cart", error);
+      throw error;
     }
   },
 };
