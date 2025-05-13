@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using server.Database;
 using server.Dtos;
@@ -13,12 +14,14 @@ namespace server.Services
          private readonly UserManager<User> _userManager;
         private readonly ILogger<OrderService> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public OrderService(UserManager<User> userManager, ILogger<OrderService> logger, ApplicationDbContext context)
+        public OrderService(UserManager<User> userManager, ILogger<OrderService> logger, ApplicationDbContext context, IEmailSender emailSender)
         {
             _userManager = userManager;
             _logger = logger;
             _context = context;
+            _emailSender = emailSender;
         }
         public async Task<CreateCartDto> CreateCart(string userId, Guid bookId, CreateCartDto createCart)
         {
@@ -167,5 +170,69 @@ namespace server.Services
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<bool> SendEmail(string userId, Guid orderId)
+        {
+            string emailMessage = "";
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == userId );
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(user == null) throw new Exception("User not found");
+            if(order == null) throw new Exception("Orders not found");
+            switch(order.OrderStatus)
+            {
+                case OrderStatus.Pending:
+                    emailMessage = $@"
+                                        <h2>Hi {user.FirstName},</h2>
+                                        <p>Your order is *Pending*. We'll notify you when it's updated.</p>";
+
+                    await _emailSender.SendEmailAsync(user.Email, "Your order has been made", emailMessage);
+                    break;
+
+                case OrderStatus.Completed:
+                    emailMessage = $@"
+                                        <h2>Hi {user.FirstName},</h2>
+                                        <p>Your order is **completed**. Thank you for shopping with us!</p>";
+
+                    await _emailSender.SendEmailAsync(user.Email, "Your order has been made", emailMessage);
+                    break;
+
+                case OrderStatus.Cancelled:
+                    emailMessage = $@"<h2>Hi {user.FirstName},</h2>
+                                        <p>Unfortunately, your order has been **cancelled**</p>";
+
+                    await _emailSender.SendEmailAsync(user.Email, "Your order has been cancelled", emailMessage);
+                    break;
+            }
+            return true;
+
+        }
+        public async Task<bool> ManageOrdersComplete(Guid orderId, string userId, Guid claimsCode)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=> u.Id == userId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(order == null) throw new Exception("Order not found");
+            if(order.ClaimsCode == claimsCode)
+            {
+                order.OrderStatus = OrderStatus.Completed;
+                _context.Orders.Update(order);
+                await _context.SaveChangesAsync();
+                await SendEmail(userId, orderId);
+            }
+            return true;
+        }
+        public async Task<bool> ManageOrdersCancelled(Guid orderId, string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=> u.Id == userId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(order == null) throw new Exception("Order not found");
+            if(order.OrderStatus == OrderStatus.Pending)
+            {
+                order.OrderStatus = OrderStatus.Cancelled;
+                _context.Orders.Update(order);
+                await _context.SaveChangesAsync();
+                await SendEmail(userId, orderId);
+            }
+            return true;
+        }
     }
 }
+

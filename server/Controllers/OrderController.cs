@@ -123,6 +123,7 @@ namespace server.Controllers
             if(req == false) return NotFound("Order not completed");
             return Ok(req);
         }
+        
         [Authorize]
         [HttpPatch("cancel-order")]
         public async Task<IActionResult>ManageOrderCancelled(Guid orderId)
