@@ -214,5 +214,12 @@ namespace server.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<User> GetUsersById(string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == userId);
+            if(user == null) throw new Exception("User not found");
+            return user;
+        }
     }
 }
