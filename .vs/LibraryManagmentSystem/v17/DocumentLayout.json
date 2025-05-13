@@ -1,37 +1,77 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\AD Project\\LibraryMangementSystem\\",
+  "WorkspaceRootPath": "C:\\Users\\acer\\LibraryMangementSystem\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\controllers\\bookcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\services\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\database\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\database\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\services\\interface\\iorederinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\interface\\iorederinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\migrations\\20250429040927_initil.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\migrations\\20250429040927_initil.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\entities\\cart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\entities\\cart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\services\\emailsenderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\emailsenderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\dtos\\getordersummarydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\dtos\\getordersummarydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\entities\\bookmark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\entities\\bookmark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\entities\\book.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\entities\\book.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\controllers\\bookcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\controllers\\bookcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\services\\bookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\services\\bookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\bookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\services\\interface\\ibookinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\services\\interface\\ibookinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\interface\\ibookinterface.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\entities\\bookinventory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\entities\\bookinventory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\entities\\bookinventory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|e:\\ad project\\librarymangementsystem\\server\\entities\\enum\\enum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|c:\\users\\acer\\librarymangementsystem\\server\\entities\\enum\\enum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3461765F-60A1-21BC-764E-FC799869FE2F}|server\\server.csproj|solutionrelative:server\\entities\\enum\\enum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -42,7 +82,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 53,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -53,25 +93,150 @@
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "BookController.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
-              "RelativeDocumentMoniker": "server\\Controllers\\BookController.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
-              "RelativeToolTip": "server\\Controllers\\BookController.cs",
-              "ViewState": "AgIAAEcAAAAAAAAAAAAgwF0AAAAeAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Database\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "server\\Database\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Database\\ApplicationDbContext.cs",
+              "RelativeToolTip": "server\\Database\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAwBIAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-11T06:18:50.266Z",
+              "WhenOpened": "2025-05-12T16:05:04.068Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "OrderService.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\OrderService.cs",
+              "RelativeDocumentMoniker": "server\\Services\\OrderService.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\OrderService.cs",
+              "RelativeToolTip": "server\\Services\\OrderService.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAAAmwG8AAABNAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:42:43.093Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "EmailSenderService.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\EmailSenderService.cs",
+              "RelativeDocumentMoniker": "server\\Services\\EmailSenderService.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\EmailSenderService.cs",
+              "RelativeToolTip": "server\\Services\\EmailSenderService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:42:42.216Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "OrderController.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Controllers\\OrderController.cs",
+              "RelativeDocumentMoniker": "server\\Controllers\\OrderController.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Controllers\\OrderController.cs",
+              "RelativeToolTip": "server\\Controllers\\OrderController.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:42:25.631Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Book.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Book.cs",
+              "RelativeDocumentMoniker": "server\\Entities\\Book.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Book.cs",
+              "RelativeToolTip": "server\\Entities\\Book.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:41:26.855Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Cart.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Cart.cs",
+              "RelativeDocumentMoniker": "server\\Entities\\Cart.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Cart.cs",
+              "RelativeToolTip": "server\\Entities\\Cart.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:41:15.755Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Bookmark.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Bookmark.cs",
+              "RelativeDocumentMoniker": "server\\Entities\\Bookmark.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Bookmark.cs",
+              "RelativeToolTip": "server\\Entities\\Bookmark.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:41:14.677Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IOrederInterface.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\Interface\\IOrederInterface.cs",
+              "RelativeDocumentMoniker": "server\\Services\\Interface\\IOrederInterface.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\Interface\\IOrederInterface.cs",
+              "RelativeToolTip": "server\\Services\\Interface\\IOrederInterface.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAqwA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:40:39.475Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "20250429040927_initil.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Migrations\\20250429040927_initil.cs",
+              "RelativeDocumentMoniker": "server\\Migrations\\20250429040927_initil.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Migrations\\20250429040927_initil.cs",
+              "RelativeToolTip": "server\\Migrations\\20250429040927_initil.cs",
+              "ViewState": "AgIAALAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T16:04:15.823Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "GetOrderSummaryDto.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Dtos\\GetOrderSummaryDto.cs",
+              "RelativeDocumentMoniker": "server\\Dtos\\GetOrderSummaryDto.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Dtos\\GetOrderSummaryDto.cs",
+              "RelativeToolTip": "server\\Dtos\\GetOrderSummaryDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAoAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-12T14:40:20.032Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "BookController.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
+              "RelativeDocumentMoniker": "server\\Controllers\\BookController.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
+              "RelativeToolTip": "server\\Controllers\\BookController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF0AAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-11T06:18:50.266Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
               "Title": "IBookInterface.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
               "RelativeDocumentMoniker": "server\\Services\\Interface\\IBookInterface.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\Interface\\IBookInterface.cs",
               "RelativeToolTip": "server\\Services\\Interface\\IBookInterface.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAMwA8AAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -79,11 +244,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 11,
               "Title": "BookService.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\BookService.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\BookService.cs",
               "RelativeDocumentMoniker": "server\\Services\\BookService.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\BookService.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\BookService.cs",
               "RelativeToolTip": "server\\Services\\BookService.cs",
               "ViewState": "AgIAADEAAAAAAAAAAAAowDoAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -91,11 +256,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 14,
               "Title": "BookInventory.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\BookInventory.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\BookInventory.cs",
               "RelativeDocumentMoniker": "server\\Entities\\BookInventory.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\BookInventory.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\BookInventory.cs",
               "RelativeToolTip": "server\\Entities\\BookInventory.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -103,11 +268,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 16,
               "Title": "User.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\User.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\User.cs",
               "RelativeDocumentMoniker": "server\\Entities\\User.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\User.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\User.cs",
               "RelativeToolTip": "server\\Entities\\User.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -115,11 +280,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 17,
               "Title": "Enum.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\Enum\\Enum.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Enum\\Enum.cs",
               "RelativeDocumentMoniker": "server\\Entities\\Enum\\Enum.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Entities\\Enum\\Enum.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Entities\\Enum\\Enum.cs",
               "RelativeToolTip": "server\\Entities\\Enum\\Enum.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -127,11 +292,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 15,
               "Title": "UserService.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\UserService.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\UserService.cs",
               "RelativeDocumentMoniker": "server\\Services\\UserService.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\UserService.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Services\\UserService.cs",
               "RelativeToolTip": "server\\Services\\UserService.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAAwBkAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -139,11 +304,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 12,
               "Title": "Program.cs",
-              "DocumentMoniker": "E:\\AD Project\\LibraryMangementSystem\\server\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Program.cs",
               "RelativeDocumentMoniker": "server\\Program.cs",
-              "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Program.cs",
+              "ToolTip": "C:\\Users\\acer\\LibraryMangementSystem\\server\\Program.cs",
               "RelativeToolTip": "server\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
