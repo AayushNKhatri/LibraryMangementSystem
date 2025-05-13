@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBullhorn } from 'react-icons/fa';
 import './AnnouncementWidget.css';
-// import announcementService from '../api/announcementService';
+import announcementService from '../api/announcementService';
 
 const AnnouncementWidget = () => {
     const [announcements, setAnnouncements] = useState([]);
@@ -12,25 +12,25 @@ const AnnouncementWidget = () => {
         const fetchAnnouncements = async () => {
             try {
                 // Uncomment to use the actual API
-                // const data = await announcementService.getActiveAnnouncements();
-                // setAnnouncements(data);
-                
+                const data = await announcementService.getActiveAnnouncements();
+                setAnnouncements(data);
+
                 // Mock data for demonstration
-                const mockAnnouncements = [
-                    {
-                        id: 1,
-                        type: 'Event',
-                        description: 'Book fair happening this weekend at the central library',
-                        endDate: '2023-12-31'
-                    },
-                    {
-                        id: 2,
-                        type: 'Notice',
-                        description: 'Library will be closed for maintenance on Monday',
-                        endDate: '2023-12-25'
-                    }
-                ];
-                
+                // const mockAnnouncements = [
+                //     {
+                //         id: 1,
+                //         type: 'Event',
+                //         description: 'Book fair happening this weekend at the central library',
+                //         endDate: '2023-12-31'
+                //     },
+                //     {
+                //         id: 2,
+                //         type: 'Notice',
+                //         description: 'Library will be closed for maintenance on Monday',
+                //         endDate: '2023-12-25'
+                //     }
+                // ];
+
                 setAnnouncements(mockAnnouncements);
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
@@ -38,7 +38,7 @@ const AnnouncementWidget = () => {
         };
 
         fetchAnnouncements();
-        
+
         // Auto rotate announcements
         const interval = setInterval(() => {
             setCurrentIndex(prevIndex => {
@@ -46,7 +46,7 @@ const AnnouncementWidget = () => {
                 return prevIndex === announcements.length - 1 ? 0 : prevIndex + 1;
             });
         }, 5000);
-        
+
         return () => clearInterval(interval);
     }, [announcements.length]);
 
@@ -66,7 +66,7 @@ const AnnouncementWidget = () => {
             </div>
             <div className="widget-nav">
                 {announcements.map((_, index) => (
-                    <span 
+                    <span
                         key={index}
                         className={`nav-dot ${index === currentIndex ? 'active' : ''}`}
                         onClick={() => setCurrentIndex(index)}
@@ -78,4 +78,4 @@ const AnnouncementWidget = () => {
     );
 };
 
-export default AnnouncementWidget; 
+export default AnnouncementWidget;

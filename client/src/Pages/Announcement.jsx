@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import announcementService from '../api/announcementService';
 import './Announcement.css';
-// import announcementService from '../api/announcementService';
 
 const Announcement = () => {
     const [announcements, setAnnouncements] = useState([]);
@@ -18,27 +18,8 @@ const Announcement = () => {
     useEffect(() => {
         const fetchAnnouncements = async () => {
             try {
-                // Uncomment to use the actual API
-                // const data = await announcementService.getAllAnnouncements();
-                // setAnnouncements(data);
-                
-                // Mock data for demonstration
-                const mockAnnouncements = [
-                    {
-                        id: 1,
-                        type: 'Event',
-                        description: 'Book fair happening this weekend at the central library',
-                        endDate: '2023-12-31'
-                    },
-                    {
-                        id: 2,
-                        type: 'Notice',
-                        description: 'Library will be closed for maintenance on Monday',
-                        endDate: '2023-12-25'
-                    }
-                ];
-                
-                setAnnouncements(mockAnnouncements);
+                const data = await announcementService.getAllAnnouncements();
+                setAnnouncements(data);
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
             }
@@ -64,30 +45,14 @@ const Announcement = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!currentAnnouncement.type || !currentAnnouncement.description || !currentAnnouncement.endDate) {
-            alert('All fields are required');
-            return;
-        }
-
         try {
             if (isEditing) {
-                // Update existing announcement
-                // Uncomment to use the actual API
-                // await announcementService.updateAnnouncement(currentAnnouncement.id, currentAnnouncement);
-                setAnnouncements(announcements.map(announcement => 
-                    announcement.id === currentAnnouncement.id ? currentAnnouncement : announcement
-                ));
+                await announcementService.updateAnnouncement(currentAnnouncement.id, currentAnnouncement);
+                setAnnouncements(announcements.map((a) => a.id === currentAnnouncement.id ? currentAnnouncement : a));
             } else {
-                // Add new announcement
-                // Uncomment to use the actual API
-                // const newAnnouncement = await announcementService.createAnnouncement(currentAnnouncement);
-                const newAnnouncement = {
-                    ...currentAnnouncement,
-                    id: Date.now()
-                };
+                const newAnnouncement = await announcementService.createAnnouncement(currentAnnouncement);
                 setAnnouncements([...announcements, newAnnouncement]);
             }
-
             resetForm();
             setShowForm(false);
         } catch (error) {
@@ -103,15 +68,12 @@ const Announcement = () => {
     };
 
     const deleteAnnouncement = async (id) => {
-        if (window.confirm('Are you sure you want to delete this announcement?')) {
-            try {
-                // Uncomment to use the actual API
-                // await announcementService.deleteAnnouncement(id);
-                setAnnouncements(announcements.filter(announcement => announcement.id !== id));
-            } catch (error) {
-                console.error('Error deleting announcement:', error);
-                alert('Failed to delete announcement. Please try again.');
-            }
+        try {
+            await announcementService.deleteAnnouncement(id);
+            setAnnouncements(announcements.filter((a) => a.id !== id));
+        } catch (error) {
+            console.error('Error deleting announcement:', error);
+            alert('Failed to delete announcement. Please try again.');
         }
     };
 
@@ -119,109 +81,31 @@ const Announcement = () => {
         <div className="announcement-container">
             <div className="announcement-header">
                 <h2>Announcements</h2>
-                <button 
-                    className="add-announcement-btn"
-                    onClick={() => {
-                        resetForm();
-                        setShowForm(!showForm);
-                    }}
-                >
+                <button className="add-announcement-btn" onClick={() => setShowForm(!showForm)}>
                     <FaPlus /> New Announcement
                 </button>
             </div>
 
             {showForm && (
-                <div className="announcement-form-container">
-                    <form onSubmit={handleSubmit} className="announcement-form">
-                        <h3>{isEditing ? 'Edit Announcement' : 'Add New Announcement'}</h3>
-                        
-                        <div className="form-group">
-                            <label htmlFor="type">Announcement Type</label>
-                            <select 
-                                name="type" 
-                                id="type" 
-                                value={currentAnnouncement.type} 
-                                onChange={handleInputChange}
-                                required
-                            >
-                                <option value="">Select Type</option>
-                                <option value="Event">Event</option>
-                                <option value="Notice">Notice</option>
-                                <option value="Update">Update</option>
-                                <option value="Alert">Alert</option>
-                            </select>
-                        </div>
-                        
-                        <div className="form-group">
-                            <label htmlFor="description">Description</label>
-                            <textarea 
-                                name="description" 
-                                id="description" 
-                                value={currentAnnouncement.description} 
-                                onChange={handleInputChange}
-                                required
-                            ></textarea>
-                        </div>
-                        
-                        <div className="form-group">
-                            <label htmlFor="endDate">End Date</label>
-                            <input 
-                                type="date" 
-                                name="endDate" 
-                                id="endDate" 
-                                value={currentAnnouncement.endDate} 
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </div>
-                        
-                        <div className="form-actions">
-                            <button type="submit" className="submit-btn">
-                                {isEditing ? 'Update' : 'Post'} Announcement
-                            </button>
-                            <button 
-                                type="button" 
-                                className="cancel-btn"
-                                onClick={() => {
-                                    resetForm();
-                                    setShowForm(false);
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <form onSubmit={handleSubmit} className="announcement-form">
+                    <h3>{isEditing ? 'Edit Announcement' : 'Add New Announcement'}</h3>
+                    <input name="type" value={currentAnnouncement.type} onChange={handleInputChange} placeholder="Type" required />
+                    <textarea name="description" value={currentAnnouncement.description} onChange={handleInputChange} placeholder="Description" required></textarea>
+                    <input type="date" name="endDate" value={currentAnnouncement.endDate} onChange={handleInputChange} required />
+                    <button type="submit">{isEditing ? 'Update' : 'Add'}</button>
+                </form>
             )}
 
             <div className="announcements-list">
-                {announcements.length === 0 ? (
-                    <p className="no-announcements">No announcements found</p>
-                ) : (
-                    announcements.map(announcement => (
-                        <div key={announcement.id} className={`announcement-card ${announcement.type.toLowerCase()}`}>
-                            <div className="announcement-type-badge">{announcement.type}</div>
-                            <div className="announcement-content">
-                                <p className="announcement-description">{announcement.description}</p>
-                                <p className="announcement-date">Valid until: {new Date(announcement.endDate).toLocaleDateString()}</p>
-                            </div>
-                            <div className="announcement-actions">
-                                <button 
-                                    className="edit-btn" 
-                                    onClick={() => editAnnouncement(announcement)}
-                                >
-                                    <FaEdit />
-                                </button>
-                                <button 
-                                    className="delete-btn"
-                                    onClick={() => deleteAnnouncement(announcement.id)}
-                                >
-                                    <FaTrash />
-                                </button>
-                            </div>
-                        </div>
-                    ))
-                )}
+                {announcements.map((announcement) => (
+                    <div key={announcement.id} className="announcement-card">
+                        <h4>{announcement.type}</h4>
+                        <p>{announcement.description}</p>
+                        <small>{announcement.endDate}</small>
+                        <button onClick={() => editAnnouncement(announcement)}><FaEdit /></button>
+                        <button onClick={() => deleteAnnouncement(announcement.id)}><FaTrash /></button>
+                    </div>
+                ))}
             </div>
         </div>
     );

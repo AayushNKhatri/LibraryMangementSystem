@@ -13,7 +13,7 @@ const bookService = {
       throw error;
     }
   },
-  
+
   getBookById: async (bookId) => {
     try {
       const response = await axios.get(`${API_URL}/Books/${bookId}`);
@@ -23,27 +23,50 @@ const bookService = {
       throw error;
     }
   },
-  
+
   addBook: async (bookData) => {
     try {
-      const response = await axios.post(`${API_URL}/Books/AddBooks`, bookData);
+      // Ensure dates are in proper ISO format
+      const formattedData = {
+        ...bookData,
+        publicationDate: new Date(bookData.publicationDate).toISOString(),
+        createdDate: new Date().toISOString(),
+        discoundStartDate: bookData.isOnSale ? new Date(bookData.discoundStartDate).toISOString() : new Date().toISOString(),
+        discoundEndDate: bookData.isOnSale ? new Date(bookData.discoundEndDate).toISOString() : new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+      };
+
+      const response = await axios.post(`${API_URL}/Books/AddBooks`, formattedData);
       return response.data;
     } catch (error) {
       console.error('Error adding book:', error);
+      if (error.response) {
+        console.error('Server response:', error.response.data);
+      }
       throw error;
     }
   },
-  
+
   updateBook: async (bookId, bookData) => {
     try {
-      const response = await axios.put(`${API_URL}/Books/${bookId}`, bookData);
+      // Ensure dates are in proper ISO format
+      const formattedData = {
+        ...bookData,
+        publicationDate: new Date(bookData.publicationDate).toISOString(),
+        discoundStartDate: bookData.isOnSale ? new Date(bookData.discoundStartDate).toISOString() : new Date().toISOString(),
+        discoundEndDate: bookData.isOnSale ? new Date(bookData.discoundEndDate).toISOString() : new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+      };
+
+      const response = await axios.put(`${API_URL}/Books/${bookId}`, formattedData);
       return response.data;
     } catch (error) {
       console.error(`Error updating book with ID ${bookId}:`, error);
+      if (error.response) {
+        console.error('Server response:', error.response.data);
+      }
       throw error;
     }
   },
-  
+
   deleteBook: async (bookId) => {
     try {
       const response = await axios.delete(`${API_URL}/Books/${bookId}`);
@@ -55,4 +78,4 @@ const bookService = {
   }
 };
 
-export default bookService; 
+export default bookService;
