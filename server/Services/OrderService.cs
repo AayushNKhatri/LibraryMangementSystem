@@ -98,6 +98,12 @@ namespace server.Services
             var cartItems = await _context.Carts.Where(u=>u.UserId == userId).Include(u=>u.User).Include(u =>u.Book).ToListAsync();
             if(!cartItems.Any()) throw new Exception("No items to make order");
             if(cartItems.Any(b => b.Book==null || b.User == null)) throw new Exception ("The cart is missing valid user or book");
+            
+            var discount = await CalculateDiscount(userId, cartItems);
+            var originalTotal = cartItems.Sum(c => c.Count * Convert.ToDecimal(c.Book?.Price ?? 0));
+            var discountedTotal = originalTotal * (1 - discount);
+
+            
             var order = new Order
             {
                 OrderId = Guid.NewGuid(),
@@ -106,7 +112,7 @@ namespace server.Services
                 BookCount = cartItems.Sum(c => c.Count),
                 TotalAmount = cartItems.Sum(c=>c.Count * (c.Book?.Price??0)),
                 OrderStatus = OrderStatus.Pending,
-                DiscountApplied = 0
+                DiscountApplied = (int)discount*100,
             };
             await _context.Orders.AddAsync(order);
             var OrderDetails = cartItems.Select(item => new OrderDetails{
@@ -263,6 +269,26 @@ namespace server.Services
                 await SendEmail(userId, orderId);
             }
             return true;
+        }
+
+            //This was doen by BERNARD 
+        public async Task<decimal> CalculateDiscount(string userId, List<Cart> cartItems)
+        {
+            if (cartItems == null || !cartItems.Any())
+                return 0m;
+
+            int totalBooks = cartItems.Sum(c => c.Count);
+            int pastOrderCount = await _context.Orders.CountAsync(o => o.UserId == userId && o.OrderStatus == OrderStatus.Completed);
+
+            decimal discount = 0;
+
+            if (totalBooks >= 5)
+                discount += 0.05m; // 5% discount
+
+            if (pastOrderCount >= 10)
+                discount += 0.10m; // Additional 10% discount
+
+            return discount;
         }
     }
 }
