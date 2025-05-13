@@ -19,6 +19,7 @@ const Announcement = () => {
         const fetchAnnouncements = async () => {
             try {
                 const data = await announcementService.getAllAnnouncements();
+                console.log(data)
                 setAnnouncements(data);
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
@@ -97,8 +98,8 @@ const Announcement = () => {
             )}
 
             <div className="announcements-list">
-                {announcements.map((announcement) => (
-                    <div key={announcement.id} className="announcement-card">
+                {announcements.map((announcement, index) => (
+                    <div key={announcement.id || index} className="announcement-card">
                         <h4>{announcement.type}</h4>
                         <p>{announcement.description}</p>
                         <small>{announcement.endDate}</small>

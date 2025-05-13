@@ -12,7 +12,7 @@ const AnnouncementWidget = () => {
         const fetchAnnouncements = async () => {
             try {
                 // Uncomment to use the actual API
-                const data = await announcementService.getActiveAnnouncements();
+                const data = await announcementService.getAllAnnouncements();
                 setAnnouncements(data);
 
                 // Mock data for demonstration
@@ -31,7 +31,7 @@ const AnnouncementWidget = () => {
                 //     }
                 // ];
 
-                setAnnouncements(mockAnnouncements);
+                //setAnnouncements(mockAnnouncements);
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
             }
