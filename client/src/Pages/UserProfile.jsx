@@ -1,42 +1,85 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, ListGroup } from 'react-bootstrap';
-import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
-import './UserProfile.css';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Table,
+  Form,
+  Badge,
+  ListGroup,
+} from "react-bootstrap";
+import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit } from "react-icons/fa";
+import "./UserProfile.css";
+import userService from "../api/UserService";
+import orderService from "../api/OrderServer";
 
 const UserProfile = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
+  const [userData, setUserData] = useState([]);
+  const [orderData, setOrderData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Sample user data - replace with actual data from your backend
-  const userData = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 890",
-    address: "123 Library Street, Booktown, BT 12345",
-    joinDate: "January 2024",
-    avatar: "https://via.placeholder.com/150"
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        const data = await orderService.getCartItems();
+        setUserData(data);
+      } catch (error) {
+        console.error("Error loading fetched cart items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const fetchOrderData = async (userId) => {
+      try {
+        setLoading(true);
+        const data = await orderService.getOrderById(userId);
+        setOrderData(data);
+      } catch (error) {
+        console.error("Error loading fetched cart items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrderData();
+  }, []);
+
+  const handleSaveChanges = async () => {
+    try {
+      setLoading(true);
+      const updatedUserData = {
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        email: userInfo.email,
+        contact: userInfo.contact,
+        city: userInfo.city,
+        userId: userInfo.userId, // Ensure user ID is included
+      };
+
+      const response = await userService.updateUser(updatedUserData);
+      setUserData(response.data);
+      setIsEditing(false); // Disable editing after saving
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Sample orders data
-  const orders = [
-    { id: 1, date: "2024-03-15", total: 45.99, status: "Delivered", items: 3 },
-    { id: 2, date: "2024-03-10", total: 29.99, status: "Processing", items: 2 },
-    { id: 3, date: "2024-03-05", total: 15.99, status: "Delivered", items: 1 },
-  ];
-
-  // Sample notifications
-  const notifications = [
-    { id: 1, title: "Order Delivered", message: "Your order #123 has been delivered", date: "2024-03-15", read: false },
-    { id: 2, title: "New Book Available", message: "A book from your wishlist is now available", date: "2024-03-14", read: true },
-    { id: 3, title: "Special Offer", message: "Get 20% off on your next purchase", date: "2024-03-13", read: true },
-  ];
-
-  // Sample wishlist
-  const wishlist = [
-    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", price: 15.99, inStock: true },
-    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", price: 12.99, inStock: false },
-    { id: 3, title: "1984", author: "George Orwell", price: 14.99, inStock: true },
-  ];
+  const statusMap = {
+    0: "Pending",
+    1: "Completed",
+    2: "Cancelled",
+  };
+  const userInfo = userData.length > 0 ? userData[0].user : {};
 
   return (
     <Container className="user-profile py-4">
@@ -45,46 +88,53 @@ const UserProfile = () => {
           <Card className="profile-sidebar mb-4">
             <Card.Body className="text-center">
               <div className="profile-avatar mb-3">
-                <img src={userData.avatar} alt="Profile" className="rounded-circle" />
+                <img alt="Profile" className="rounded-circle" />
               </div>
-              <h4>{userData.name}</h4>
-              <p className="text-muted">Member since {userData.joinDate}</p>
+              <h4>{`${userInfo.firstName || ""} ${
+                userInfo.lastName || ""
+              }`}</h4>
             </Card.Body>
             <ListGroup variant="flush">
-              <ListGroup.Item 
-                action 
-                active={activeTab === 'profile'}
-                onClick={() => setActiveTab('profile')}
+              <ListGroup.Item
+                action
+                active={activeTab === "profile"}
+                onClick={() => setActiveTab("profile")}
               >
                 <FaUser className="me-2" />
                 Profile Information
               </ListGroup.Item>
-              <ListGroup.Item 
-                action 
-                active={activeTab === 'orders'}
-                onClick={() => setActiveTab('orders')}
+              <ListGroup.Item
+                action
+                active={activeTab === "orders"}
+                onClick={() => setActiveTab("orders")}
               >
                 <FaShoppingBag className="me-2" />
                 My Orders
-                <Badge bg="primary" className="ms-2">3</Badge>
+                <Badge bg="primary" className="ms-2">
+                  3
+                </Badge>
               </ListGroup.Item>
-              <ListGroup.Item 
-                action 
-                active={activeTab === 'notifications'}
-                onClick={() => setActiveTab('notifications')}
+              <ListGroup.Item
+                action
+                active={activeTab === "notifications"}
+                onClick={() => setActiveTab("notifications")}
               >
                 <FaBell className="me-2" />
                 Notifications
-                <Badge bg="danger" className="ms-2">1</Badge>
+                <Badge bg="danger" className="ms-2">
+                  1
+                </Badge>
               </ListGroup.Item>
-              <ListGroup.Item 
-                action 
-                active={activeTab === 'wishlist'}
-                onClick={() => setActiveTab('wishlist')}
+              <ListGroup.Item
+                action
+                active={activeTab === "wishlist"}
+                onClick={() => setActiveTab("wishlist")}
               >
                 <FaHeart className="me-2" />
                 Wishlist
-                <Badge bg="primary" className="ms-2">3</Badge>
+                <Badge bg="primary" className="ms-2">
+                  3
+                </Badge>
               </ListGroup.Item>
             </ListGroup>
           </Card>
@@ -93,14 +143,15 @@ const UserProfile = () => {
         <Col lg={9}>
           <Card>
             <Card.Body>
-              {/* Profile Information */}
-              {activeTab === 'profile' && (
+              {activeTab === "profile" && (
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h4>Profile Information</h4>
-                    <Button 
+                    <Button
                       variant={isEditing ? "success" : "primary"}
-                      onClick={() => setIsEditing(!isEditing)}
+                      onClick={
+                        isEditing ? handleSaveChanges : () => setIsEditing(true)
+                      }
                     >
                       <FaEdit className="me-2" />
                       {isEditing ? "Save Changes" : "Edit Profile"}
@@ -111,9 +162,9 @@ const UserProfile = () => {
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Full Name</Form.Label>
-                          <Form.Control 
-                            type="text" 
-                            defaultValue={userData.name}
+                          <Form.Control
+                            type="text"
+                            defaultValue={userInfo.firstName || ""}
                             disabled={!isEditing}
                           />
                         </Form.Group>
@@ -121,9 +172,9 @@ const UserProfile = () => {
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Email</Form.Label>
-                          <Form.Control 
-                            type="email" 
-                            defaultValue={userData.email}
+                          <Form.Control
+                            type="email"
+                            defaultValue={userInfo.email || ""}
                             disabled={!isEditing}
                           />
                         </Form.Group>
@@ -133,9 +184,9 @@ const UserProfile = () => {
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Phone</Form.Label>
-                          <Form.Control 
-                            type="tel" 
-                            defaultValue={userData.phone}
+                          <Form.Control
+                            type="tel"
+                            defaultValue={userInfo.contact || ""}
                             disabled={!isEditing}
                           />
                         </Form.Group>
@@ -143,9 +194,9 @@ const UserProfile = () => {
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Address</Form.Label>
-                          <Form.Control 
-                            type="text" 
-                            defaultValue={userData.address}
+                          <Form.Control
+                            type="text"
+                            defaultValue={userInfo.city}
                             disabled={!isEditing}
                           />
                         </Form.Group>
@@ -154,9 +205,7 @@ const UserProfile = () => {
                   </Form>
                 </div>
               )}
-
-              {/* Orders */}
-              {activeTab === 'orders' && (
+              {activeTab === "orders" && (
                 <div>
                   <h4 className="mb-4">My Orders</h4>
                   <Table responsive hover>
@@ -164,100 +213,33 @@ const UserProfile = () => {
                       <tr>
                         <th>Order ID</th>
                         <th>Date</th>
-                        <th>Items</th>
                         <th>Total</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>CLaim Code</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {orders.map(order => (
-                        <tr key={order.id}>
-                          <td>#{order.id}</td>
-                          <td>{order.date}</td>
-                          <td>{order.items}</td>
-                          <td>${order.total}</td>
+                      {orderData.map((order) => (
+                        <tr key={order.orderId}>
+                          <td>{order.orderId}</td>
                           <td>
-                            <Badge bg={order.status === 'Delivered' ? 'success' : 'warning'}>
-                              {order.status}
-                            </Badge>
+                            {new Date(order.orderDate).toLocaleDateString()}
                           </td>
+                          <td>${order.totalAmount}</td>
                           <td>
-                            <Button variant="outline-primary" size="sm">
-                              View Details
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
-              )}
-
-              {/* Notifications */}
-              {activeTab === 'notifications' && (
-                <div>
-                  <h4 className="mb-4">Notifications</h4>
-                  <ListGroup>
-                    {notifications.map(notification => (
-                      <ListGroup.Item 
-                        key={notification.id}
-                        className={!notification.read ? 'unread' : ''}
-                      >
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <h6 className="mb-1">{notification.title}</h6>
-                            <p className="mb-1">{notification.message}</p>
-                            <small className="text-muted">{notification.date}</small>
-                          </div>
-                          {!notification.read && (
-                            <Badge bg="primary">New</Badge>
-                          )}
-                        </div>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
-                </div>
-              )}
-
-              {/* Wishlist */}
-              {activeTab === 'wishlist' && (
-                <div>
-                  <h4 className="mb-4">My Wishlist</h4>
-                  <Table responsive hover>
-                    <thead>
-                      <tr>
-                        <th>Book</th>
-                        <th>Author</th>
-                        <th>Price</th>
-                        <th>Availability</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {wishlist.map(book => (
-                        <tr key={book.id}>
-                          <td>{book.title}</td>
-                          <td>{book.author}</td>
-                          <td>${book.price}</td>
-                          <td>
-                            <Badge bg={book.inStock ? 'success' : 'warning'}>
-                              {book.inStock ? 'In Stock' : 'Out of Stock'}
-                            </Badge>
-                          </td>
-                          <td>
-                            <Button 
-                              variant="primary" 
-                              size="sm" 
-                              className="me-2"
-                              disabled={!book.inStock}
+                            <Badge
+                              bg={
+                                statusMap[order.orderStatus] === "Completed"
+                                  ? "success"
+                                  : statusMap[order.orderStatus] === "Pending"
+                                  ? "warning"
+                                  : "danger"
+                              }
                             >
-                              Add to Cart
-                            </Button>
-                            <Button variant="outline-danger" size="sm">
-                              Remove
-                            </Button>
+                              {statusMap[order.orderStatus] || "Unknown"}
+                            </Badge>
                           </td>
+                          <td>{order.claimsCode}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -272,4 +254,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile; 
+export default UserProfile;

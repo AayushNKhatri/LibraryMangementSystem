@@ -32,11 +32,7 @@ namespace server.Controllers
                 var token = await userServices.Login(request);
 
                 // Return a proper response object with the token
-                return Ok(new {
-                    token,
-                    success = true,
-                    message = "Login successful"
-                });
+                return Ok(token);
             }
             catch(Exception ex){
                 // Return a clean error message
@@ -45,11 +41,30 @@ namespace server.Controllers
         }
 
         [Authorize]
-        [HttpPost("Get-User")]
+        [HttpGet("Get-User")]
         public async Task<IActionResult> GetAllUser()
         {
             try{
                 var result = await userServices.GetAllUsers();
+                if(result == null)
+                {
+                    return NotFound("No user found");
+                }
+                return Ok(result);
+            }
+            catch(Exception ex){
+                return BadRequest($"Error fetching users: {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpGet("Get-User-By-Id")]
+        public async Task<IActionResult> GetUserById()
+        {
+            try{
+                var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if(user == null) return Unauthorized("User not found");
+                var result = await userServices.GetUsersById(user);
                 if(result == null)
                 {
                     return NotFound("No user found");

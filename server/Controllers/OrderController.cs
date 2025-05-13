@@ -14,11 +14,13 @@ namespace server.Controllers
     [Route("api/[controller]")]
     public class OrderController(IOrederInterface orderService, UserManager<User> _userManager, ILogger<User> _logger) : ControllerBase
     {
-        [HttpPost("Add-To-Cart/{userId}/{bookId}")]
-        public async Task<IActionResult> AddToCart([FromBody] CreateCartDto createCart, [FromRoute] string userId, [FromRoute]Guid bookId)
+        [HttpPost("Add-To-Cart/{bookId}")]
+        public async Task<IActionResult> AddToCart([FromBody] CreateCartDto createCart, [FromRoute]Guid bookId)
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if(userId == null) return Unauthorized("User not found");
                 var request = await orderService.CreateCart(userId,bookId, createCart);
                 if(request == null) return BadRequest("Items not added to cart");
                 return Ok(request);
@@ -49,23 +51,6 @@ namespace server.Controllers
             }
         }
         [Authorize]
-        [HttpGet("get-order-summary")]
-        public async Task<IActionResult>GetOrderSummary()
-        {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if(string.IsNullOrEmpty(userId)) return Unauthorized("No user found");
-                var req = await orderService.OrderSummary(userId);
-                if(!req.Any()) return NotFound("There is no item to show");
-                return Ok(req);
-            }
-            catch(Exception ex)
-            {
-                throw new Exception($"Order summary not fetched {ex.Message}");
-            }
-        }
-        [Authorize]
         [HttpPost("Add-order")]
         public async Task<IActionResult>CreateOrder()
         {
@@ -83,9 +68,46 @@ namespace server.Controllers
                 throw new Exception($"Order not created {ex.Message}");
             }
         }
+
         [Authorize]
-        [HttpPatch("Increase-cartitem")]
-        public async Task<IActionResult>IncreaseCartItem(Guid bookId)
+        [HttpGet("Get-orders")]
+        public async Task<IActionResult>GetAllOrders()
+        {
+            try
+            {
+                var req = await orderService.GetOrder();
+                if(!req.Any()) return NotFound("Not orders to show");
+                return Ok(req);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Orders is empty {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpGet("Get-orders-by-id")]
+        public async Task<IActionResult>GetAllOrdersById()
+        {
+            try
+            {
+                var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var req = await orderService.GetOrderById(user);
+                if(!req.Any()) return NotFound("Not orders to show");
+                return Ok(req);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Orders is empty {ex.Message}");
+            }
+        }
+
+
+
+
+        [Authorize]
+        [HttpPatch("Increase-cartitem/bookId")]
+        public async Task<IActionResult>IncreaseCartItem([FromRoute] Guid bookId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if(string.IsNullOrEmpty(userId)) return Unauthorized("user not found");
@@ -94,8 +116,8 @@ namespace server.Controllers
             return Ok(req);
         }
         [Authorize]
-        [HttpPatch("decrease-cartitem")]
-        public async Task<IActionResult>DecreaseCartItem(Guid bookId)
+        [HttpPatch("decrease-cartitem/bookId")]
+        public async Task<IActionResult>DecreaseCartItem([FromRoute] Guid bookId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if(string.IsNullOrEmpty(userId)) return Unauthorized("user not found");
@@ -104,8 +126,8 @@ namespace server.Controllers
             return Ok(req);
         }
         [Authorize]
-        [HttpPatch("remove-cartitem")]
-        public async Task<IActionResult>RemoveCartItem(Guid bookId)
+        [HttpPatch("remove-cartitem/bookId")]
+        public async Task<IActionResult>RemoveCartItem([FromRoute] Guid bookId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if(string.IsNullOrEmpty(userId)) return Unauthorized("user not found");
