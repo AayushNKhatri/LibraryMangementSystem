@@ -60,7 +60,7 @@
               "RelativeDocumentMoniker": "server\\Controllers\\BookController.cs",
               "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Controllers\\BookController.cs",
               "RelativeToolTip": "server\\Controllers\\BookController.cs",
-              "ViewState": "AgIAAEcAAAAAAAAAAAAgwF0AAAAeAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEoAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-11T06:18:50.266Z",
               "EditorCaption": ""
@@ -85,9 +85,10 @@
               "RelativeDocumentMoniker": "server\\Services\\BookService.cs",
               "ToolTip": "E:\\AD Project\\LibraryMangementSystem\\server\\Services\\BookService.cs",
               "RelativeToolTip": "server\\Services\\BookService.cs",
-              "ViewState": "AgIAADEAAAAAAAAAAAAowDoAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-11T06:06:48.546Z"
+              "WhenOpened": "2025-05-11T06:06:48.546Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
