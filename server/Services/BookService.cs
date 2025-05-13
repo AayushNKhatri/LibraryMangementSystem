@@ -89,13 +89,13 @@ namespace server.Services
                     PublicationDate = updateBookDto.PublicationDate,
                     Status = updateBookDto.Status
                 };
-                var filterUpdateModel = new 
+                var filterUpdateModel = new
                 {
                     Category = updateBookDto.Category,
                     Genre = updateBookDto.Genre,
                     Format = updateBookDto.Format
                 };
-                var inventoryUpdateModel = new 
+                var inventoryUpdateModel = new
                 {
                     Quantity = updateBookDto.Quantity,
                     Price = updateBookDto.Price,
@@ -110,13 +110,14 @@ namespace server.Services
                 _context.Entry(bookUpdate).CurrentValues.SetValues(bookModel);
                 _context.Entry(bookFilterUpdate).CurrentValues.SetValues(filterUpdateModel);
                 _context.Entry(bookInventoryUpdate).CurrentValues.SetValues(inventoryUpdateModel);
-                
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception("Book not updated" + ex.Message);
-            }  
+            }
         }
     }
+
 }

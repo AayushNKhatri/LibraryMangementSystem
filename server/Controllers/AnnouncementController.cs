@@ -61,5 +61,16 @@ namespace server.Controllers
                 throw new Exception($"Cannt update announcment {ex}");
             }
         }
+        [HttpDelete("DeleteAnnouncement/{id}")]
+        public async Task<IActionResult> DeleteAnnouncement(Guid id)
+        {
+            try{
+                await _announcementService.DeleteAnnouncement(id);
+                return Ok("Deletde");
+            }
+            catch(Exception ex){
+                throw new Exception($"Cannt update announcment {ex}");
+            }
+        }
     }
 }
