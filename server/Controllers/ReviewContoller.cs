@@ -56,7 +56,7 @@ namespace server.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpGet]
+        [HttpGet("GetAllReviews")]
         public async Task<IActionResult> GetReviews(){
             try{
                 var review = await _review.GetReview();
@@ -66,7 +66,7 @@ namespace server.Controllers
                 throw new Exception(ex.Message);
             }
         }
-        [HttpGet]
+        [HttpGet("GetReviewsById")]
         public async Task<IActionResult> GetReviewById(Guid reviewID){
             try{
                 var review = await _review.GetReviewById(reviewID);

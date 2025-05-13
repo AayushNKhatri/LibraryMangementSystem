@@ -41,7 +41,7 @@ namespace server.Controllers
                 throw new Exception("Cant add bookmark");
             }
         }
-        [HttpGet]
+        [HttpGet("GetAllBookmark")]
         public async Task<IActionResult> GetAllBookmark(){
             try{
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -52,7 +52,7 @@ namespace server.Controllers
                 throw new Exception(ex.Message,ex);
             }
         }
-        [HttpGet]
+        [HttpGet("BookmarkBy/{bookmarkId}")]
         public async Task<IActionResult> GetBookmarkById(Guid bookmarkId){
             try{
                 var bookmark = await _bookmarkServices.GetBookmarkByID(bookmarkId);
