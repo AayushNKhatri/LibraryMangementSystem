@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using server.Dtos;
 using server.Entities;
@@ -21,6 +22,9 @@ namespace server.Controllers
                 Title = bookDto.Title,
                 ISBN = bookDto.ISBN,
                 Description = bookDto.Description,
+                AuthorNamePrimary = bookDto.AuthorName1,
+                AuthorNameSecondary = bookDto.AuthorName2,
+                AdditionalAuthorName = bookDto.AuthorName3,
                 PublicationDate = bookDto.PublicationDate,
                 Publisher = bookDto.Publisher,
                 Language = bookDto.Language,
@@ -46,6 +50,7 @@ namespace server.Controllers
                 DiscoundStartDate = bookDto.DiscoundStartDate,
                 DiscoundEndDate = bookDto.DiscoundEndDate,
             };
+
             await bookService.AddBooks(bookModel, filterModel, bookInventoryModel);
             return Ok("Book Added");
         }
@@ -66,7 +71,7 @@ namespace server.Controllers
                 return Ok("Book Deleted");
             }
             catch (Exception ex)
-            { 
+            {
                 return BadRequest(ex.Message);
             }
         }
@@ -98,6 +103,26 @@ namespace server.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("BookImage/{bookId}")]
+        public async Task<IActionResult> AddImage(Guid bookId, IFormFile image){
+            try{
+                await bookService.AddImage(bookId, image);
+                return Ok("Image added sucess");
+            }
+            catch (Exception ex){
+                throw new Exception(ex.Message);
+            }
+        }
+        [HttpPatch("BookImage/{bookId}")]
+        public async Task<IActionResult> UpdateImage (Guid bookId, IFormFile image){
+            try{
+                await bookService.UpdateImage(bookId, image);
+                return Ok("Image Updated sucessfullty");
+            }
+            catch (Exception ex){
+                throw new Exception(ex.Message);
             }
         }
     }

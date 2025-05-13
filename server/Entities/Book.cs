@@ -6,7 +6,7 @@ namespace server.Entities
     public class Book
     {
         [Key]
-        public Guid BookId { get; set; } 
+        public Guid BookId { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]
@@ -20,6 +20,15 @@ namespace server.Entities
         public BookLanguage Language { get; set; }
         [Required]
         public double Price {get; set;}
+
+        public string? Image {get; set; }
+
+        [Required]
+        public string AuthorNamePrimary {get; set;}
+
+        public string? AuthorNameSecondary {get; set;}
+        public string? AdditionalAuthorName {get; set;}
+
         [Required]
         public DateTime PublicationDate { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
