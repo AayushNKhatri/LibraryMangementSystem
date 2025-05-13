@@ -15,15 +15,13 @@ namespace server.Controllers
     public class UserController(IUserInterface userServices, UserManager<User> _userManager, ILogger<User> _logger) : Controller
     {
         [HttpPost("Register-User")]
-
         public async Task<IActionResult> AddUser([FromBody] InsertUserDto userDto)
         {
             try{
                 await userServices.RegisterUser(userDto);
                 return Ok("User successfully registered");
-
             }catch(Exception ex){
-                throw new Exception("Registration failed" + ex.Message);
+                return BadRequest($"Registration failed: {ex.Message}");
             }
         }
 
@@ -31,18 +29,25 @@ namespace server.Controllers
         public async Task<IActionResult>Login([FromBody] LoginDto request)
         {
             try{
-                var req = await userServices.Login(request);
-                return Ok(req);
+                var token = await userServices.Login(request);
+
+                // Return a proper response object with the token
+                return Ok(new {
+                    token,
+                    success = true,
+                    message = "Login successful"
+                });
             }
             catch(Exception ex){
-                throw new Exception("Login faile"+ex.Message);
+                // Return a clean error message
+                return BadRequest(ex.Message.Replace("Login failed: ", ""));
             }
         }
 
         [Authorize]
         [HttpPost("Get-User")]
         public async Task<IActionResult> GetAllUser()
-        {   
+        {
             try{
                 var result = await userServices.GetAllUsers();
                 if(result == null)
@@ -52,9 +57,10 @@ namespace server.Controllers
                 return Ok(result);
             }
             catch(Exception ex){
-                throw new Exception($"Error fetching User:{ex.Message}");
+                return BadRequest($"Error fetching users: {ex.Message}");
             }
         }
+
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -76,7 +82,7 @@ namespace server.Controllers
         {
             try
             {
-                await userServices.ForgotPassword(forgetPassword); 
+                await userServices.ForgotPassword(forgetPassword);
                 return Ok("Password reset email sent.");
             }
             catch (Exception ex)
@@ -91,26 +97,25 @@ namespace server.Controllers
         {
             try
             {
-                     var user = await _userManager.FindByEmailAsync(resetPassword.Email);
-            if(user == null)
-            {
-                return BadRequest("User not found! Invalid Email Address");
-            }
-            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
-            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPassword.NewPassword);
-            if(result.Succeeded)
-            {
-                return Ok("Password Successfully Reset");
-            }
-            else
-            {
-                return BadRequest($"Password Reset Failed");
-            }
-
+                var user = await _userManager.FindByEmailAsync(resetPassword.Email);
+                if(user == null)
+                {
+                    return BadRequest("User not found! Invalid Email Address");
+                }
+                var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPassword.NewPassword);
+                if(result.Succeeded)
+                {
+                    return Ok("Password Successfully Reset");
+                }
+                else
+                {
+                    return BadRequest("Password Reset Failed");
+                }
             }
             catch(Exception ex)
             {
-                throw new Exception($"Password Reset Failed {ex.Message}");
+                return BadRequest($"Password Reset Failed: {ex.Message}");
             }
         }
 
@@ -120,17 +125,17 @@ namespace server.Controllers
         {
             try
             {
-            var user = _userManager.FindByIdAsync(userId);
-            if(user == null) return BadRequest("User not found");
-            var result = await userServices.updateUser(userId, updateUser);
-            if(result)
-            {
-                return Ok("User Updated Successfully");
-            }
-            return BadRequest("User not updated");
+                var user = _userManager.FindByIdAsync(userId);
+                if(user == null) return BadRequest("User not found");
+                var result = await userServices.updateUser(userId, updateUser);
+                if(result)
+                {
+                    return Ok("User Updated Successfully");
+                }
+                return BadRequest("User not updated");
             }
             catch(Exception ex){
-                throw new Exception($"Update Failed {ex.Message}");
+                return BadRequest($"Update Failed: {ex.Message}");
             }
         }
     }

@@ -63,7 +63,6 @@ namespace server.Services
 
             _context.Carts.Add(newCartItem);
             await _context.SaveChangesAsync();
-
             return new CreateCartDto
             {
                 Count = newCartItem.Count

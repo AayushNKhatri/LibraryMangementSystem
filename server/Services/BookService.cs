@@ -3,6 +3,7 @@ using server.Entities;
 using server.Database;
 using Microsoft.EntityFrameworkCore;
 using server.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace server.Services
 {
@@ -14,6 +15,7 @@ namespace server.Services
         {
             _context = context;
         }
+        [Authorize(Roles = "Admin")]
         public async Task AddBooks(Book book, BookFilters bookFilters, BookInventory bookInventory)
         {
             try

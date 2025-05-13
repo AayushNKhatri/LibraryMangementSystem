@@ -20,14 +20,14 @@ namespace server.Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<User> _logger;
-        private readonly ApplicationDbContext _context; 
+        private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
-        public UserService(UserManager<User> userManager, 
-                           SignInManager<User> signInManager, 
-                           ApplicationDbContext context, 
-                           IConfiguration configuration, 
-                           ILogger<User> logger, 
+        public UserService(UserManager<User> userManager,
+                           SignInManager<User> signInManager,
+                           ApplicationDbContext context,
+                           IConfiguration configuration,
+                           ILogger<User> logger,
                            IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -47,8 +47,8 @@ namespace server.Services
                     throw new Exception("User already exists.");
                 }
 
-                var userModel = new User 
-                { 
+                var userModel = new User
+                {
                     UserName = registerUser.UserName,
                     Email = registerUser.Email,
                     FirstName = registerUser.FirstName,
@@ -73,7 +73,7 @@ namespace server.Services
             catch (Exception ex)
             {
                 throw new Exception("Registration Failed:" + ex.Message);
-            } 
+            }
         }
         //send conformation email method
         public async Task<string> SendEmailConformation(User user)
@@ -108,7 +108,7 @@ namespace server.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email ?? string.Empty), 
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.UserName ?? string.Empty)
             };
             //Assigning roles to claim
@@ -143,27 +143,21 @@ namespace server.Services
         //user login method
         public async Task<string> Login(LoginDto request)
         {
-            try
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
             {
-                var user = await _userManager.FindByEmailAsync(request.Email);
-                if (user == null)
-                {
-                    throw new Exception("Invalid credentials.");
-                }
-                var result = await _signInManager.CheckPasswordSignInAsync(user,request.Password, false);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in successfully.");
-                    return await CreateJwtToken(user);
-                }
-                else
-                {
-                    throw new Exception("Invalid login attempt.");
-                }
+                throw new Exception("Invalid email or password");
             }
-            catch(Exception ex)
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+            if (result.Succeeded)
             {
-                throw new Exception("Login failed: " + ex.Message);
+                _logger.LogInformation("User logged in successfully.");
+                return await CreateJwtToken(user);
+            }
+            else
+            {
+                throw new Exception("Invalid email or password");
             }
         }
         //get all user method

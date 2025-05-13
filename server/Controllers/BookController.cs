@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using server.Dtos;
 using server.Entities;
 using server.Services.Interface;
@@ -11,7 +12,7 @@ namespace server.Controllers
     public class BookController(IBookInterface bookService) : Controller
     {
         [HttpPost("AddBooks")]
-
+        [Authorize(Roles = "Admin")]
         public async Task <IActionResult> AddBook([FromBody] BookDto bookDto)
         {
             var bookModel = new Book
@@ -56,6 +57,7 @@ namespace server.Controllers
         }
 
         [HttpDelete("{bookId:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task <IActionResult> DeleteBook(Guid bookId)
         {
             try
@@ -70,7 +72,7 @@ namespace server.Controllers
         }
 
         [HttpPut("{bookId:guid}")]
-
+        [Authorize(Roles = "Admin")]
         public async Task <IActionResult> UpdateBook(Guid bookId, [FromBody] UpdateBookDto updateBookDto)
         {
             try
