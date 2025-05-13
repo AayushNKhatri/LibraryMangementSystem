@@ -14,7 +14,6 @@ namespace server.Services.Interface
         Task<List<BookFilters>> FilterByCategoryAsync(Category category);
         Task<List<BookFilters>> FilterByGenreAsync(Genre genre);
         Task<List<BookFilters>> FilterByFormatAsync(Format format);
-        Task<List<Author>> FilterByAuthorAsync();
         Task<List<Book>> FilterByNewArrivalAsync(DateTime arrivalDate);
 
         Task<List<BookFilters>> FilterByCollectorsAsync();

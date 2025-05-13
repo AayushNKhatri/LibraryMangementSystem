@@ -39,11 +39,6 @@ namespace server.Services
         {
             return await _db.BookFilters.Where(b => b.Format == format).ToListAsync();
         }
-        
-        public async Task<List<Author>> FilterByAuthorAsync()
-        {
-            return await _db.Authors.ToListAsync();
-        }
 
         public async Task<List<Book>> FilterByNewArrivalAsync(DateTime arrivalDate)
         {

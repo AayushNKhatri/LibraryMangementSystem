@@ -9,10 +9,13 @@ import {
   Form,
   Badge,
   ListGroup,
+  Alert,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
-import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit } from "react-icons/fa";
+import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit, FaCheckCircle } from "react-icons/fa";
 import "./UserProfile.css";
-import userService from "../api/UserService";
+import userService from "../api/userService";
 import orderService from "../api/OrderServer";
 
 const UserProfile = () => {
@@ -20,18 +23,26 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState([]);
   const [orderData, setOrderData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [updateError, setUpdateError] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         const data = await orderService.getCartItems();
-        setUserData(data);
+        // Handle the case when data is an empty array
+        setUserData(data || []);
       } catch (error) {
         console.error("Error loading fetched cart items:", error);
+        // Set userData to empty array in case of error
+        setUserData([]);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     fetchUserData();
@@ -40,13 +51,16 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchOrderData = async (userId) => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         const data = await orderService.getOrderById(userId);
-        setOrderData(data);
+        // Handle the case when data is an empty array
+        setOrderData(data || []);
       } catch (error) {
-        console.error("Error loading fetched cart items:", error);
+        console.error("Error loading orders:", error);
+        // Set orderData to empty array in case of error
+        setOrderData([]);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     fetchOrderData();
@@ -54,7 +68,7 @@ const UserProfile = () => {
 
   const handleSaveChanges = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const updatedUserData = {
         firstName: userInfo.firstName,
         lastName: userInfo.lastName,
@@ -70,7 +84,7 @@ const UserProfile = () => {
     } catch (error) {
       console.error("Error updating user data:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 

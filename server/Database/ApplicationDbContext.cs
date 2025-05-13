@@ -10,7 +10,6 @@ namespace server.Database
         }
         public DbSet<Book> Books {get; set;}
         public DbSet<BookFilters> BookFilters {get; set;}
-        public DbSet<Author> Authors {get; set;}
         public DbSet<BookInventory> BookInventories {get; set;}
         public DbSet<Cart> Carts {get; set;}
         public DbSet<Order> Orders {get; set;}

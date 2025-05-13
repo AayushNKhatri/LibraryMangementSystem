@@ -12,6 +12,7 @@ namespace server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class OrderController(IOrederInterface orderService, UserManager<User> _userManager, ILogger<User> _logger) : ControllerBase
     {
         [HttpPost("Add-To-Cart/{bookId}")]
@@ -27,7 +28,7 @@ namespace server.Controllers
             }
             catch(Exception ex)
             {
-                throw new Exception($"Cart not created {ex.Message}");
+                throw new Exception("Cart not created: " + ex.InnerException?.Message);
             }
         }
         [Authorize]
@@ -39,10 +40,6 @@ namespace server.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if(string.IsNullOrEmpty(userId)) return Unauthorized("User not found");
                 var req = await orderService.GetCart(userId);
-                if(!req.Any())
-                {   
-                    return NotFound("The cart is empty");
-                }
                 return Ok(req);
             }
             catch(Exception ex)
@@ -65,7 +62,7 @@ namespace server.Controllers
             }
             catch(Exception ex)
             {
-                throw new Exception($"Order not created {ex.Message}");
+                throw new Exception("Cart not created: " + ex.InnerException?.Message);
             }
         }
 

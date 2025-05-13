@@ -57,13 +57,6 @@ namespace server.Controllers
             return books.Any() ? Ok(books) : NotFound("No books found for that format.");
         }
         
-        [HttpGet("/filter/author")]
-        public async Task<IActionResult> FilterByAuthorAsync()
-        {
-            var authors = await _filterService.FilterByAuthorAsync();
-            return authors.Any() ? Ok(authors) : NotFound("Sorry, we couldn't find the author you're looking for");
-        }
-
         [HttpGet("/filter/new-arrivals")]
         public async Task<IActionResult> FilterByNewArrivals(DateTime arrivalDate)
         {

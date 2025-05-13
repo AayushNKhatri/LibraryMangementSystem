@@ -1,17 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace server.Entities
 {
     public class Notification
     {
+        [Key]
         public int Id { get; set; }
         public string Message { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        // Foreign key to the user who receives the notification
-        public string UserId { get; set; }
+        [ForeignKey("UserId")]
+        [ValidateNever]
         public User User { get; set; }
+        public string UserId { get; set; }
 
         public bool IsRead { get; set; } = false;
 

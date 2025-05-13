@@ -15,9 +15,10 @@ namespace server.Services
         private readonly ILogger<OrderService> _logger;
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IEmailSender _emailSender;
 
 
-        public OrderService(UserManager<User> userManager, ILogger<OrderService> logger, ApplicationDbContext context, IEmailSender emailSender)
+        public OrderService(UserManager<User> userManager, ILogger<OrderService> logger, ApplicationDbContext context, IEmailSender emailSender, INotificationService notificationService)
         {
             _userManager = userManager;
             _logger = logger;
@@ -49,9 +50,6 @@ namespace server.Services
                 await _context.SaveChangesAsync();
 
                 // Send notification that item quantity was updated
-                await _notificationService.CreateNotification(
-                    userId, 
-                    $"You've updated {book.Title} quantity in your cart to {existingCartItem.Count}");
 
                 return new CreateCartDto
                 {
@@ -71,9 +69,6 @@ namespace server.Services
             await _context.SaveChangesAsync();
 
             // Send notification that item was added to cart
-            await _notificationService.CreateNotification(
-                userId, 
-                $"You've added {book.Title} to your cart");
 
             return new CreateCartDto
             {
@@ -83,10 +78,7 @@ namespace server.Services
         public async Task<List<Cart>> GetCart(string userId)
         {
             var userCart = await _context.Carts.Where(u=>u.UserId == userId).Include(u=> u.User).Include(b=>b.Book).ToListAsync();
-            if(!userCart.Any())
-            {
-                throw new Exception("User cart is empty");
-            }
+            // Return the cart items even if the list is empty
             return userCart;
         }
         public async Task<List<Order>> GetOrder()
@@ -147,11 +139,6 @@ namespace server.Services
             var book = await _context.Books.FirstOrDefaultAsync(b => b.BookId == bookId);
             var bookTitle = book?.Title ?? "Selected book";
 
-            // Send notification that item quantity was increased
-            await _notificationService.CreateNotification(
-                userId, 
-                $"You've increased the quantity of {bookTitle} in your cart");
-
             return true;
 
 
@@ -170,21 +157,12 @@ namespace server.Services
                 _context.Carts.Remove(cartItem);
                 await _context.SaveChangesAsync();
                 
-                // Send notification that item was removed
-                await _notificationService.CreateNotification(
-                    userId, 
-                    $"You've removed {bookTitle} from your cart");
-                
                 return true;
             }
             
             cartItem.Count -= 1;
             await _context.SaveChangesAsync();
             
-            // Send notification that item quantity was decreased
-            await _notificationService.CreateNotification(
-                userId, 
-                $"You've decreased the quantity of {bookTitle} in your cart to {cartItem.Count}");
             
             return true;
         }
@@ -199,11 +177,6 @@ namespace server.Services
             
             _context.Carts.Remove(cartItem);
             await _context.SaveChangesAsync();
-            
-            // Send notification that item was removed
-            await _notificationService.CreateNotification(
-                userId, 
-                $"You've removed {bookTitle} from your cart");
             
             return true;
         }
@@ -220,11 +193,11 @@ namespace server.Services
             await _context.SaveChangesAsync();
             
             // Check if user reached 10 successful orders for reward
-            if (oldCount == 9 && user.succesfullOrderCount == 10) {
-                await _notificationService.CreateNotification(
-                    userId, 
-                    "Congratulations! You've completed 10 orders and earned a loyalty reward!");
-            }
+            // if (oldCount == 9 && user.succesfullOrderCount == 10) {
+            //     await _notificationService.CreateNotification(
+            //         userId, 
+            //         "Congratulations! You've completed 10 orders and earned a loyalty reward!");
+            // }
             
             return true;
         }

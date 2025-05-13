@@ -23,7 +23,8 @@ public class NotificationService : INotificationService
             UserId = userId,
             Message = message,
             CreatedAt = DateTime.UtcNow,
-            IsRead = false
+            IsRead = false,
+            Type = "AddOrder"
         };
 
         _context.Notifications.Add(notification);
