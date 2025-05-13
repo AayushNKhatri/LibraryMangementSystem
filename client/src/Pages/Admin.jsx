@@ -3,8 +3,8 @@ import { Container, Row, Col, Card, Button, Table, Form, Modal, Nav, Tab, Badge,
 import { FaBook, FaShoppingCart, FaTag, FaBullhorn, FaBox, FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaUsers, FaDollarSign, FaExclamationTriangle } from 'react-icons/fa';
 import './Admin.css';
 import bookService from '../api/bookService';
-import announcementService from '../api/announcementService';
-import { BookLanguage, Status, Category, Genre, Format, AnnouncementType } from '../utils/enums';
+import announcementService, { AnnouncementType } from '../api/announcementService';
+import { BookLanguage, Status, Category, Genre, Format } from '../utils/enums';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -43,7 +43,6 @@ const Admin = () => {
     title: '',
     content: '',
     type: 0, // Default to Deal
-    startDate: '',
     endDate: ''
   });
 
@@ -91,7 +90,6 @@ const Admin = () => {
             title: "Summer Sale",
             content: "Get 20% off on all fiction books",
             type: 0, // Deal
-            startDate: "2024-05-15",
             endDate: "2024-05-30",
             status: "Active"
           },
@@ -100,7 +98,6 @@ const Admin = () => {
             title: "New Books Added",
             content: "Check out our latest collection of sci-fi novels",
             type: 1, // New Arrival
-            startDate: "2024-05-14",
             endDate: "2024-05-28",
             status: "Active"
           }
@@ -293,7 +290,6 @@ const Admin = () => {
       title: '',
       content: '',
       type: 0,
-      startDate: '',
       endDate: ''
     });
     setIsEditing(false);
@@ -311,7 +307,6 @@ const Admin = () => {
       title: announcement.title,
       content: announcement.content,
       type: announcement.type,
-      startDate: announcement.startDate,
       endDate: announcement.endDate
     });
 
@@ -320,8 +315,8 @@ const Admin = () => {
 
   // Handle announcement form submission
   const handleSubmitAnnouncement = async () => {
-    if (!announcementForm.title || !announcementForm.content || !announcementForm.startDate || !announcementForm.endDate) {
-      alert('All fields are required');
+    if (!announcementForm.content || !announcementForm.endDate) {
+      alert('Content and end date are required');
       return;
     }
 
@@ -329,7 +324,6 @@ const Admin = () => {
       const announcementData = {
         type: announcementForm.type,
         content: announcementForm.content,
-        startDate: announcementForm.startDate,
         endDate: announcementForm.endDate
       };
 
@@ -368,7 +362,6 @@ const Admin = () => {
   const handleDeleteAnnouncement = async (id) => {
     if (window.confirm('Are you sure you want to delete this announcement?')) {
       try {
-        // Note: API might not support deletion, so handle accordingly
         await announcementService.deleteAnnouncement(id);
 
         // Refresh announcements list
@@ -388,10 +381,7 @@ const Admin = () => {
         setAnnouncements(transformedData);
       } catch (error) {
         console.error('Error deleting announcement:', error);
-        alert('Failed to delete announcement. The API may not support deletion.');
-
-        // If the API doesn't support deletion, just update the UI
-        setAnnouncements(announcements.filter(announcement => announcement.id !== id));
+        alert('Failed to delete announcement. Please try again.');
       }
     }
   };
@@ -953,7 +943,9 @@ const Admin = () => {
                         <td>{announcement.title}</td>
                           <td>
                             <Badge bg="info">
-                              {AnnouncementType[announcement.type]}
+                              {announcement.type === 0 ? 'Deal' : 
+                               announcement.type === 1 ? 'New Arrival' : 
+                               'Information'}
                             </Badge>
                           </td>
                           <td>
@@ -1349,9 +1341,9 @@ const Admin = () => {
                 value={announcementForm.type}
                 onChange={handleAnnouncementInputChange}
               >
-                {Object.entries(AnnouncementType).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
-                ))}
+                <option value={AnnouncementType.Deal}>Deal</option>
+                <option value={AnnouncementType.New_Arrival}>New Arrival</option>
+                <option value={AnnouncementType.Information}>Information</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
@@ -1363,15 +1355,6 @@ const Admin = () => {
                 value={announcementForm.content}
                 onChange={handleAnnouncementInputChange}
                 placeholder="Enter announcement content"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Start Date</Form.Label>
-              <Form.Control
-                type="date"
-                name="startDate"
-                value={announcementForm.startDate}
-                onChange={handleAnnouncementInputChange}
               />
             </Form.Group>
             <Form.Group className="mb-3">
