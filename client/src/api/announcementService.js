@@ -47,21 +47,6 @@ const announcementService = {
     }
   },
 
-  getActiveAnnouncements: async () => {
-    try {
-      const response = await axios.get(`${API_URL}/Anoucment/active`, {
-        headers: getAuthHeader()
-      });
-      return response.data;
-    } catch (error) {
-      if (error.response?.status === 401) {
-        handleUnauthorized();
-      }
-      console.error('Error fetching active announcements:', error);
-      throw error;
-    }
-  },
-
   getAnnouncementById: async (id) => {
     try {
       const response = await axios.get(`${API_URL}/Anoucment/${id}`, {
@@ -129,7 +114,7 @@ const announcementService = {
 
   deleteAnnouncement: async (id) => {
     try {
-      const response = await axios.delete(`${API_URL}/Anoucment/${id}`, {
+      const response = await axios.delete(`${API_URL}/Anoucment/DeleteAnnouncement/${id}`, {
         headers: getAuthHeader()
       });
       return response.data;

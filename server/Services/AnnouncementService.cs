@@ -29,15 +29,38 @@ namespace server.Services
             return true;
         }
 
-        public Task<List<Announcement>> GetAllAnnouncements()
+        public async Task<List<Announcement>> GetAllAnnouncements()
         {
-            return _dbContext.Announcements.ToListAsync();
+            var now = DateTime.UtcNow;
+
+    // Get all announcements
+            var allAnnouncements = await _dbContext.Announcements.ToListAsync();
+
+    // Find expired ones
+            var expiredAnnouncements = allAnnouncements
+                .Where(a => a.EndDate < now)
+                .ToList();
+
+    // Remove expired ones
+            if (expiredAnnouncements.Any())
+            {
+                _dbContext.Announcements.RemoveRange(expiredAnnouncements);
+                await _dbContext.SaveChangesAsync();
+            }
+
+    // Return only active announcements
+            var activeAnnouncements = allAnnouncements
+            .Where(a => a.EndDate >= now)
+            .ToList();
+
+            return activeAnnouncements;
         }
 
         public async Task<Announcement> GetAnnouncementById(Guid id)
         {
-            var announcement = await _dbContext.Announcements.FirstOrDefaultAsync(x => x.AnnouncementId == id);
+                  var announcement = await _dbContext.Announcements.FirstOrDefaultAsync(x => x.AnnouncementId == id);
             return announcement;
+
         }
 
         public async Task<Announcement> UpdateAnnouncement(CreateAnnouncementDTO createAnnouncement, Guid Id)

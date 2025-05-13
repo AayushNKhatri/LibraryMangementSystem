@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -123,15 +124,25 @@ builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IBookInterface, BookService>();
 builder.Services.AddScoped<IOrederInterface,OrderService>();
+<<<<<<< HEAD
 builder.Services.AddScoped<IFilterService, FilterService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IReviewService, ReviewServices>();
 builder.Services.AddScoped<IBookmarkServices, BookmarkService>();
 
+=======
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddHttpContextAccessor();
+>>>>>>> c0e4313c2f6351d83d2c5b286a3fc2613a557b29
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
 var app = builder.Build();
-
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
+    RequestPath = "/uploads"
+});
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();

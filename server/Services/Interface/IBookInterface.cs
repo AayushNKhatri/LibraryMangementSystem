@@ -14,5 +14,7 @@ namespace server.Services.Interface
         Task UpdateBook(Guid bookID, UpdateBookDto updateBookDto);
 
         Task <List<Book>> GetById(Guid bookID);
+        Task <bool> AddImage(Guid bookId, IFormFile image);
+        Task<bool> UpdateImage(Guid bookId, IFormFile image);
     }
 }

@@ -11,6 +11,9 @@ namespace server.Dtos
         public string Description { get; set; }
 
         public string Publisher { get; set; }
+        public string AuthorName1 { get; set; }
+        public string AuthorName2 { get; set; }
+        public string AuthorName3 { get; set; }
 
         public BookLanguage Language { get; set; }
 

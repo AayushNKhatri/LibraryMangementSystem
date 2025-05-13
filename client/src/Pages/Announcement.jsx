@@ -16,6 +16,7 @@ const Announcement = () => {
                 setLoading(true);
                 // Using getActiveAnnouncements to only show current announcements
                 const data = await announcementService.getAllAnnouncements();
+<<<<<<< HEAD
 
                 console.log(data);
                 
@@ -30,6 +31,10 @@ const Announcement = () => {
                 
                 setAnnouncements(transformedData);
                 setError(null);
+=======
+                console.log(data)
+                setAnnouncements(data);
+>>>>>>> c0e4313c2f6351d83d2c5b286a3fc2613a557b29
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
                 setError('Failed to load announcements. Please try again later.');
@@ -99,6 +104,7 @@ const Announcement = () => {
                 </div>
             )}
 
+<<<<<<< HEAD
             {error && (
                 <Alert variant="danger" className="my-4">
                     <FaInfoCircle className="me-2" />
@@ -136,6 +142,17 @@ const Announcement = () => {
                             </Card.Body>
                         </Card>
                     </Col>
+=======
+            <div className="announcements-list">
+                {announcements.map((announcement, index) => (
+                    <div key={announcement.id || index} className="announcement-card">
+                        <h4>{announcement.type}</h4>
+                        <p>{announcement.description}</p>
+                        <small>{announcement.endDate}</small>
+                        <button onClick={() => editAnnouncement(announcement)}><FaEdit /></button>
+                        <button onClick={() => deleteAnnouncement(announcement.id)}><FaTrash /></button>
+                    </div>
+>>>>>>> c0e4313c2f6351d83d2c5b286a3fc2613a557b29
                 ))}
             </Row>
         </Container>
