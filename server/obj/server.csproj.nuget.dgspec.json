@@ -1,26 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "D:\\LibraryManagement\\LibraryMangementSystem\\server\\server.csproj": {}
+    "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj": {}
   },
   "projects": {
-    "D:\\LibraryManagement\\LibraryMangementSystem\\server\\server.csproj": {
+    "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\LibraryManagement\\LibraryMangementSystem\\server\\server.csproj",
+        "projectUniqueName": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
         "projectName": "server",
-        "projectPath": "D:\\LibraryManagement\\LibraryMangementSystem\\server\\server.csproj",
-        "packagesPath": "C:\\Users\\aryan\\.nuget\\packages\\",
-        "outputPath": "D:\\LibraryManagement\\LibraryMangementSystem\\server\\obj\\",
+        "projectPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
+        "packagesPath": "/home/midas/.nuget/packages/",
+        "outputPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\aryan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/home/midas/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -33,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -128,7 +122,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.310/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
