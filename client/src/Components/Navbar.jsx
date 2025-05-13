@@ -122,8 +122,8 @@ const Navbar = () => {
                             </a>
                             <ul className="dropdown-menu">
                                 <li><Link className="dropdown-item" to="/new-arrivals">New Arrivals</Link></li>
-                                <li><Link className="dropdown-item" to="/bestsellers">Bestsellers</Link></li>
-                                <li><Link className="dropdown-item" to="/textbooks">Textbooks</Link></li>
+                                <li><Link className="dropdown-item" to="/collectors">Collectors</Link></li>
+                                <li><Link className="dropdown-item" to="/paperbacks">Paperbacks</Link></li>
                             </ul>
                         </li>
 
@@ -134,7 +134,7 @@ const Navbar = () => {
                             <ul className="dropdown-menu">
                                 <li><Link className="dropdown-item" to="/fiction">Fiction</Link></li>
                                 <li><Link className="dropdown-item" to="/non-fiction">Non-Fiction</Link></li>
-                                <li><Link className="dropdown-item" to="/academic">Academic</Link></li>
+                                <li><Link className="dropdown-item" to="/science">Science</Link></li>
                             </ul>
                         </li>
 
@@ -144,8 +144,8 @@ const Navbar = () => {
                             </a>
                             <ul className="dropdown-menu">
                                 <li><Link className="dropdown-item" to="/authors">Authors</Link></li>
-                                <li><Link className="dropdown-item" to="/publishers">Publishers</Link></li>
-                                <li><Link className="dropdown-item" to="/events">Events</Link></li>
+                                <li><Link className="dropdown-item" to="/fantasy">Fantasy</Link></li>
+                                <li><Link className="dropdown-item" to="/adventure">Adventure</Link></li>
                             </ul>
                         </li>
 

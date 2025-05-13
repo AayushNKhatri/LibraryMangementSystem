@@ -14,6 +14,7 @@ import Cart from './Pages/Cart';
 import OrderSummary from './Pages/OrderSummary';
 import Verify from './Pages/Verify';
 import Authors from './Pages/Authors';
+import FilteredBooks from './Pages/FilteredBooks';
 import Home from './Home';
 import './App.css';
 
@@ -28,6 +29,7 @@ function App() {
         <Route path="/books" element={<BookPage />} />
         <Route path="/book/:bookId" element={<IndividualBook />} />
         <Route path="/authors" element={<Authors />} />
+        <Route path="/filtered-books" element={<FilteredBooks />} />
         <Route path="/announcements" element={<Announcement />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/cart" element={<Cart />} />

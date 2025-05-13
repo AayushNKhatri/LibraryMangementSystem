@@ -8,6 +8,7 @@ import reviewService from '../api/reviewService';
 import bookmarkService from '../api/bookmarkService';
 import { Modal, Button, Form, Toast, ToastContainer } from 'react-bootstrap';
 import { BookLanguage, Genre } from '../utils/enums';
+import { isAdmin } from '../utils/tokenUtils';
 
 const IndividualBook = () => {
     const navigate = useNavigate();
@@ -31,13 +32,17 @@ const IndividualBook = () => {
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState('success');
     const [bookmarkLoading, setBookmarkLoading] = useState(false);
+    const [isUserAdmin, setIsUserAdmin] = useState(false);
 
     useEffect(() => {
         // Set user ID from local storage
-        const storedUserId = localStorage.getItem('userId');
+        const storedUserId = localStorage.getItem('authToken');
         if (storedUserId) {
             setUserId(storedUserId);
         }
+        
+        // Check if user is admin
+        setIsUserAdmin(isAdmin());
         
         fetchBookDetails();
         fetchSimilarBooks();
@@ -57,6 +62,16 @@ const IndividualBook = () => {
             const data = await bookService.getBookById(bookId);
             // Since the API returns a list, we need to find the book with matching ID
             const bookData = Array.isArray(data) ? data.find(b => b.bookId === bookId) : data;
+            
+            // Checking for image url
+            if (bookData && bookData.imageUrl) {
+                // Check if the URL already has parameters
+                const separator = bookData.image.includes('?') ? '&' : '?';
+                bookData.image = `${bookData.image}${separator}t=${new Date().getTime()}`;
+                console.log(`The book does have imaage ${bookData.imageUrl}`);
+            }
+            
+            console.log(bookData);
             setBook(bookData);
             setLoading(false);
         } catch (error) {
@@ -98,6 +113,15 @@ const IndividualBook = () => {
                 // Just take any 4 books
                 filtered = filtered.slice(0, 4);
             }
+            
+            // Add timestamp to image URLs to prevent caching
+            filtered = filtered.map(book => {
+                if (book.imageUrl) {
+                    const separator = book.imageUrl.includes('?') ? '&' : '?';
+                    book.imageUrl = `${book.imageUrl}${separator}t=${new Date().getTime()}`;
+                }
+                return book;
+            });
             
             setSimilarBooks(filtered);
         } catch (error) {
@@ -297,12 +321,24 @@ const IndividualBook = () => {
             <div className="row">
                 {/* Book Details Section */}
                 <div className="col-md-4">
-                    <div className="book-image-container mb-4">
-                        <img 
-                            src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"} 
-                            alt={book.title} 
-                            className="img-fluid rounded shadow"
-                        />
+                    <div className="book-image-container mb-4 position-relative">
+                        {book.image ? (
+                            <img 
+                                src={book.image} 
+                                alt={book.title} 
+                                className="img-fluid rounded shadow"
+                                onError={(e) => {
+                                    e.target.onerror = null; 
+                                    e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+                                }}
+                            />
+                        ) : (
+                            <img 
+                                src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                                alt={book.title} 
+                                className="img-fluid rounded shadow"
+                            />
+                        )}
                     </div>
                 </div>
                 <div className="col-md-8">
@@ -500,6 +536,10 @@ const IndividualBook = () => {
                                             src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"} 
                                             alt={book.title} 
                                             className="book-image"
+                                            onError={(e) => {
+                                                e.target.onerror = null; 
+                                                e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+                                            }}
                                         />
                                     </div>
                                     <div className="card-body">

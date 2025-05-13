@@ -182,7 +182,7 @@ const BookPage = () => {
                             >
                                 <div className="book-image-container">
                                     <img
-                                        src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+                                        src={book.image}
                                         alt={book.title}
                                         className="book-image"
                                     />
