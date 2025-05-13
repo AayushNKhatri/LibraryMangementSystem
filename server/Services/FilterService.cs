@@ -49,5 +49,40 @@ namespace server.Services
         {
             return await _db.Books.Where(b => b.PublicationDate == arrivalDate).ToListAsync();
         }
+
+        public async Task<List<BookFilters>> FilterByCollectorsAsync() 
+        {
+            return await _db.BookFilters.Where(b => b.Format == Format.Collectors).ToListAsync();
+        }
+
+        public async Task<List<BookFilters>> FilterByPaperbacksAsync()
+        {
+            return await _db.BookFilters.Where(b => b.Format == Format.Paperback).ToListAsync();
+        }
+
+        public async Task<List<BookFilters>> FilterByFantasyAsync()
+        {
+            return await _db.BookFilters.Where(b => b.Genre == Genre.Fantasy).ToListAsync();
+        }
+
+        public async Task<List<BookFilters>> FilterByAdventureAsync()
+        {
+            return await _db.BookFilters.Where(b => b.Genre == Genre.Adventure).ToListAsync();
+        }
+
+        public async Task<List<BookFilters>> FilterByScienceAsync()
+        {
+            return await _db.BookFilters.Where(b => b.Category == Category.Science).ToListAsync();
+        }
+
+        public async Task<List<BookFilters>> FilterByFictionAsync()
+        {
+            return await _db.BookFilters.Where(b => b.Category == Category.Fiction).ToListAsync();
+        }
+
+        public async Task<List<BookFilters>> FilterByNonFictionAsync()
+        {
+            return await _db.BookFilters.Where(b => b.Category == Category.Nonfiction).ToListAsync();
+        }
     }
 }

@@ -16,5 +16,13 @@ namespace server.Services.Interface
         Task<List<BookFilters>> FilterByFormatAsync(Format format);
         Task<List<Author>> FilterByAuthorAsync();
         Task<List<Book>> FilterByNewArrivalAsync(DateTime arrivalDate);
+
+        Task<List<BookFilters>> FilterByCollectorsAsync();
+        Task<List<BookFilters>> FilterByPaperbacksAsync();
+        Task<List<BookFilters>> FilterByFantasyAsync();
+        Task<List<BookFilters>> FilterByAdventureAsync();
+        Task<List<BookFilters>> FilterByScienceAsync();
+        Task<List<BookFilters>> FilterByFictionAsync();
+        Task<List<BookFilters>> FilterByNonFictionAsync();
     }
 }
