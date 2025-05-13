@@ -116,7 +116,8 @@ namespace server.Services
                 BookCount = cartItems.Sum(c => c.Count),
                 TotalAmount = cartItems.Sum(c=>c.Count * (c.Book?.Price??0)),
                 OrderStatus = OrderStatus.Pending,
-                DiscountApplied = 0
+                DiscountApplied = 0,
+                ClaimsCode = Guid.NewGuid()
             };
             await _context.Orders.AddAsync(order);
             var OrderDetails = cartItems.Select(item => new OrderDetails{
@@ -211,6 +212,34 @@ namespace server.Services
             {
                 throw new Exception($"Email sending failed: {ex.Message}");
             }
+        }
+        public async Task<bool> ManageOrdersComplete(Guid orderId, string userId, Guid claimsCode)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=> u.Id == userId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(order == null) throw new Exception("Order not found");
+            if(order.ClaimsCode == claimsCode)
+            {
+                order.OrderStatus = OrderStatus.Completed;
+                _context.Orders.Update(order);
+                await _context.SaveChangesAsync();
+                await SendEmail(user);
+            }
+            return true;
+        }
+        public async Task<bool> ManageOrdersCancelled(Guid orderId, string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=> u.Id == userId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(order == null) throw new Exception("Order not found");
+            if(order.OrderStatus == OrderStatus.Pending)
+            {
+                order.OrderStatus = OrderStatus.Cancelled;
+                _context.Orders.Update(order);
+                await _context.SaveChangesAsync();
+                await SendEmail(user);
+            }
+            return true;
         }
     }
 }

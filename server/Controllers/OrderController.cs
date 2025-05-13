@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using server.Database;
 using server.Dtos;
 using server.Entities;
 using server.Services.Interface;
@@ -109,6 +111,26 @@ namespace server.Controllers
             if(string.IsNullOrEmpty(userId)) return Unauthorized("user not found");
             var req = await orderService.RemoveCartItem(userId, bookId);
             if(req == false) return NotFound("Cart Item not removed");
+            return Ok(req);
+        }
+        [Authorize]
+        [HttpPatch("complete-Order")]
+        public async Task<IActionResult>ManageOrderComplete(Guid claimsCode, Guid orderId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(string.IsNullOrEmpty(userId)) return Unauthorized("User not found");
+            var req = await orderService.ManageOrdersComplete(orderId,userId,claimsCode);
+            if(req == false) return NotFound("Order not completed");
+            return Ok(req);
+        }
+        [Authorize]
+        [HttpPatch("cancel-order")]
+        public async Task<IActionResult>ManageOrderCancelled(Guid orderId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(string.IsNullOrEmpty(userId)) return Unauthorized("User not found");
+            var req = await orderService.ManageOrdersCancelled(orderId, userId);
+            if(req == false) return NotFound("Order not completed");
             return Ok(req);
         }
     }

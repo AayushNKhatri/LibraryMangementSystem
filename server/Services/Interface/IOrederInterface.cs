@@ -15,5 +15,7 @@ namespace server.Services.Interface
         Task<bool> RemoveCartItem(string userId,Guid bookId);
         Task<bool> StacableOrderCount(string userId);
         Task<bool> SendEmail(User user);   
+        Task<bool> ManageOrdersComplete(Guid orderId, string userId, Guid claimsCode);
+        Task<bool> ManageOrdersCancelled(Guid orderId, string userId);
     }
 }
