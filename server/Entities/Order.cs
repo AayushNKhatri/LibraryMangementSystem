@@ -26,5 +26,7 @@ namespace server.Entities {
 
         [Required]
         public int DiscountApplied {get; set;}
+
+        public Guid ClaimsCode {get; set;}
     }
 }

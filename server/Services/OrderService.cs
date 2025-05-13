@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using server.Database;
 using server.Dtos;
@@ -15,16 +16,14 @@ namespace server.Services
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
 
-        public OrderService(
-            UserManager<User> userManager, 
-            ILogger<OrderService> logger, 
-            ApplicationDbContext context,
-            INotificationService notificationService)
+
+        public OrderService(UserManager<User> userManager, ILogger<OrderService> logger, ApplicationDbContext context, IEmailSender emailSender)
         {
             _userManager = userManager;
             _logger = logger;
             _context = context;
             _notificationService = notificationService;
+            _emailSender = emailSender;
         }
         public async Task<CreateCartDto> CreateCart(string userId, Guid bookId, CreateCartDto createCart)
         {
@@ -81,38 +80,26 @@ namespace server.Services
                 Count = newCartItem.Count
             };
         }
-        public async Task<List<GetCartDto>> GetCart(string userId)
+        public async Task<List<Cart>> GetCart(string userId)
         {
-            var userCart = await _context.Carts.Where(u=>u.UserId == userId).ToListAsync();
+            var userCart = await _context.Carts.Where(u=>u.UserId == userId).Include(u=> u.User).Include(b=>b.Book).ToListAsync();
             if(!userCart.Any())
             {
                 throw new Exception("User cart is empty");
             }
-            var result = userCart.Select(cart => new GetCartDto{
-                UserId = cart.UserId,
-                BookId = cart.BookId,
-                Count = cart.Count
-            }).ToList();
-            return  result;
+            return userCart;
         }
-        public async Task<List<GetOrderSummaryDto>> OrderSummary(string userId)
+        public async Task<List<Order>> GetOrder()
         {
-            var ordersFromUser = await _context.Carts.Where(u=>u.UserId == userId).Include(u=>u.User).Include(b=>b.Book).ToListAsync();
-            if(!ordersFromUser.Any()) throw new Exception("There is no orders to show");
-            var result = ordersFromUser.Select(cart => new GetOrderSummaryDto
-            {
-                FirstName = cart.User.FirstName,
-                LastName = cart.User.LastName,
-                City = cart.User.City,
-                Street = cart.User.Street,
-                Contact = cart.User.Contact,
-                Quantity = cart.Count,
-                Price = cart.Book.Price,
-                TotalAmount = cart.Count * cart.Book.Price,
-                DiscountApplied = 0
-            }).ToList();
-            if(!result.Any()) throw new Exception("Nothing to display for order summary");
-            return result;
+            var orderFromDb = await _context.Orders.ToListAsync();
+            if(orderFromDb == null) throw new Exception("Orders not found");
+            return orderFromDb;
+        }
+        public async Task<List<Order>> GetOrderById(string userId)
+        {
+            var orderFromDb = await _context.Orders.Where(o=>o.UserId == userId).OrderByDescending(o=>o.OrderDate).Take(5).ToListAsync();
+            if(orderFromDb == null) throw new Exception("Orders not found");
+            return orderFromDb;
         }
         public async Task<Order> OrderConformation(string userId)
         {
@@ -241,5 +228,69 @@ namespace server.Services
             
             return true;
         }
+        public async Task<bool> SendEmail(string userId, Guid orderId)
+        {
+            string emailMessage = "";
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == userId );
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(user == null) throw new Exception("User not found");
+            if(order == null) throw new Exception("Orders not found");
+            switch(order.OrderStatus)
+            {
+                case OrderStatus.Pending:
+                    emailMessage = $@"
+                                        <h2>Hi {user.FirstName},</h2>
+                                        <p>Your order is *Pending*. We'll notify you when it's updated.</p>";
+
+                    await _emailSender.SendEmailAsync(user.Email, "Your order has been made", emailMessage);
+                    break;
+
+                case OrderStatus.Completed:
+                    emailMessage = $@"
+                                        <h2>Hi {user.FirstName},</h2>
+                                        <p>Your order is **completed**. Thank you for shopping with us!</p>";
+
+                    await _emailSender.SendEmailAsync(user.Email, "Your order has been made", emailMessage);
+                    break;
+
+                case OrderStatus.Cancelled:
+                    emailMessage = $@"<h2>Hi {user.FirstName},</h2>
+                                        <p>Unfortunately, your order has been **cancelled**</p>";
+
+                    await _emailSender.SendEmailAsync(user.Email, "Your order has been cancelled", emailMessage);
+                    break;
+            }
+            return true;
+
+        }
+        public async Task<bool> ManageOrdersComplete(Guid orderId, string userId, Guid claimsCode)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=> u.Id == userId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(order == null) throw new Exception("Order not found");
+            if(order.ClaimsCode == claimsCode)
+            {
+                order.OrderStatus = OrderStatus.Completed;
+                _context.Orders.Update(order);
+                await _context.SaveChangesAsync();
+                await SendEmail(userId, orderId);
+            }
+            return true;
+        }
+        public async Task<bool> ManageOrdersCancelled(Guid orderId, string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=> u.Id == userId);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if(order == null) throw new Exception("Order not found");
+            if(order.OrderStatus == OrderStatus.Pending)
+            {
+                order.OrderStatus = OrderStatus.Cancelled;
+                _context.Orders.Update(order);
+                await _context.SaveChangesAsync();
+                await SendEmail(userId, orderId);
+            }
+            return true;
+        }
     }
 }
+
