@@ -117,7 +117,7 @@ const Navbar = () => {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item dropdown">
-                            <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <a className="nav-link dropdown-toggle" href="/books" role="button" data-bs-toggle="dropdown">
                                 Shop
                             </a>
                             <ul className="dropdown-menu">

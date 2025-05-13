@@ -15,56 +15,53 @@ namespace server.Controllers
 
     public class FilterController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IFilterService _filterService;
 
-        public FilterController(ApplicationDbContext db) {
-            _db = db;
+        public FilterController(IFilterService filterService)
+        {
+            _filterService = filterService;
         }
 
-        // GET Method for filter the books based on language
-        [HttpGet("/filter/language/{bookLanguange}")]
-        public async Task<IActionResult> FilterBooksByLanguage(BookLanguage language) {
-            var filterByLanguage = await _db.Books.Where(b => b.Language == language).ToListAsync();
-            if (filterByLanguage == null) return NotFound("Sorry, please select language between Nepali and English");
-            return filterByLanguage.Any() ? Ok(filterByLanguage) : NotFound("No Books found for that language");
+        [HttpGet("/filter/language/{language}")]
+        public async Task<IActionResult> FilterBooksByLanguage(BookLanguage language)
+        {
+            var books = await _filterService.FilterByLanguageAsync(language);
+            return books.Any() ? Ok(books) : NotFound("No books found for that language.");
         }
 
-
-        // GET Method for filter the books based on status
         [HttpGet("/filter/status/{status}")]
-        public async Task<IActionResult> FilterBooksByStatus(Status status) {
-            var filterByStatus = await _db.Books.Where(b => b.Status == status).ToListAsync();
+        public async Task<IActionResult> FilterBooksByStatus(Status status)
+        {
+            var books = await _filterService.FilterByStatusAsync(status);
+            return books.Any() ? Ok(books) : NotFound("No books found with the specified status.");
+        }
 
-            if (!filterByStatus.Any())
-                return NotFound("No books found with the specified status.");
-
-            return Ok(filterByStatus);
-                }
-
-        // GET Method for filter the books based on category
         [HttpGet("/filter/category/{category}")]
-        public async Task<IActionResult> FilterBooksByCategory(Category Category) {
-            var filterByCategory = await _db.BookFilters.Where(b => b.Category == Category).ToListAsync();
-            if (filterByCategory == null) return NotFound("Sorry, we don't have that category");
-            return filterByCategory.Any() ? Ok(filterByCategory) : NotFound("No we don't have that category");
+        public async Task<IActionResult> FilterBooksByCategory(Category category)
+        {
+            var books = await _filterService.FilterByCategoryAsync(category);
+            return books.Any() ? Ok(books) : NotFound("No books found in that category.");
         }
 
-        // GET Method for filter the books based on genre
         [HttpGet("/filter/genre/{genre}")]
-        public async Task<IActionResult> FilterBooksByGenre(Genre Genre) {
-            var filterByGenre = await _db.BookFilters.Where(b => b.Genre == Genre).ToListAsync();
-            if(filterByGenre == null) return NotFound("Sorry, we do not contain that genre right now");
-            return filterByGenre.Any() ? Ok(filterByGenre) : NotFound("No we don't have that category");
+        public async Task<IActionResult> FilterBooksByGenre(Genre genre)
+        {
+            var books = await _filterService.FilterByGenreAsync(genre);
+            return books.Any() ? Ok(books) : NotFound("No books found for that genre.");
         }
 
-        //GET Method for filter the books based on formats
-        [HttpGet("/filter/filter/{format}")]
-        public async Task<IActionResult> FilterBooksByFormat(Format format) {
-            var filterByFormat = await _db.BookFilters.Where(b => b.Format == format).ToListAsync();
-            if(filterByFormat == null) return NotFound("Sorry, we don't own that format of book");
-            return filterByFormat.Any() ? Ok(filterByFormat) : NotFound("No we don't have that format of book");
+        [HttpGet("/filter/format/{format}")]
+        public async Task<IActionResult> FilterBooksByFormat(Format format)
+        {
+            var books = await _filterService.FilterByFormatAsync(format);
+            return books.Any() ? Ok(books) : NotFound("No books found for that format.");
         }
-
-        //The following filter endpoints are for order specific
+        
+        [HttpGet("/filter/author")]
+        public async Task<ActionResult> FilterByAuthorAsync()
+        {
+            var authors = await _filterService.FilterByAuthorAsync();
+            return authors.Any() ? Ok(authors) : NotFound("Sorry, we couldn't find the author you're looking for");
+        }
     }
 }

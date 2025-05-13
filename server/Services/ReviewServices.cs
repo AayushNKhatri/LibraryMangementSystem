@@ -15,10 +15,12 @@ namespace server.Services
 
         public async Task<bool> DeleteReview(Guid id)
         {
-            var review =await _dbContext.Reviews.FirstOrDefaultAsync(u => u.ReviewId == id);
-            if (review != null)
+            var review = await _dbContext.Reviews.FirstOrDefaultAsync(u => u.ReviewId == id);
+            if (review == null)
                 throw new Exception("No review found by that id");
-            var deleteReview = _dbContext.Reviews.Remove(review);
+            
+            _dbContext.Reviews.Remove(review);
+            await _dbContext.SaveChangesAsync();
             return true;
         }
 
@@ -34,13 +36,17 @@ namespace server.Services
             return review;
         }
 
-        public Task<Review> UpdateReview(Review review, Guid id)
+        public async Task<Review> UpdateReview(Review review, Guid id)
         {
-            var updateRevview = _dbContext.Reviews.FirstOrDefaultAsync(x => x.ReviewId == id);
-            _dbContext.Entry(updateRevview).CurrentValues.SetValues(review);
-            _dbContext.SaveChangesAsync();
-            return updateRevview;
-
+            var existingReview = await _dbContext.Reviews.FirstOrDefaultAsync(x => x.ReviewId == id);
+            if (existingReview == null)
+                throw new Exception("Review not found");
+                
+            existingReview.Rating = review.Rating;
+            existingReview.Comment = review.Comment;
+            
+            await _dbContext.SaveChangesAsync();
+            return existingReview;
         }
     }
 }

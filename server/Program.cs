@@ -50,9 +50,9 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 builder.Services.AddCors(option => {
-    option.AddPolicy("AllowAll", policy => {
-        policy
-        .AllowAnyOrigin()
+    option.AddPolicy("CorsPolicy", policy => {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        .AllowCredentials()
         .AllowAnyMethod()
         .AllowAnyHeader();
     });
@@ -81,11 +81,11 @@ builder.Services.AddIdentity<User, IdentityRole>(opt =>
 
 builder.Services.AddAuthentication(options =>{
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }
 ).AddJwtBearer(
     options =>{
-        options.TokenValidationParameters  = new TokenValidationParameters{
+        options.TokenValidationParameters = new TokenValidationParameters{
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["TokenSettings:Issuer"],
             ValidateAudience = true,
@@ -93,6 +93,25 @@ builder.Services.AddAuthentication(options =>{
             ValidateLifetime = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenSettings:Token"]!)),
             ValidateIssuerSigningKey = true
+        };
+        
+        // Configure the JwtBearer events for SignalR
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                
+                // If the request is for our hub...
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && 
+                    path.StartsWithSegments("/notificationhub"))
+                {
+                    // Read the token out of the query string
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -104,6 +123,10 @@ builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IBookInterface, BookService>();
 builder.Services.AddScoped<IOrederInterface,OrderService>();
+builder.Services.AddScoped<IFilterService, FilterService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IReviewService, ReviewServices>();
+builder.Services.AddScoped<IBookmarkServices, BookmarkService>();
 
 // Env.Load();
 // builder.Configuration["ConnectionStrings:DefaultConnection"] = Env.GetString("DB");
@@ -123,7 +146,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowAll");
+app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

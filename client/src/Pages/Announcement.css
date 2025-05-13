@@ -123,83 +123,64 @@
     gap: 1.2rem;
 }
 
+.announcement-page {
+    padding: 2rem 0;
+}
+
 .announcement-card {
     position: relative;
-    background-color: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #ccc;
+    height: 100%;
     transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .announcement-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-.announcement-card.event {
-    border-left-color: #4caf50;
+.announcement-card.deal {
+    border-top: 4px solid #28a745;
 }
 
-.announcement-card.notice {
-    border-left-color: #2196f3;
+.announcement-card.new-arrival {
+    border-top: 4px solid #007bff;
 }
 
-.announcement-card.update {
-    border-left-color: #ff9800;
+.announcement-card.information {
+    border-top: 4px solid #17a2b8;
 }
 
-.announcement-card.alert {
-    border-left-color: #f44336;
+.announcement-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
 }
 
-.announcement-type-badge {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background-color: #eee;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #555;
+.announcement-icon.deal {
+    color: #28a745;
 }
 
-.announcement-card.event .announcement-type-badge {
-    background-color: rgba(76, 175, 80, 0.15);
-    color: #2e7d32;
+.announcement-icon.new-arrival {
+    color: #007bff;
 }
 
-.announcement-card.notice .announcement-type-badge {
-    background-color: rgba(33, 150, 243, 0.15);
-    color: #0d47a1;
-}
-
-.announcement-card.update .announcement-type-badge {
-    background-color: rgba(255, 152, 0, 0.15);
-    color: #e65100;
-}
-
-.announcement-card.alert .announcement-type-badge {
-    background-color: rgba(244, 67, 54, 0.15);
-    color: #b71c1c;
+.announcement-icon.info {
+    color: #17a2b8;
 }
 
 .announcement-content {
-    margin-right: 100px; /* Space for the type badge */
-}
-
-.announcement-description {
     font-size: 1.1rem;
-    line-height: 1.5;
+    line-height: 1.6;
     margin-bottom: 1rem;
+    color: #333;
 }
 
-.announcement-date {
-    color: #777;
+.announcement-dates {
     font-size: 0.9rem;
-    margin-bottom: 0;
+    color: #6c757d;
 }
 
 .announcement-actions {
@@ -242,23 +223,17 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .announcement-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+    .announcement-page {
+        padding: 1rem 0;
     }
     
-    .announcement-type-badge {
-        position: static;
-        display: inline-block;
-        margin-bottom: 0.8rem;
+    .announcement-card {
+        margin-bottom: 1.5rem;
     }
-    
+}
+
+@media (max-width: 576px) {
     .announcement-content {
-        margin-right: 0;
-    }
-    
-    .form-actions {
-        flex-direction: column;
+        font-size: 1rem;
     }
 }

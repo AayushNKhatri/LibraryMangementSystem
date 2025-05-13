@@ -13,6 +13,7 @@ import UserProfile from './Pages/UserProfile';
 import Cart from './Pages/Cart';
 import OrderSummary from './Pages/OrderSummary';
 import Verify from './Pages/Verify';
+import Authors from './Pages/Authors';
 import Home from './Home';
 import './App.css';
 
@@ -26,8 +27,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/books" element={<BookPage />} />
         <Route path="/book/:bookId" element={<IndividualBook />} />
+        <Route path="/authors" element={<Authors />} />
         <Route path="/announcements" element={<Announcement />} />
-        <Route path="/account" element={<UserProfile />} />
+        <Route path="/profile" element={<UserProfile />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/order-summary" element={<OrderSummary />} />
         <Route path="/verify" element={<Verify />} />

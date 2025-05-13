@@ -1,113 +1,144 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import announcementService from '../api/announcementService';
+import { Container, Card, Badge, Row, Col, Alert } from 'react-bootstrap';
+import { FaBullhorn, FaCalendarAlt, FaTag, FaInfoCircle } from 'react-icons/fa';
+import announcementService, { AnnouncementType } from '../api/announcementService';
 import './Announcement.css';
 
 const Announcement = () => {
     const [announcements, setAnnouncements] = useState([]);
-    const [showForm, setShowForm] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentAnnouncement, setCurrentAnnouncement] = useState({
-        id: null,
-        type: '',
-        description: '',
-        endDate: ''
-    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Fetch announcements from API
+    // Fetch active announcements from API
     useEffect(() => {
         const fetchAnnouncements = async () => {
             try {
+                setLoading(true);
+                // Using getActiveAnnouncements to only show current announcements
                 const data = await announcementService.getAllAnnouncements();
-                setAnnouncements(data);
+
+                console.log(data);
+                
+                // Transform data to handle UI needs
+                const transformedData = data.map(item => ({
+                    id: item.announcementId,
+                    type: item.announcementType,
+                    content: item.announcementDescription,
+                    startDate: new Date(item.startDate).toLocaleDateString(),
+                    endDate: new Date(item.endDate).toLocaleDateString()
+                }));
+                
+                setAnnouncements(transformedData);
+                setError(null);
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
+                setError('Failed to load announcements. Please try again later.');
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchAnnouncements();
     }, []);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setCurrentAnnouncement({ ...currentAnnouncement, [name]: value });
-    };
-
-    const resetForm = () => {
-        setCurrentAnnouncement({
-            id: null,
-            type: '',
-            description: '',
-            endDate: ''
-        });
-        setIsEditing(false);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            if (isEditing) {
-                await announcementService.updateAnnouncement(currentAnnouncement.id, currentAnnouncement);
-                setAnnouncements(announcements.map((a) => a.id === currentAnnouncement.id ? currentAnnouncement : a));
-            } else {
-                const newAnnouncement = await announcementService.createAnnouncement(currentAnnouncement);
-                setAnnouncements([...announcements, newAnnouncement]);
-            }
-            resetForm();
-            setShowForm(false);
-        } catch (error) {
-            console.error('Error saving announcement:', error);
-            alert('Failed to save announcement. Please try again.');
+    // Function to get announcement type icon
+    const getAnnouncementIcon = (type) => {
+        switch (type) {
+            case AnnouncementType.Deal:
+                return <FaTag className="announcement-icon deal" />;
+            case AnnouncementType.New_Arrival:
+                return <FaBullhorn className="announcement-icon new-arrival" />;
+            case AnnouncementType.Information:
+                return <FaInfoCircle className="announcement-icon info" />;
+            default:
+                return <FaBullhorn className="announcement-icon" />;
         }
     };
 
-    const editAnnouncement = (announcement) => {
-        setCurrentAnnouncement(announcement);
-        setIsEditing(true);
-        setShowForm(true);
+    // Function to get announcement type name
+    const getAnnouncementTypeName = (type) => {
+        switch (type) {
+            case AnnouncementType.Deal:
+                return 'Deal';
+            case AnnouncementType.New_Arrival:
+                return 'New Arrival';
+            case AnnouncementType.Information:
+                return 'Information';
+            default:
+                return 'Announcement';
+        }
     };
 
-    const deleteAnnouncement = async (id) => {
-        try {
-            await announcementService.deleteAnnouncement(id);
-            setAnnouncements(announcements.filter((a) => a.id !== id));
-        } catch (error) {
-            console.error('Error deleting announcement:', error);
-            alert('Failed to delete announcement. Please try again.');
+    // Function to get announcement type badge color
+    const getAnnouncementBadgeColor = (type) => {
+        switch (type) {
+            case AnnouncementType.Deal:
+                return 'success';
+            case AnnouncementType.New_Arrival:
+                return 'primary';
+            case AnnouncementType.Information:
+                return 'info';
+            default:
+                return 'secondary';
         }
     };
 
     return (
-        <div className="announcement-container">
-            <div className="announcement-header">
-                <h2>Announcements</h2>
-                <button className="add-announcement-btn" onClick={() => setShowForm(!showForm)}>
-                    <FaPlus /> New Announcement
-                </button>
+        <Container className="announcement-page py-5">
+            <div className="text-center mb-5">
+                <h1 className="display-4">Announcements</h1>
+                <p className="lead text-muted">Stay updated with the latest news and offers from our library</p>
             </div>
 
-            {showForm && (
-                <form onSubmit={handleSubmit} className="announcement-form">
-                    <h3>{isEditing ? 'Edit Announcement' : 'Add New Announcement'}</h3>
-                    <input name="type" value={currentAnnouncement.type} onChange={handleInputChange} placeholder="Type" required />
-                    <textarea name="description" value={currentAnnouncement.description} onChange={handleInputChange} placeholder="Description" required></textarea>
-                    <input type="date" name="endDate" value={currentAnnouncement.endDate} onChange={handleInputChange} required />
-                    <button type="submit">{isEditing ? 'Update' : 'Add'}</button>
-                </form>
+            {loading && (
+                <div className="text-center my-5">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-2">Loading announcements...</p>
+                </div>
             )}
 
-            <div className="announcements-list">
+            {error && (
+                <Alert variant="danger" className="my-4">
+                    <FaInfoCircle className="me-2" />
+                    {error}
+                </Alert>
+            )}
+
+            {!loading && !error && announcements.length === 0 && (
+                <Alert variant="info" className="my-4 text-center">
+                    <FaInfoCircle className="me-2" />
+                    There are no active announcements at this time.
+                </Alert>
+            )}
+
+            <Row className="g-4">
                 {announcements.map((announcement) => (
-                    <div key={announcement.id} className="announcement-card">
-                        <h4>{announcement.type}</h4>
-                        <p>{announcement.description}</p>
-                        <small>{announcement.endDate}</small>
-                        <button onClick={() => editAnnouncement(announcement)}><FaEdit /></button>
-                        <button onClick={() => deleteAnnouncement(announcement.id)}><FaTrash /></button>
-                    </div>
+                    <Col key={announcement.id} xs={12} md={6} lg={4}>
+                        <Card className={`announcement-card ${getAnnouncementTypeName(announcement.type).toLowerCase().replace(' ', '-')}`}>
+                            <Card.Body>
+                                <div className="d-flex justify-content-between align-items-start mb-3">
+                                    <div className="d-flex align-items-center">
+                                        {getAnnouncementIcon(announcement.type)}
+                                        <Badge bg={getAnnouncementBadgeColor(announcement.type)} className="ms-2">
+                                            {getAnnouncementTypeName(announcement.type)}
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <Card.Text className="announcement-content">{announcement.content}</Card.Text>
+                                <div className="announcement-dates mt-3 text-muted">
+                                    <small className="d-flex align-items-center">
+                                        <FaCalendarAlt className="me-1" />
+                                        Valid: {announcement.startDate} - {announcement.endDate}
+                                    </small>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
                 ))}
-            </div>
-        </div>
+            </Row>
+        </Container>
     );
 };
 

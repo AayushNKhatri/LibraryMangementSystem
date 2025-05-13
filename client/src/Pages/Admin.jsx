@@ -926,54 +926,36 @@ const Admin = () => {
                 <Table responsive hover>
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Title</th>
-                        <th>Type</th>
                       <th>Content</th>
                       <th>Start Date</th>
                       <th>End Date</th>
-                      <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {announcements.map(announcement => (
                       <tr key={announcement.id}>
-                        <td>{announcement.id}</td>
-                        <td>{announcement.title}</td>
-                          <td>
-                            <Badge bg="info">
-                              {announcement.type === 0 ? 'Deal' : 
-                               announcement.type === 1 ? 'New Arrival' : 
-                               'Information'}
-                            </Badge>
-                          </td>
-                          <td>
-                            {announcement.content.length > 50
-                              ? `${announcement.content.substring(0, 50)}...`
-                              : announcement.content}
-                          </td>
+                        <td>
+                          {announcement.content.length > 50
+                            ? `${announcement.content.substring(0, 50)}...`
+                            : announcement.content}
+                        </td>
                         <td>{announcement.startDate}</td>
                         <td>{announcement.endDate}</td>
                         <td>
-                          <Badge bg={announcement.status === 'Active' ? 'success' : 'secondary'}>
-                            {announcement.status}
-                          </Badge>
-                        </td>
-                        <td>
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              className="me-2"
-                              onClick={() => handleEditAnnouncement(announcement)}
-                            >
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => handleEditAnnouncement(announcement)}
+                          >
                             <FaEdit />
                           </Button>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              onClick={() => handleDeleteAnnouncement(announcement.id)}
-                            >
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDeleteAnnouncement(announcement.id)}
+                          >
                             <FaTrash />
                           </Button>
                         </td>
