@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Modal, Nav, Tab, Badge, Pagination, Alert } from 'react-bootstrap';
-import { FaBook, FaShoppingCart, FaTag, FaBullhorn, FaBox, FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaUsers, FaDollarSign, FaExclamationTriangle, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaBook, FaShoppingCart, FaTag, FaBullhorn, FaBox, FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaUsers, FaDollarSign, FaExclamationTriangle, FaCheck, FaTimes, FaBell } from 'react-icons/fa';
 import './Admin.css';
 import bookService from '../api/bookService';
 import announcementService, { AnnouncementType } from '../api/announcementService';
 import orderService from '../api/OrderServer';
+import dashboardService from '../api/dashboardService';
+import notificationService from '../api/notificationService';
 import { BookLanguage, Status, Category, Genre, Format } from '../utils/enums';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAddBookModal, setShowAddBookModal] = useState(false);
-  const [showAddDiscountModal, setShowAddDiscountModal] = useState(false);
   const [showAddAnnouncementModal, setShowAddAnnouncementModal] = useState(false);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [currentBookId, setCurrentBookId] = useState(null);
@@ -59,6 +61,16 @@ const Admin = () => {
   const [claimCode, setClaimCode] = useState('');
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderMessage, setOrderMessage] = useState({ show: false, text: '', type: '' });
+  
+  // Handle notification functionality
+  const [notifications, setNotifications] = useState([]);
+  const [notificationForm, setNotificationForm] = useState({
+    title: '',
+    message: '',
+    userId: '',
+    isGlobal: false
+  });
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
 
   // Fetch books data
   useEffect(() => {
@@ -97,27 +109,6 @@ const Admin = () => {
         setAnnouncements(transformedData);
       } catch (error) {
         console.error('Failed to fetch announcements:', error);
-        // Fall back to mock data if API call fails
-        const mockAnnouncements = [
-          {
-            id: 1,
-            title: "Summer Sale",
-            content: "Get 20% off on all fiction books",
-            type: 0, // Deal
-            endDate: "2024-05-30",
-            status: "Active"
-          },
-          {
-            id: 2,
-            title: "New Books Added",
-            content: "Check out our latest collection of sci-fi novels",
-            type: 1, // New Arrival
-            endDate: "2024-05-28",
-            status: "Active"
-          }
-        ];
-
-        setAnnouncements(mockAnnouncements);
       }
     };
 
@@ -132,17 +123,32 @@ const Admin = () => {
         setOrders(data);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
-        // Fall back to sample data if API call fails
-        setOrders([
-          { id: 1, customer: "John Doe", total: 28.98, status: "Pending", date: "2024-03-10" },
-          { id: 2, customer: "Jane Smith", total: 15.99, status: "Completed", date: "2024-03-12" },
-        ]);
+
       }
     };
 
     if (activeTab === 'orders') {
       fetchOrders();
     }
+  }, [activeTab]);
+
+  // Fetch notifications data
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (activeTab === 'notifications') {
+        setLoadingNotifications(true);
+        try {
+          const data = await notificationService.getNotifications();
+          setNotifications(data);
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        } finally {
+          setLoadingNotifications(false);
+        }
+      }
+    };
+
+    fetchNotifications();
   }, [activeTab]);
 
   // Handle book form input change
@@ -228,7 +234,7 @@ const Admin = () => {
     // Reset image preview
     setBookImage(null);
     setImagePreview('');
-    
+
     setShowAddBookModal(true);
   };
 
@@ -309,7 +315,7 @@ const Admin = () => {
       if (isEditing && currentBookId) {
         // Update existing book
         await bookService.updateBook(currentBookId, bookData);
-        
+
         // Upload image if provided
         if (bookImage) {
           const formData = new FormData();
@@ -319,7 +325,7 @@ const Admin = () => {
       } else {
         // Add new book
         const result = await bookService.addBook(bookData);
-        
+
         // Upload image if provided and book was created successfully
         if (bookImage && result) {
           const bookId = result.bookId || currentBookId;
@@ -421,7 +427,7 @@ const Admin = () => {
       // Transform data to match our component state structure
       const transformedData = data.map(item => ({
         id: item.announcementId,
-        title: item.announcementDescription.substring(0, 30) + '...',
+        title: item.announcementDescription.substring(0, 30) + '...',  // Use first part of description as title
         content: item.announcementDescription,
         type: item.announcementType,
         startDate: new Date(item.startDate).toISOString().split('T')[0],
@@ -450,7 +456,7 @@ const Admin = () => {
         // Transform data to match our component state structure
         const transformedData = data.map(item => ({
           id: item.announcementId,
-          title: item.announcementDescription.substring(0, 30) + '...',
+          title: item.announcementDescription.substring(0, 30) + '...',  // Use first part of description as title
           content: item.announcementDescription,
           type: item.announcementType,
           startDate: new Date(item.startDate).toISOString().split('T')[0],
@@ -482,10 +488,10 @@ const Admin = () => {
   // Mark order as complete
   const handleCompleteOrder = async () => {
     if (!selectedOrder || !claimCode) {
-      setOrderMessage({ 
-        show: true, 
-        text: 'Please enter the claim code to complete this order.', 
-        type: 'warning' 
+      setOrderMessage({
+        show: true,
+        text: 'Please enter the claim code to complete this order.',
+        type: 'warning'
       });
       return;
     }
@@ -493,35 +499,35 @@ const Admin = () => {
     try {
       setProcessingOrder(true);
       const result = await orderService.completeOrder(selectedOrder.orderId, claimCode);
-      
+
       if (result) {
-        setOrderMessage({ 
-          show: true, 
-          text: 'Order has been successfully marked as complete!', 
-          type: 'success' 
+        setOrderMessage({
+          show: true,
+          text: 'Order has been successfully marked as complete!',
+          type: 'success'
         });
-        
+
         // Refresh orders list
         const updatedOrders = await orderService.getAllOrders();
         setOrders(updatedOrders);
-        
+
         // Close modal after a delay
         setTimeout(() => {
           setShowOrderDetailsModal(false);
         }, 2000);
       } else {
-        setOrderMessage({ 
-          show: true, 
-          text: 'Failed to complete order. Invalid claim code or order status.', 
-          type: 'danger' 
+        setOrderMessage({
+          show: true,
+          text: 'Failed to complete order. Invalid claim code or order status.',
+          type: 'danger'
         });
       }
     } catch (error) {
       console.error('Error completing order:', error);
-      setOrderMessage({ 
-        show: true, 
-        text: 'An error occurred while completing the order.', 
-        type: 'danger' 
+      setOrderMessage({
+        show: true,
+        text: 'An error occurred while completing the order.',
+        type: 'danger'
       });
     } finally {
       setProcessingOrder(false);
@@ -539,35 +545,35 @@ const Admin = () => {
     try {
       setProcessingOrder(true);
       const result = await orderService.cancelOrder(selectedOrder.orderId);
-      
+
       if (result) {
-        setOrderMessage({ 
-          show: true, 
-          text: 'Order has been successfully cancelled!', 
-          type: 'success' 
+        setOrderMessage({
+          show: true,
+          text: 'Order has been successfully cancelled!',
+          type: 'success'
         });
-        
+
         // Refresh orders list
         const updatedOrders = await orderService.getAllOrders();
         setOrders(updatedOrders);
-        
+
         // Close modal after a delay
         setTimeout(() => {
           setShowOrderDetailsModal(false);
         }, 2000);
       } else {
-        setOrderMessage({ 
-          show: true, 
-          text: 'Failed to cancel order.', 
-          type: 'danger' 
+        setOrderMessage({
+          show: true,
+          text: 'Failed to cancel order.',
+          type: 'danger'
         });
       }
     } catch (error) {
       console.error('Error cancelling order:', error);
-      setOrderMessage({ 
-        show: true, 
-        text: 'An error occurred while cancelling the order.', 
-        type: 'danger' 
+      setOrderMessage({
+        show: true,
+        text: 'An error occurred while cancelling the order.',
+        type: 'danger'
       });
     } finally {
       setProcessingOrder(false);
@@ -586,13 +592,31 @@ const Admin = () => {
     { id: 2, book: "To Kill a Mockingbird", discount: "15%", startDate: "2024-03-20", endDate: "2024-04-05" },
   ];
 
-  // Summary data
-  const summaryData = {
-    totalSales: 12500.99,
-    totalOrders: 156,
-    lowStockItems: 8,
-    activeUsers: 45
-  };
+  // Dashboard summary data state
+  const [summaryData, setSummaryData] = useState({
+    totalSales: 0,
+    totalOrders: 0,
+    lowStockItems: 0,
+    activeUsers: 0,
+    recentOrders: [],
+    lowStockBooks: []
+  });
+  
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (activeTab === 'dashboard') {
+        try {
+          const data = await dashboardService.getDashboardSummary();
+          setSummaryData(data);
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+        }
+      }
+    };
+    
+    fetchDashboardData();
+  }, [activeTab]);
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -629,6 +653,45 @@ const Admin = () => {
       return quantity < 5;
     }).length;
   }, [books]);
+
+  // Handle marking notification as read
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await notificationService.markAsRead(notificationId);
+      // Update the notifications list
+      setNotifications(notifications.map(notification => 
+        notification.notificationId === notificationId 
+          ? {...notification, isRead: true} 
+          : notification
+      ));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+  
+  // Handle sending a new notification
+  const handleSendNotification = async () => {
+    // This is a placeholder - you'll need to add the sendNotification method to your notificationService
+    console.log('Sending notification:', notificationForm);
+    // Close the modal
+    setShowNotificationModal(false);
+    // Reset the form
+    setNotificationForm({
+      title: '',
+      message: '',
+      userId: '',
+      isGlobal: false
+    });
+    // Refresh notifications list
+    if (activeTab === 'notifications') {
+      try {
+        const data = await notificationService.getNotifications();
+        setNotifications(data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    }
+  };
 
   return (
     <Container fluid className="admin-dashboard px-0">
@@ -671,24 +734,6 @@ const Admin = () => {
             </Nav.Item>
             <Nav.Item>
               <Nav.Link
-                active={activeTab === 'users'}
-                onClick={() => setActiveTab('users')}
-              >
-                <FaUsers className="me-2" />
-                User Management
-              </Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link
-                active={activeTab === 'discounts'}
-                onClick={() => setActiveTab('discounts')}
-              >
-                <FaTag className="me-2" />
-                Discount Manager
-              </Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link
                 active={activeTab === 'announcements'}
                 onClick={() => setActiveTab('announcements')}
               >
@@ -698,14 +743,11 @@ const Admin = () => {
             </Nav.Item>
             <Nav.Item>
               <Nav.Link
-                active={activeTab === 'inventory'}
-                onClick={() => setActiveTab('inventory')}
+                active={activeTab === 'notifications'}
+                onClick={() => setActiveTab('notifications')}
               >
-                <FaBox className="me-2" />
-                Inventory View
-                {inventoryNotifications > 0 && (
-                  <span className="notification-badge">{inventoryNotifications}</span>
-                )}
+                <FaBell className="me-2" />
+                Notifications
               </Nav.Link>
             </Nav.Item>
           </Nav>
@@ -722,7 +764,6 @@ const Admin = () => {
                   <Card.Body>
                     <h6 className="text-muted mb-2">Total Sales</h6>
                     <h3 className="mb-0">${summaryData.totalSales.toLocaleString()}</h3>
-                    <small className="text-success">↑ 12% from last month</small>
                   </Card.Body>
                 </Card>
               </Col>
@@ -731,7 +772,6 @@ const Admin = () => {
                   <Card.Body>
                     <h6 className="text-muted mb-2">Total Orders</h6>
                     <h3 className="mb-0">{summaryData.totalOrders}</h3>
-                    <small className="text-success">↑ 8% from last month</small>
                   </Card.Body>
                 </Card>
               </Col>
@@ -747,9 +787,8 @@ const Admin = () => {
               <Col md={3}>
                 <Card className="summary-card">
                   <Card.Body>
-                    <h6 className="text-muted mb-2">Active Users</h6>
-                    <h3 className="mb-0">{summaryData.activeUsers}</h3>
-                    <small className="text-success">↑ 5% from last month</small>
+                    <h6 className="text-muted mb-2">Verified Users</h6>
+                    <h3 className="mb-0">{summaryData.verifiedUsers}</h3>
                   </Card.Body>
                 </Card>
               </Col>
@@ -772,11 +811,11 @@ const Admin = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {orders.slice(0, 5).map(order => (
+                        {summaryData.recentOrders.map(order => (
                           <tr key={order.id}>
                             <td>{order.id}</td>
                             <td>{order.customer}</td>
-                            <td>${order.total}</td>
+                            <td>${order.total.toFixed(2)}</td>
                             <td>
                               <Badge bg={order.status === 'Completed' ? 'success' : 'warning'}>
                                 {order.status}
@@ -804,7 +843,7 @@ const Admin = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {books.filter(book => book.stock < 10).slice(0, 5).map(book => (
+                        {summaryData.lowStockBooks.map(book => (
                           <tr key={book.id}>
                             <td>{book.title}</td>
                             <td>{book.stock}</td>
@@ -1018,87 +1057,41 @@ const Admin = () => {
                         <td>${order.totalAmount?.toFixed(2) || order.total}</td>
                         <td>
                           <Badge bg={
-                            order.orderStatus === 0 || order.status === 'Pending' 
-                              ? 'warning' 
-                              : order.orderStatus === 1 || order.status === 'Completed' 
-                                ? 'success' 
+                            order.orderStatus === 0 || order.status === 'Pending'
+                              ? 'warning'
+                              : order.orderStatus === 1 || order.status === 'Completed'
+                                ? 'success'
                                 : 'danger'
                           }>
-                            {order.orderStatus === 0 || order.status === 'Pending' 
-                              ? 'Pending' 
-                              : order.orderStatus === 1 || order.status === 'Completed' 
-                                ? 'Completed' 
+                            {order.orderStatus === 0 || order.status === 'Pending'
+                              ? 'Pending'
+                              : order.orderStatus === 1 || order.status === 'Completed'
+                                ? 'Completed'
                                 : 'Cancelled'}
                           </Badge>
                         </td>
-                        <td>{order.orderDate 
-                            ? new Date(order.orderDate).toLocaleDateString() 
+                        <td>{order.orderDate
+                            ? new Date(order.orderDate).toLocaleDateString()
                             : order.date}
                         </td>
                         <td>
-                          <Button 
-                            variant="outline-primary" 
-                            size="sm" 
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
                             className="me-2"
                             onClick={() => handleViewOrderDetails(order)}
                           >
                             View Details
                           </Button>
                           {(order.orderStatus === 0 || order.status === 'Pending') && (
-                            <Button 
-                              variant="outline-success" 
+                            <Button
+                              variant="outline-success"
                               size="sm"
                               onClick={() => handleViewOrderDetails(order)}
                             >
                               <FaCheck className="me-1" /> Complete
                             </Button>
                           )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card.Body>
-            </Card>
-          </Tab.Pane>
-
-          {/* Discount Manager */}
-          <Tab.Pane active={activeTab === 'discounts'}>
-            <Card>
-              <Card.Header className="bg-light d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Discount Manager</h5>
-                <Button variant="primary" onClick={() => setShowAddDiscountModal(true)}>
-                  <FaPlus className="me-2" />
-                  Add Discount
-                </Button>
-              </Card.Header>
-              <Card.Body>
-                <Table responsive hover>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Book</th>
-                      <th>Discount</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {discounts.map(discount => (
-                      <tr key={discount.id}>
-                        <td>{discount.id}</td>
-                        <td>{discount.book}</td>
-                        <td>{discount.discount}</td>
-                        <td>{discount.startDate}</td>
-                        <td>{discount.endDate}</td>
-                        <td>
-                          <Button variant="outline-primary" size="sm" className="me-2">
-                            <FaEdit />
-                          </Button>
-                          <Button variant="outline-danger" size="sm">
-                            <FaTrash />
-                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -1172,65 +1165,74 @@ const Admin = () => {
             </Card>
           </Tab.Pane>
 
-          {/* Inventory View */}
-          <Tab.Pane active={activeTab === 'inventory'}>
+          {/* Notifications Management */}
+          <Tab.Pane active={activeTab === 'notifications'}>
             <Card>
-              <Card.Header className="bg-light">
-                <h5 className="mb-0">Inventory Overview</h5>
+              <Card.Header className="bg-light d-flex justify-content-between align-items-center">
+                <h5 className="mb-0">Notification Management</h5>
+                <Button variant="primary" onClick={() => setShowNotificationModal(true)}>
+                  <FaPlus className="me-2" />
+                  Send Notification
+                </Button>
               </Card.Header>
               <Card.Body>
-                <div className="mb-3 d-flex gap-3">
-                  <Form.Control
-                    type="search"
-                    placeholder="Search inventory..."
-                    className="w-25"
-                  />
-                  <Form.Select className="w-25">
-                    <option value="">All Categories</option>
-                    <option value="fiction">Fiction</option>
-                    <option value="non-fiction">Non-Fiction</option>
-                    <option value="academic">Academic</option>
-                  </Form.Select>
-                </div>
-                <Table responsive hover>
-                  <thead>
-                    <tr>
-                      <th>Book ID</th>
-                      <th>Title</th>
-                      <th>Category</th>
-                      <th>In Stock</th>
-                      <th>Reserved</th>
-                      <th>Available</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {books.map(book => (
-                      <tr key={book.id}>
-                        <td>{book.id}</td>
-                        <td>{book.title}</td>
-                        <td>{book.category}</td>
-                        <td>{book.stock}</td>
-                        <td>{book.stock - book.reserved}</td>
-                        <td>{book.reserved}</td>
-                        <td>
-                          <Badge bg={book.status === 'In Stock' ? 'success' : 'warning'}>
-                            {book.status}
-                          </Badge>
-                        </td>
-                        <td>
-                          <Button variant="outline-primary" size="sm" className="me-2">
-                            <FaEdit />
-                          </Button>
-                          <Button variant="outline-danger" size="sm">
-                            <FaTrash />
-                          </Button>
-                        </td>
+                {loadingNotifications ? (
+                  <div className="text-center py-4">
+                    <p>Loading notifications...</p>
+                  </div>
+                ) : (
+                  <Table responsive hover>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Message</th>
+                        <th>Recipient</th>
+                        <th>Date</th>
+                        <th>Read</th>
+                        <th>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                    </thead>
+                    <tbody>
+                      {notifications.map(notification => (
+                        <tr key={notification.notificationId}>
+                          <td>{notification.notificationId}</td>
+                          <td>{notification.title || 'No Title'}</td>
+                          <td>{notification.message}</td>
+                          <td>{notification.isGlobal ? 'All Users' : notification.userId}</td>
+                          <td>{new Date(notification.createdDate).toLocaleDateString()}</td>
+                          <td>
+                            <Badge bg={notification.isRead ? 'success' : 'warning'}>
+                              {notification.isRead ? 'Read' : 'Unread'}
+                            </Badge>
+                          </td>
+                          <td>
+                            {!notification.isRead && (
+                              <Button 
+                                variant="outline-success" 
+                                size="sm" 
+                                className="me-2"
+                                onClick={() => handleMarkAsRead(notification.notificationId)}
+                              >
+                                <FaCheck />
+                              </Button>
+                            )}
+                            <Button variant="outline-danger" size="sm">
+                              <FaTrash />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                      {notifications.length === 0 && (
+                        <tr>
+                          <td colSpan="7" className="text-center py-3">
+                            No notifications found
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
+                )}
               </Card.Body>
             </Card>
           </Tab.Pane>
@@ -1336,7 +1338,7 @@ const Admin = () => {
                     placeholder="Enter book description"
                   />
                 </Form.Group>
-                
+
                 <h5 className="mb-3 mt-4">Authors</h5>
                 <Form.Group className="mb-3">
                   <Form.Label>Primary Author *</Form.Label>
@@ -1439,7 +1441,7 @@ const Admin = () => {
                     placeholder="Enter quantity"
                   />
                 </Form.Group>
-                
+
                 <Form.Group className="mb-4">
                   <Form.Label>Book Cover Image</Form.Label>
                   <Form.Control
@@ -1450,19 +1452,19 @@ const Admin = () => {
                   <Form.Text className="text-muted">
                     Upload a cover image for the book (JPG, PNG)
                   </Form.Text>
-                  
+
                   {imagePreview && (
                     <div className="mt-2 text-center">
-                      <img 
-                        src={imagePreview} 
-                        alt="Cover preview" 
-                        style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} 
+                      <img
+                        src={imagePreview}
+                        alt="Cover preview"
+                        style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }}
                         className="border rounded"
                       />
                     </div>
                   )}
                 </Form.Group>
-                
+
                 <hr />
                 <Form.Group className="mb-3">
                   <Form.Check
@@ -1515,46 +1517,6 @@ const Admin = () => {
           </Button>
           <Button variant="primary" onClick={handleSubmitBook}>
             {isEditing ? 'Update Book' : 'Add Book'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Add Discount Modal */}
-      <Modal show={showAddDiscountModal} onHide={() => setShowAddDiscountModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Discount</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Book</Form.Label>
-              <Form.Select>
-                <option value="">Select book</option>
-                {books.map(book => (
-                  <option key={book.id} value={book.id}>{book.title}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Discount Percentage</Form.Label>
-              <Form.Control type="number" placeholder="Enter discount percentage" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Start Date</Form.Label>
-              <Form.Control type="date" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>End Date</Form.Label>
-              <Form.Control type="date" />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddDiscountModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={() => setShowAddDiscountModal(false)}>
-            Add Discount
           </Button>
         </Modal.Footer>
       </Modal>
@@ -1660,9 +1622,66 @@ const Admin = () => {
         </Modal.Footer>
       </Modal>
 
+      {/* Send Notification Modal */}
+      <Modal show={showNotificationModal} onHide={() => setShowNotificationModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Send Notification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Title</Form.Label>
+              <Form.Control 
+                type="text" 
+                placeholder="Notification title" 
+                value={notificationForm.title}
+                onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Message</Form.Label>
+              <Form.Control 
+                as="textarea" 
+                rows={3} 
+                placeholder="Notification message" 
+                value={notificationForm.message}
+                onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check 
+                type="checkbox" 
+                label="Send to all users" 
+                checked={notificationForm.isGlobal}
+                onChange={(e) => setNotificationForm({...notificationForm, isGlobal: e.target.checked})}
+              />
+            </Form.Group>
+            {!notificationForm.isGlobal && (
+              <Form.Group className="mb-3">
+                <Form.Label>User ID</Form.Label>
+                <Form.Control 
+                  type="text" 
+                  placeholder="Enter specific user ID" 
+                  value={notificationForm.userId}
+                  onChange={(e) => setNotificationForm({...notificationForm, userId: e.target.value})}
+                />
+              </Form.Group>
+            )}
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowNotificationModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSendNotification}>
+            Send Notification
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* Order Details Modal */}
-      <Modal 
-        show={showOrderDetailsModal} 
+      <Modal
+        show={showOrderDetailsModal}
         onHide={() => setShowOrderDetailsModal(false)}
         size="lg"
       >
@@ -1675,29 +1694,29 @@ const Admin = () => {
               <Row className="mb-4">
                 <Col md={6}>
                   <h5>Order Information</h5>
-                  <p><strong>Order ID:</strong> {selectedOrder.orderId 
-                    ? selectedOrder.orderId.substring(0, 8) 
+                  <p><strong>Order ID:</strong> {selectedOrder.orderId
+                    ? selectedOrder.orderId.substring(0, 8)
                     : selectedOrder.id}</p>
-                  <p><strong>Date:</strong> {selectedOrder.orderDate 
-                    ? new Date(selectedOrder.orderDate).toLocaleDateString() 
+                  <p><strong>Date:</strong> {selectedOrder.orderDate
+                    ? new Date(selectedOrder.orderDate).toLocaleDateString()
                     : selectedOrder.date}</p>
                   <p><strong>Customer:</strong> {selectedOrder.userName || selectedOrder.customer}</p>
                   <p><strong>Total Amount:</strong> ${selectedOrder.totalAmount?.toFixed(2) || selectedOrder.total}</p>
-                  <p><strong>Status:</strong> 
-                    <Badge 
+                  <p><strong>Status:</strong>
+                    <Badge
                       className="ms-2"
                       bg={
-                        selectedOrder.orderStatus === 0 || selectedOrder.status === 'Pending' 
-                          ? 'warning' 
-                          : selectedOrder.orderStatus === 1 || selectedOrder.status === 'Completed' 
-                            ? 'success' 
+                        selectedOrder.orderStatus === 0 || selectedOrder.status === 'Pending'
+                          ? 'warning'
+                          : selectedOrder.orderStatus === 1 || selectedOrder.status === 'Completed'
+                            ? 'success'
                             : 'danger'
                       }
                     >
-                      {selectedOrder.orderStatus === 0 || selectedOrder.status === 'Pending' 
-                        ? 'Pending' 
-                        : selectedOrder.orderStatus === 1 || selectedOrder.status === 'Completed' 
-                          ? 'Completed' 
+                      {selectedOrder.orderStatus === 0 || selectedOrder.status === 'Pending'
+                        ? 'Pending'
+                        : selectedOrder.orderStatus === 1 || selectedOrder.status === 'Completed'
+                          ? 'Completed'
                           : 'Cancelled'}
                     </Badge>
                   </p>
@@ -1730,8 +1749,8 @@ const Admin = () => {
                   <Col>
                     <Form.Group>
                       <Form.Label>Enter Claim Code to Complete Order</Form.Label>
-                      <Form.Control 
-                        type="text" 
+                      <Form.Control
+                        type="text"
                         placeholder="Enter claim code"
                         value={claimCode}
                         onChange={handleClaimCodeChange}
@@ -1747,17 +1766,17 @@ const Admin = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowOrderDetailsModal(false)}
           >
             Close
           </Button>
-          
+
           {(selectedOrder?.orderStatus === 0 || selectedOrder?.status === 'Pending') && (
             <>
-              <Button 
-                variant="danger" 
+              <Button
+                variant="danger"
                 onClick={handleCancelOrder}
                 disabled={processingOrder}
               >
@@ -1768,8 +1787,8 @@ const Admin = () => {
                 )}
                 Cancel Order
               </Button>
-              <Button 
-                variant="success" 
+              <Button
+                variant="success"
                 onClick={handleCompleteOrder}
                 disabled={processingOrder || !claimCode}
               >

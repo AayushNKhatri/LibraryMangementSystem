@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBook, FaUsers, FaExchangeAlt, FaSearch, FaArrowRight } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Home.css';
 import AnnouncementWidget from './Components/AnnouncementWidget';
+import userService from './api/userService';
 
 function Home() {
     const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        // Check if user is logged in
+        setIsLoggedIn(userService.isLoggedIn());
+    }, []);
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -21,7 +28,7 @@ function Home() {
                         <div className="col-lg-6">
                             <h1 className="display-4 fw-bold mb-4">Discover Your Next Great Read</h1>
                             <p className="lead mb-4">Explore our vast collection of books, manage your reading journey, and connect with fellow book lovers.</p>
-                            <button 
+                            <button
                                 className="btn btn-primary btn-lg"
                                 onClick={() => handleNavigation('/books')}
                             >
@@ -29,16 +36,16 @@ function Home() {
                             </button>
                         </div>
                         <div className="col-lg-6">
-                            <img 
-                                src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&auto=format&fit=crop&q=60" 
-                                alt="Library" 
+                            <img
+                                src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&auto=format&fit=crop&q=60"
+                                alt="Library"
                                 className="img-fluid rounded-3 shadow-lg"
                             />
                         </div>
                     </div>
                 </div>
             </header>
-            
+
             {/* Announcements Widget */}
             <div className="container">
                 <AnnouncementWidget />
@@ -50,7 +57,7 @@ function Home() {
                     <h2 className="text-center mb-5">Our Features</h2>
                     <div className="row g-4">
                         <div className="col-md-6 col-lg-3">
-                            <div 
+                            <div
                                 className="feature-card"
                                 onClick={() => handleNavigation('/books')}
                             >
@@ -67,14 +74,14 @@ function Home() {
                             </div>
                         </div>
                         <div className="col-md-6 col-lg-3">
-                            <div 
+                            <div
                                 className="feature-card"
                                 onClick={() => handleNavigation('/members')}
                             >
                                 <div className="icon-wrapper">
                                     <FaUsers className="feature-icon" />
                                 </div>
-                                <h3>Member Portal</h3>
+                                <h3>Member Portal(Coming Soon)</h3>
                                 <p>Manage your profile, track your reading history, and maintain your wishlist.</p>
                                 <div className="feature-overlay">
                                     <button className="btn btn-light">
@@ -84,14 +91,14 @@ function Home() {
                             </div>
                         </div>
                         <div className="col-md-6 col-lg-3">
-                            <div 
+                            <div
                                 className="feature-card"
                                 onClick={() => handleNavigation('/borrow')}
                             >
                                 <div className="icon-wrapper">
                                     <FaExchangeAlt className="feature-icon" />
                                 </div>
-                                <h3>Borrowing System</h3>
+                                <h3>Borrowing System(Coming Soon)</h3>
                                 <p>Easy book borrowing and return process with automatic due date tracking.</p>
                                 <div className="feature-overlay">
                                     <button className="btn btn-light">
@@ -101,14 +108,14 @@ function Home() {
                             </div>
                         </div>
                         <div className="col-md-6 col-lg-3">
-                            <div 
+                            <div
                                 className="feature-card"
                                 onClick={() => handleNavigation('/search')}
                             >
                                 <div className="icon-wrapper">
                                     <FaSearch className="feature-icon" />
                                 </div>
-                                <h3>Smart Search</h3>
+                                <h3>Smart Search(Coming Soon)</h3>
                                 <p>Find your next read with our advanced search and filtering system.</p>
                                 <div className="feature-overlay">
                                     <button className="btn btn-light">
@@ -148,25 +155,28 @@ function Home() {
             </section>
 
             {/* CTA Section */}
-            <section className="cta-section py-5">
-                <div className="container text-center">
-                    <h2 className="mb-4">Ready to Start Your Reading Journey?</h2>
-                    <div className="d-flex justify-content-center gap-3">
-                        <button 
-                            className="btn btn-primary btn-lg"
-                            onClick={() => handleNavigation('/register')}
-                        >
-                            Join Now
-                        </button>
-                        <button 
-                            className="btn btn-outline-primary btn-lg"
-                            onClick={() => handleNavigation('/login')}
-                        >
-                            Sign In
-                        </button>
+            {/* Only show CTA section when user is not logged in */}
+            {!isLoggedIn && (
+                <section className="cta-section py-5">
+                    <div className="container text-center">
+                        <h2 className="mb-4">Ready to Start Your Reading Journey?</h2>
+                        <div className="d-flex justify-content-center gap-3">
+                            <button
+                                className="btn btn-primary btn-lg"
+                                onClick={() => handleNavigation('/register')}
+                            >
+                                Join Now
+                            </button>
+                            <button
+                                className="btn btn-outline-primary btn-lg"
+                                onClick={() => handleNavigation('/login')}
+                            >
+                                Sign In
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
         </div>
     );
 }

@@ -1,4 +1,4 @@
-﻿using server.Services.Interface;
+using server.Services.Interface;
 using server.Dtos;
 using server.Entities;
 using server.Database;
@@ -200,7 +200,7 @@ namespace server.Services
             }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var confirmationLink = $"http://localhost:5129/api/User/forgot-password?userId={user.Id}&token={encodedToken}";
+            var confirmationLink = $"http://localhost:5173/reset-password?token={encodedToken}&email={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(user.Email))}";
             _logger.LogInformation($"Confirmation Link: {confirmationLink}");
             var emailMessage = $@"
                                 <h2>Hi {user.FirstName},</h2>

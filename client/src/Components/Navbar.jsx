@@ -37,7 +37,7 @@ const Navbar = () => {
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
-    
+
     const handleLogout = () => {
         logout();
         updateAuthState(); // Update immediately
@@ -56,26 +56,9 @@ const Navbar = () => {
                         <span className="d-none d-md-inline">{user?.username || 'Profile'}</span>
                     </a>
                     <ul className="dropdown-menu dropdown-menu-end">
-                        {userIsAdmin && (
-                            <li>
-                                <Link className="dropdown-item" to="/admin">
-                                    Admin Dashboard
-                                </Link>
-                            </li>
-                        )}
                         <li>
                             <Link className="dropdown-item" to="/profile">
                                 My Profile
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="dropdown-item" to="/orders">
-                                My Orders
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="dropdown-item" to="/wishlist">
-                                My Wishlist
                             </Link>
                         </li>
                         <li><hr className="dropdown-divider" /></li>

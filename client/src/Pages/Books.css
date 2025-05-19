@@ -73,6 +73,7 @@
     padding: 2rem;
     border-radius: 8px;
     margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .dropdown-toggle::after {
@@ -126,25 +127,32 @@
 .active-filter-badge {
     display: inline-flex;
     align-items: center;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background-color: #e9f0ff;
+    border: 1px solid #c2d8ff;
     border-radius: 20px;
-    padding: 5px 15px;
+    padding: 8px 15px;
     margin: 5px;
     font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .active-filter-badge span {
     text-transform: capitalize;
     font-weight: 500;
+    color: #0d6efd;
 }
 
 .active-filter-badge .btn {
     padding: 0;
-    margin-left: 5px;
+    margin-left: 8px;
     border: none;
     background: transparent;
     line-height: 1;
+    transition: transform 0.2s;
+}
+
+.active-filter-badge .btn:hover {
+    transform: scale(1.2);
 }
 
 .filters-wrapper {
@@ -156,4 +164,53 @@
     .filters-wrapper .dropdown {
         margin-bottom: 10px;
     }
+    
+    .filter-options {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .filter-panels {
+        padding: 1rem !important;
+    }
+}
+
+/* New filter panel styles */
+.filter-panels {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.filter-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #495057;
+    display: flex;
+    align-items: center;
+}
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-options .btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    transition: all 0.2s;
+}
+
+.filter-options .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-options .btn-primary {
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
 }

@@ -1,66 +1,19 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-
-// Check if token exists and is valid
-const isTokenValid = () => {
-  try {
-    const token = localStorage.getItem('authToken');
-    if (!token) return false;
-
-    const decoded = jwtDecode(token);
-
-    // Check expiration
-    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-      localStorage.removeItem('authToken');
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    localStorage.removeItem('authToken');
-    return false;
-  }
-};
-
-// Get user roles from token
-const getUserRoles = () => {
-  try {
-    const token = localStorage.getItem('authToken');
-    if (!token) return [];
-
-    const decoded = jwtDecode(token);
-
-    // Get roles from .NET Identity claim
-    let roles = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-
-    // Fallback to other formats if needed
-    if (!roles) {
-      roles = decoded.role || decoded.roles || [];
-    }
-
-    // Normalize to array
-    return Array.isArray(roles) ? roles : [roles];
-  } catch {
-    return [];
-  }
-};
-
-// Check if user has specific role
-const hasRole = (role) => {
-  const roles = getUserRoles();
-  return roles.includes(role);
-};
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { isAuthenticated, isAdmin, hasRole } from './tokenUtils';
 
 /**
- * Admin-only route (using Outlet pattern)
+ * Admin-only route
+ * - Only allows admin users
+ * - Redirects to login if not authenticated
+ * - Redirects to home if authenticated but not admin
  */
 export const AdminRoute = () => {
-  if (!isTokenValid()) {
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!hasRole('Admin')) {
+  if (!isAdmin()) {
     return <Navigate to="/" replace />;
   }
 
@@ -68,36 +21,76 @@ export const AdminRoute = () => {
 };
 
 /**
- * User-only route - any authenticated user (using Outlet pattern)
+ * Admin-restricted route
+ * - Prevents admins from accessing non-admin pages
+ * - Redirects admins to admin panel
+ * - Allows non-admin users to access the page
  */
-export const UserRoute = () => {
-  if (!isTokenValid()) {
+export const AdminRestrictedRoute = () => {
+  if (isAuthenticated() && isAdmin()) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return <Outlet />;
+};
+
+/**
+ * Authenticated user route
+ * - Requires authentication
+ * - Redirects to login if not authenticated
+ * - Allows any authenticated user (including admins)
+ */
+export const AuthenticatedRoute = () => {
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;
 };
 
-// Alias for backward compatibility
-export const ProtectedRoute = UserRoute;
-
 /**
- * Public route (using Outlet pattern)
+ * Public route
+ * - Accessible to everyone, including non-authenticated users
  */
 export const PublicRoute = () => {
   return <Outlet />;
 };
 
 /**
+ * Guest-only route
+ * - Only accessible to non-authenticated users
+ * - Redirects authenticated users to home page
+ * - Useful for login/register pages
+ */
+export const GuestOnlyRoute = () => {
+  const location = useLocation();
+  
+  if (isAuthenticated()) {
+    // Redirect admins to admin panel, others to home
+    if (isAdmin()) {
+      return <Navigate to="/admin" replace />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  return <Outlet />;
+};
+// Legacy alias for backward compatibility
+export const UserRoute = AuthenticatedRoute;
+export const ProtectedRoute = AuthenticatedRoute;
+
+// Public route is already defined above, so this is removed to avoid duplication
+
+/**
  * Role-based protection for wrapping components directly
  */
 export const RoleProtectedRoute = ({ children, allowedRoles }) => {
-  if (!isTokenValid()) {
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 
-  const userRoles = getUserRoles();
-  const hasAllowedRole = userRoles.some(role => allowedRoles.includes(role));
+  const hasAllowedRole = allowedRoles.some(role => hasRole(role));
 
   if (!hasAllowedRole) {
     return <Navigate to="/" replace />;

@@ -8,51 +8,18 @@ const filterService = {
         try {
             let endpoint;
             
-            switch(filterType) {
-                case 'language':
-                    endpoint = `/filter/language/${filterValue}`;
-                    break;
-                case 'status':
-                    endpoint = `/filter/status/${filterValue}`;
-                    break;
-                case 'category':
-                    endpoint = `/filter/category/${filterValue}`;
-                    break;
-                case 'genre':
-                    endpoint = `/filter/genre/${filterValue}`;
-                    break;
-                case 'format':
-                    endpoint = `/filter/format/${filterValue}`;
-                    break;
-                case 'author':
-                    endpoint = `/filter/author`;
-                    break;
-                case 'new-arrivals':
-                    endpoint = `/filter/new-arrivals`;
-                    break;
-                case 'collectors':
-                    endpoint = `/filter/collectors`;
-                    break;
-                case 'paperbacks':
-                    endpoint = `/filter/paperbacks`;
-                    break;
-                case 'fantasy':
-                    endpoint = `/filter/fantasy`;
-                    break;
-                case 'adventure':
-                    endpoint = `/filter/adventure`;
-                    break;
-                case 'science':
-                    endpoint = `/filter/science`;
-                    break;
-                case 'fiction':
-                    endpoint = `/filter/fiction`;
-                    break;
-                case 'non-fiction':
-                    endpoint = `/filter/nonfiction`;
-                    break;
-                default:
-                    throw new Error(`Unknown filter type: ${filterType}`);
+            // Handle different filter types
+            if (['language', 'status', 'category', 'genre', 'format'].includes(filterType) && filterValue) {
+                // These filters require a value parameter
+                endpoint = `/filter/${filterType}/${filterValue}`;
+            } else if (['author', 'new-arrivals', 'collectors', 'paperbacks', 'fantasy', 'adventure', 'science', 'fiction'].includes(filterType)) {
+                // These filters don't require a value parameter
+                endpoint = `/filter/${filterType}`;
+            } else if (filterType === 'non-fiction') {
+                // Special case for non-fiction (backend endpoint might be different)
+                endpoint = `/filter/nonfiction`;
+            } else {
+                throw new Error(`Unknown filter type: ${filterType}`);
             }
             
             const response = await axios.get(`${API_URL}${endpoint}`);
@@ -94,7 +61,7 @@ const filterService = {
         }
     },
 
-    getFilteredPapaerbacks : async() => {
+    getFilteredPaperbacks : async() => {
         try {
             const response = await axios.get(`${API_URL}/filter/paperbacks`);
             return response.data;
@@ -146,10 +113,21 @@ const filterService = {
 
     getFilteredNonFiction : async() => {
         try {
-            const response = await axios.get(`${API_URL}/filter/non-fiction`);
+            const response = await axios.get(`${API_URL}/filter/nonfiction`);
             return response.data;
         } catch (error) {
             console.error('Error fetching non-fiction books:', error);
+            throw error;
+        }
+    },
+    
+    // Helper method to get all available filter options
+    getFilterOptions: async () => {
+        try {
+            const response = await axios.get(`${API_URL}/filter/options`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching filter options:', error);
             throw error;
         }
     },

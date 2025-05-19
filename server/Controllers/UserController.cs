@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -86,7 +86,7 @@ namespace server.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
             if (result.Succeeded)
-                return Ok("Email confirmed successfully!");
+                return Redirect("http://localhost:5173/login");
             else
                 return BadRequest("Email confirmation failed.");
         }
@@ -104,6 +104,14 @@ namespace server.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("forgot-password")]
+        public IActionResult RedirectToResetPassword([FromQuery] string token)
+        {
+            // Redirect to the frontend reset password page with the token
+            return Redirect($"http://localhost:5173/reset-password?token={token}");
         }
 
         [AllowAnonymous]

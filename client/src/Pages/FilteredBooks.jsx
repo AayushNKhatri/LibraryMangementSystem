@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaStar, FaFilter, FaChevronDown, FaChevronRight } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaSearch, FaStar, FaFilter, FaChevronDown, FaChevronRight, FaTimes, FaBook, FaLanguage, FaCheck } from 'react-icons/fa';
+import { useNavigate, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Books.css'; // Reusing Books.css
 import filterService from '../api/FilterService';
@@ -9,72 +9,78 @@ import { BookLanguage, Status, Category, Genre, Format } from '../utils/enums';
 
 const FilteredBooks = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [visibleBooks, setVisibleBooks] = useState(8);
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeFilter, setActiveFilter] = useState('all');
+    
+    // Filter state
+    const [activeFilters, setActiveFilters] = useState({
+        type: null,
+        value: null,
+        label: null
+    });
     const [filterTitle, setFilterTitle] = useState('All Books');
+    const [showFilters, setShowFilters] = useState(false);
 
     useEffect(() => {
-        // Check if there's an active filter in localStorage
-        const storedFilter = localStorage.getItem('activeFilter');
-        if (storedFilter) {
-            setActiveFilter(storedFilter);
-            // Clear it after reading to avoid stale data on page refresh
-            localStorage.removeItem('activeFilter');
+        // Check URL parameters for filters
+        const queryParams = new URLSearchParams(location.search);
+        const filterType = queryParams.get('type');
+        const filterValue = queryParams.get('value');
+        const filterLabel = queryParams.get('label');
+        
+        if (filterType) {
+            setActiveFilters({
+                type: filterType,
+                value: filterValue,
+                label: filterLabel || filterType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())
+            });
         }
-    }, []);
+    }, [location]);
 
     useEffect(() => {
         fetchBooks();
-    }, [activeFilter]);
+    }, [activeFilters]);
 
     const fetchBooks = async () => {
         try {
             setLoading(true);
             let data;
-
-            // Use the new dynamic filterService method
-            if (activeFilter === 'all') {
+            
+            if (!activeFilters.type) {
                 // Default to getting all books
                 data = await bookService.getAllBooks();
                 setFilterTitle('All Books');
             } else {
-                // Use the dynamic filter method for all other filters
-                data = await filterService.getFilteredBooks(activeFilter);
+                console.log(`Fetching books with filter: ${activeFilters.type}, value: ${activeFilters.value}`);
+                data = await filterService.getFilteredBooks(activeFilters.type, activeFilters.value);
+                
+                // If the data is in BookFilters format, we need to fetch the complete book details
+                if (data && data.length > 0 && !data[0].title) {
+                    // Fetch complete details for each filtered book
+                    const completeBooks = await Promise.all(
+                        data.map(async (book) => {
+                            try {
+                                const bookId = book.bookId || book.id;
+                                if (!bookId) return null;
+                                
+                                const completeBookData = await bookService.getBookById(bookId);
+                                return completeBookData;
+                            } catch (error) {
+                                console.error(`Error fetching details for book:`, error);
+                                return null;
+                            }
+                        })
+                    );
+                    
+                    data = completeBooks.filter(book => book !== null);
+                }
                 
                 // Set filter title based on active filter
-                switch(activeFilter) {
-                    case 'new-arrivals':
-                        setFilterTitle('New Arrivals');
-                        break;
-                    case 'collectors':
-                        setFilterTitle('Collector\'s Editions');
-                        break;
-                    case 'paperbacks':
-                        setFilterTitle('Paperbacks');
-                        break;
-                    case 'fantasy':
-                        setFilterTitle('Fantasy Books');
-                        break;
-                    case 'adventure':
-                        setFilterTitle('Adventure Books');
-                        break;
-                    case 'science':
-                        setFilterTitle('Science Books');
-                        break;
-                    case 'fiction':
-                        setFilterTitle('Fiction Books');
-                        break;
-                    case 'non-fiction':
-                        setFilterTitle('Non-Fiction Books');
-                        break;
-                    default:
-                        setFilterTitle(`${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Books`);
-                        break;
-                }
+                setFilterTitle(activeFilters.label || 'Filtered Books');
             }
 
             setBooks(data);
@@ -98,9 +104,41 @@ const FilteredBooks = () => {
         setSearchTerm(e.target.value);
     };
 
-    const handleFilterChange = (filter) => {
-        setActiveFilter(filter);
-        setVisibleBooks(8); // Reset visible books count when changing filter
+    const applyFilter = (filterType, filterValue = null, label = null) => {
+        // For direct genre filters, we use the type directly with no value
+        const filterLabel = label || (filterValue ? 
+            (filterType === 'category' ? Category[filterValue] :
+             filterType === 'genre' ? Genre[filterValue] :
+             filterType === 'format' ? Format[filterValue] :
+             filterType === 'language' ? BookLanguage[filterValue] :
+             filterType === 'status' ? Status[filterValue] : null) 
+            : filterType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()));
+            
+        console.log(`Applying filter: ${filterType}, value: ${filterValue}, label: ${filterLabel}`);
+        
+        // Update URL with filter parameters
+        const params = new URLSearchParams();
+        if (filterType) {
+            params.set('type', filterType);
+            if (filterValue !== null) params.set('value', filterValue);
+            if (filterLabel) params.set('label', filterLabel);
+            navigate(`/filtered-books?${params.toString()}`);
+        } else {
+            navigate('/filtered-books');
+        }
+        
+        setActiveFilters({ type: filterType, value: filterValue, label: filterLabel });
+        setVisibleBooks(8); // Reset pagination when applying new filter
+    };
+    
+    const clearFilters = () => {
+        setActiveFilters({ type: null, value: null, label: null });
+        setVisibleBooks(8);
+        navigate('/filtered-books');
+    };
+    
+    const toggleFilters = () => {
+        setShowFilters(!showFilters);
     };
 
     // Get current price considering discounts
@@ -163,134 +201,161 @@ const FilteredBooks = () => {
                                 value={searchTerm}
                                 onChange={handleSearch}
                             />
+                            <button 
+                                className={`btn ${showFilters ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                onClick={toggleFilters}
+                                type="button"
+                            >
+                                <FaFilter className="me-2" />
+                                Filters {showFilters ? <FaChevronDown className="ms-1" /> : <FaChevronRight className="ms-1" />}
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div className="row justify-content-center">
-                    <div className="col-md-10">
-                        <div className="d-flex justify-content-center gap-3 filters-wrapper flex-wrap">
-                            <div className="dropdown">
-                                <button
-                                    className={`btn ${activeFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary'} dropdown-toggle`}
-                                    type="button"
-                                    data-bs-toggle="dropdown"
-                                >
-                                    <FaFilter className="me-2" />
-                                    Format
-                                </button>
-                                <ul className="dropdown-menu">
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'all' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('all')}
-                                        >
-                                            All Books
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'paperbacks' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('paperbacks')}
-                                        >
-                                            Paperbacks
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'collectors' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('collectors')}
-                                        >
-                                            Collector's Editions
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div className="dropdown">
-                                <button
-                                    className={`btn ${['fantasy', 'adventure', 'science', 'fiction', 'non-fiction'].includes(activeFilter) ? 'btn-primary' : 'btn-outline-secondary'} dropdown-toggle`}
-                                    type="button"
-                                    data-bs-toggle="dropdown"
-                                >
-                                    <FaFilter className="me-2" />
-                                    Genres
-                                </button>
-                                <ul className="dropdown-menu">
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'fantasy' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('fantasy')}
-                                        >
-                                            Fantasy
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'adventure' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('adventure')}
-                                        >
-                                            Adventure
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'science' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('science')}
-                                        >
-                                            Science
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'fiction' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('fiction')}
-                                        >
-                                            Fiction
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'non-fiction' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('non-fiction')}
-                                        >
-                                            Non-Fiction
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div className="dropdown">
-                                <button
-                                    className={`btn ${activeFilter === 'new-arrivals' ? 'btn-primary' : 'btn-outline-secondary'} dropdown-toggle`}
-                                    type="button"
-                                    data-bs-toggle="dropdown"
-                                >
-                                    <FaFilter className="me-2" />
-                                    New Releases
-                                </button>
-                                <ul className="dropdown-menu">
-                                    <li>
-                                        <a 
-                                            className={`dropdown-item ${activeFilter === 'new-arrivals' ? 'active' : ''}`} 
-                                            href="#" 
-                                            onClick={() => handleFilterChange('new-arrivals')}
-                                        >
-                                            New Arrivals
-                                        </a>
-                                    </li>
-                                </ul>
+                
+                {activeFilters.type && (
+                    <div className="row justify-content-center mt-2 mb-3">
+                        <div className="col-md-8">
+                            <div className="d-flex justify-content-center">
+                                <div className="active-filter-badge">
+                                    <span className="me-2">
+                                        Active Filter: {activeFilters.label}
+                                    </span>
+                                    <button 
+                                        className="btn btn-sm text-danger" 
+                                        onClick={clearFilters}
+                                        aria-label="Clear filter"
+                                    >
+                                        <FaTimes />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
+                
+                {showFilters && (
+                    <div className="row justify-content-center">
+                        <div className="col-md-10">
+                            <div className="filter-panels p-3 mb-4 border rounded">
+                                <div className="row">
+                                    {/* Category Filters */}
+                                    <div className="col-md-4 mb-3">
+                                        <h5 className="filter-heading"><FaBook className="me-2" /> Categories</h5>
+                                        <div className="filter-options">
+                                            {Object.entries(Category).map(([key, value]) => (
+                                                <button 
+                                                    key={key}
+                                                    className={`btn btn-sm m-1 ${activeFilters.type === 'category' && activeFilters.value === key ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                    onClick={() => applyFilter('category', key, value)}
+                                                >
+                                                    {value}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Genre Filters */}
+                                    <div className="col-md-4 mb-3">
+                                        <h5 className="filter-heading">Genres</h5>
+                                        <div className="filter-options">
+                                            {Object.entries(Genre).map(([key, value]) => (
+                                                <button 
+                                                    key={key}
+                                                    className={`btn btn-sm m-1 ${activeFilters.type === 'genre' && activeFilters.value === key ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                    onClick={() => applyFilter('genre', key, value)}
+                                                >
+                                                    {value}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Format Filters */}
+                                    <div className="col-md-4 mb-3">
+                                        <h5 className="filter-heading">Format</h5>
+                                        <div className="filter-options">
+                                            {Object.entries(Format).map(([key, value]) => (
+                                                <button 
+                                                    key={key}
+                                                    className={`btn btn-sm m-1 ${activeFilters.type === 'format' && activeFilters.value === key ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                    onClick={() => applyFilter('format', key, value)}
+                                                >
+                                                    {value}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="row mt-2">
+                                    {/* Language Filters */}
+                                    <div className="col-md-4 mb-3">
+                                        <h5 className="filter-heading"><FaLanguage className="me-2" /> Language</h5>
+                                        <div className="filter-options">
+                                            {Object.entries(BookLanguage).map(([key, value]) => (
+                                                <button 
+                                                    key={key}
+                                                    className={`btn btn-sm m-1 ${activeFilters.type === 'language' && activeFilters.value === key ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                    onClick={() => applyFilter('language', key, value)}
+                                                >
+                                                    {value}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Status Filters */}
+                                    <div className="col-md-4 mb-3">
+                                        <h5 className="filter-heading"><FaCheck className="me-2" /> Availability</h5>
+                                        <div className="filter-options">
+                                            {Object.entries(Status).map(([key, value]) => (
+                                                <button 
+                                                    key={key}
+                                                    className={`btn btn-sm m-1 ${activeFilters.type === 'status' && activeFilters.value === key ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                    onClick={() => applyFilter('status', key, value)}
+                                                >
+                                                    {value}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Special Collections */}
+                                    <div className="col-md-4 mb-3">
+                                        <h5 className="filter-heading">Special Collections</h5>
+                                        <div className="filter-options">
+                                            <button 
+                                                className={`btn btn-sm m-1 ${activeFilters.type === 'new-arrivals' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                onClick={() => applyFilter('new-arrivals', null, 'New Arrivals')}
+                                            >
+                                                New Arrivals
+                                            </button>
+                                            <button 
+                                                className={`btn btn-sm m-1 ${activeFilters.type === 'collectors' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                onClick={() => applyFilter('collectors', null, 'Collectors Edition')}
+                                            >
+                                                Collectors Edition
+                                            </button>
+                                            <button 
+                                                className={`btn btn-sm m-1 ${activeFilters.type === 'paperbacks' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                onClick={() => applyFilter('paperbacks', null, 'Paperbacks')}
+                                            >
+                                                Paperbacks
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="text-center mt-3">
+                                    <button className="btn btn-secondary" onClick={clearFilters}>
+                                        Clear All Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {filteredBooks.length === 0 ? (

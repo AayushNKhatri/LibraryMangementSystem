@@ -83,6 +83,26 @@ const userService = {
     }
   },
   
+  // Add method for resetting password
+  resetPassword: async (resetData, token) => {
+    try {
+      // Format the data according to what the backend expects (ResetPasswordDto)
+      const formattedData = {
+        Email: resetData.email,
+        NewPassword: resetData.newPassword
+      };
+      
+      const response = await axios.post(
+        `${api_url}/request-password-reset?token=${token}`,
+        formattedData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Failed to reset password:", error);
+      throw error;
+    }
+  },
+  
   // Add user registration method
   registerUser: async (userData) => {
     try {
