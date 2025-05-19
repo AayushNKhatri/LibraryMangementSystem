@@ -1,16 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Modal, Nav, Tab, Badge, Pagination, Alert } from 'react-bootstrap';
-import { FaBook, FaShoppingCart, FaTag, FaBullhorn, FaBox, FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaUsers, FaDollarSign, FaExclamationTriangle, FaCheck, FaTimes, FaBell } from 'react-icons/fa';
+import { FaBook, FaShoppingCart, FaTag, FaBullhorn, FaBox, FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaUsers, FaDollarSign, FaCheck, FaTimes, FaBell, FaSignOutAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import './Admin.css';
 import bookService from '../api/bookService';
 import announcementService, { AnnouncementType } from '../api/announcementService';
 import orderService from '../api/OrderServer';
 import dashboardService from '../api/dashboardService';
 import notificationService from '../api/notificationService';
+import authService from '../api/authService';
 import { BookLanguage, Status, Category, Genre, Format } from '../utils/enums';
 
 const Admin = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Handle logout
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+  };
   const [showAddBookModal, setShowAddBookModal] = useState(false);
   const [showAddAnnouncementModal, setShowAddAnnouncementModal] = useState(false);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -20,6 +29,110 @@ const Admin = () => {
   const [currentBookId, setCurrentBookId] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Catalog filters
+  const [catalogFilters, setCatalogFilters] = useState({
+    search: '',
+    category: '',
+    genre: '',
+    status: '',
+    priceRange: { min: '', max: '' },
+    stockStatus: ''
+  });
+
+  // Order filters
+  const [orderFilters, setOrderFilters] = useState({
+    dateFrom: '',
+    dateTo: '',
+    status: '',
+    search: '',
+    minAmount: '',
+    maxAmount: ''
+  });
+
+  // Filtered books based on catalog filters
+  const filteredBooks = useMemo(() => {
+    if (!books || books.length === 0) return [];
+
+    return books.filter(book => {
+      // Search filter (title, author, ISBN, publisher)
+      if (catalogFilters.search && catalogFilters.search.trim() !== '') {
+        const searchTerm = catalogFilters.search.toLowerCase();
+        const titleMatch = book.title?.toLowerCase().includes(searchTerm);
+        const publisherMatch = book.publisher?.toLowerCase().includes(searchTerm);
+        const authorMatch = [
+          book.authorNamePrimary,
+          book.authorNameSecondary,
+          book.additionalAuthorName
+        ].some(author => author?.toLowerCase().includes(searchTerm));
+        const isbnMatch = book.isbn?.toLowerCase().includes(searchTerm);
+
+        if (!(titleMatch || publisherMatch || authorMatch || isbnMatch)) {
+          return false;
+        }
+      }
+
+      // Category filter
+      if (catalogFilters.category && catalogFilters.category !== '') {
+        const categoryValue = parseInt(catalogFilters.category);
+        if (book.filters?.[0]?.category !== categoryValue) {
+          return false;
+        }
+      }
+
+      // Genre filter
+      if (catalogFilters.genre && catalogFilters.genre !== '') {
+        const genreValue = parseInt(catalogFilters.genre);
+        if (book.filters?.[0]?.genre !== genreValue) {
+          return false;
+        }
+      }
+
+      // Status filter
+      if (catalogFilters.status && catalogFilters.status !== '') {
+        const statusValue = parseInt(catalogFilters.status);
+        if (book.status !== statusValue) {
+          return false;
+        }
+      }
+
+      // Price range filter
+      if (catalogFilters.priceRange.min && !isNaN(catalogFilters.priceRange.min)) {
+        const minPrice = parseFloat(catalogFilters.priceRange.min);
+        if (book.inventories?.[0]?.price < minPrice) {
+          return false;
+        }
+      }
+
+      if (catalogFilters.priceRange.max && !isNaN(catalogFilters.priceRange.max)) {
+        const maxPrice = parseFloat(catalogFilters.priceRange.max);
+        if (book.inventories?.[0]?.price > maxPrice) {
+          return false;
+        }
+      }
+
+      // Stock status filter
+      if (catalogFilters.stockStatus && catalogFilters.stockStatus !== '') {
+        const quantity = book.inventories?.[0]?.quantity || 0;
+
+        if (catalogFilters.stockStatus === 'inStock' && quantity <= 0) {
+          return false;
+        }
+
+        if (catalogFilters.stockStatus === 'lowStock' && (quantity > 3 || quantity <= 0)) {
+          return false;
+        }
+
+        if (catalogFilters.stockStatus === 'outOfStock' && quantity > 0) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [books, catalogFilters]);
+
+  // Removed filteredOrders useMemo hook from here to place it after orders state declaration
   const [bookForm, setBookForm] = useState({
     title: '',
     isbn: '',
@@ -56,12 +169,87 @@ const Admin = () => {
 
   // Handle order functionality
   const [orders, setOrders] = useState([]);
+
+  // Filtered orders based on order filters
+  const filteredOrders = useMemo(() => {
+    if (!orders || orders.length === 0) return [];
+
+    return orders.filter(order => {
+      // Search filter (order ID, customer name)
+      if (orderFilters.search && orderFilters.search.trim() !== '') {
+        const searchTerm = orderFilters.search.toLowerCase();
+        const orderIdMatch = order.orderId?.toLowerCase().includes(searchTerm) ||
+                            order.id?.toString().toLowerCase().includes(searchTerm);
+        const customerMatch = order.userName?.toLowerCase().includes(searchTerm) ||
+                             order.customer?.toLowerCase().includes(searchTerm);
+
+        if (!(orderIdMatch || customerMatch)) {
+          return false;
+        }
+      }
+
+      // Date range filter - from
+      if (orderFilters.dateFrom && orderFilters.dateFrom.trim() !== '') {
+        const fromDate = new Date(orderFilters.dateFrom);
+        const orderDate = new Date(order.orderDate || order.date);
+
+        if (orderDate < fromDate) {
+          return false;
+        }
+      }
+
+      // Date range filter - to
+      if (orderFilters.dateTo && orderFilters.dateTo.trim() !== '') {
+        const toDate = new Date(orderFilters.dateTo);
+        toDate.setHours(23, 59, 59); // End of the day
+        const orderDate = new Date(order.orderDate || order.date);
+
+        if (orderDate > toDate) {
+          return false;
+        }
+      }
+
+      // Status filter
+      if (orderFilters.status && orderFilters.status !== '') {
+        const statusValue = parseInt(orderFilters.status);
+        const orderStatus = order.orderStatus !== undefined ? order.orderStatus :
+                           (order.status === 'Pending' ? 0 :
+                            order.status === 'Completed' ? 1 : 2);
+
+        if (orderStatus !== statusValue) {
+          return false;
+        }
+      }
+
+      // Amount range filter - min
+      if (orderFilters.minAmount && !isNaN(orderFilters.minAmount)) {
+        const minAmount = parseFloat(orderFilters.minAmount);
+        const orderAmount = order.totalAmount || order.total || 0;
+
+        if (orderAmount < minAmount) {
+          return false;
+        }
+      }
+
+      // Amount range filter - max
+      if (orderFilters.maxAmount && !isNaN(orderFilters.maxAmount)) {
+        const maxAmount = parseFloat(orderFilters.maxAmount);
+        const orderAmount = order.totalAmount || order.total || 0;
+
+        if (orderAmount > maxAmount) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [orders, orderFilters]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false);
   const [claimCode, setClaimCode] = useState('');
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderMessage, setOrderMessage] = useState({ show: false, text: '', type: '' });
-  
+
   // Handle notification functionality
   const [notifications, setNotifications] = useState([]);
   const [notificationForm, setNotificationForm] = useState({
@@ -325,10 +513,19 @@ const Admin = () => {
       } else {
         // Add new book
         const result = await bookService.addBook(bookData);
+        console.log('Book add response:', result); // Log the response for debugging
 
         // Upload image if provided and book was created successfully
         if (bookImage && result) {
-          const bookId = result.bookId || currentBookId;
+          // Extract book ID from response - check for both camelCase and PascalCase properties
+          const bookId = result.bookId || result.BookId;
+
+          if (!bookId) {
+            console.error('Book ID is missing from the response:', result);
+            throw new Error('Could not get book ID from the response');
+          }
+
+          console.log('Using book ID for image upload:', bookId);
           const formData = new FormData();
           formData.append('image', bookImage);
           await bookService.addBookImage(bookId, formData);
@@ -601,7 +798,7 @@ const Admin = () => {
     recentOrders: [],
     lowStockBooks: []
   });
-  
+
   // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -614,7 +811,7 @@ const Admin = () => {
         }
       }
     };
-    
+
     fetchDashboardData();
   }, [activeTab]);
 
@@ -626,10 +823,10 @@ const Admin = () => {
 
   // Calculate notification badges
   const catalogNotifications = useMemo(() => {
-    // Count books with low stock (less than 5 items)
+    // Count books with low stock (less than 3 items)
     const lowStockBooks = books.filter(book => {
       const quantity = book.inventories?.[0]?.quantity || 0;
-      return quantity < 5 && quantity > 0;
+      return quantity <= 3 && quantity > 0;
     }).length;
 
     // Count out of stock books
@@ -659,16 +856,16 @@ const Admin = () => {
     try {
       await notificationService.markAsRead(notificationId);
       // Update the notifications list
-      setNotifications(notifications.map(notification => 
-        notification.notificationId === notificationId 
-          ? {...notification, isRead: true} 
+      setNotifications(notifications.map(notification =>
+        notification.notificationId === notificationId
+          ? {...notification, isRead: true}
           : notification
       ));
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
   };
-  
+
   // Handle sending a new notification
   const handleSendNotification = async () => {
     // This is a placeholder - you'll need to add the sendNotification method to your notificationService
@@ -750,6 +947,18 @@ const Admin = () => {
                 Notifications
               </Nav.Link>
             </Nav.Item>
+
+            <div className="mt-auto pt-4 border-top mt-4">
+              <Nav.Item>
+                <Nav.Link
+                  className="text-danger"
+                  onClick={handleLogout}
+                >
+                  <FaSignOutAlt className="me-2" />
+                  Logout
+                </Nav.Link>
+              </Nav.Item>
+            </div>
           </Nav>
         </Card.Body>
       </Card>
@@ -813,11 +1022,24 @@ const Admin = () => {
                       <tbody>
                         {summaryData.recentOrders.map(order => (
                           <tr key={order.id}>
-                            <td>{order.id}</td>
-                            <td>{order.customer}</td>
+                            <td>{order.id ? order.id.substring(0, 8) : 'N/A'}</td>
+                            <td>
+                              {order.user ? (
+                                <>
+                                  {order.user.firstName} {order.user.lastName}
+                                  <br />
+                                  <small className="text-muted">{order.user.email}</small>
+                                </>
+                              ) : (
+                                order.customer || 'Unknown'
+                              )}
+                            </td>
                             <td>${order.total.toFixed(2)}</td>
                             <td>
-                              <Badge bg={order.status === 'Completed' ? 'success' : 'warning'}>
+                              <Badge bg={
+                                order.orderStatus === 1 ? 'success' : 
+                                order.orderStatus === 0 ? 'warning' : 'danger'
+                              }>
                                 {order.status}
                               </Badge>
                             </td>
@@ -937,19 +1159,124 @@ const Admin = () => {
                 </Button>
               </Card.Header>
               <Card.Body>
-                <div className="mb-3 d-flex gap-3">
-                  <Form.Control
-                    type="search"
-                    placeholder="Search books..."
-                    className="w-25"
-                  />
-                  <Form.Select className="w-25">
-                    <option value="">All Categories</option>
-                    {Object.entries(Category).map(([key, value]) => (
-                      <option key={key} value={key}>{value}</option>
-                    ))}
-                  </Form.Select>
-                </div>
+                <Card className="filter-card mb-3">
+                  <Card.Body>
+                    <h6 className="mb-3"><FaFilter className="me-2" /> Filter Books</h6>
+                    <Row className="g-2">
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Search</Form.Label>
+                          <Form.Control
+                            type="search"
+                            placeholder="Search by title, author, ISBN..."
+                            value={catalogFilters.search}
+                            onChange={(e) => setCatalogFilters({...catalogFilters, search: e.target.value})}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Category</Form.Label>
+                          <Form.Select
+                            value={catalogFilters.category}
+                            onChange={(e) => setCatalogFilters({...catalogFilters, category: e.target.value})}
+                          >
+                            <option value="">All Categories</option>
+                            {Object.entries(Category).map(([key, value]) => (
+                              <option key={key} value={key}>{value}</option>
+                            ))}
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Genre</Form.Label>
+                          <Form.Select
+                            value={catalogFilters.genre}
+                            onChange={(e) => setCatalogFilters({...catalogFilters, genre: e.target.value})}
+                          >
+                            <option value="">All Genres</option>
+                            {Object.entries(Genre).map(([key, value]) => (
+                              <option key={key} value={key}>{value}</option>
+                            ))}
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Status</Form.Label>
+                          <Form.Select
+                            value={catalogFilters.status}
+                            onChange={(e) => setCatalogFilters({...catalogFilters, status: e.target.value})}
+                          >
+                            <option value="">All Statuses</option>
+                            {Object.entries(Status).map(([key, value]) => (
+                              <option key={key} value={key}>{value}</option>
+                            ))}
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Price Range</Form.Label>
+                          <div className="d-flex gap-2">
+                            <Form.Control
+                              type="number"
+                              placeholder="Min"
+                              value={catalogFilters.priceRange.min}
+                              onChange={(e) => setCatalogFilters({
+                                ...catalogFilters,
+                                priceRange: {...catalogFilters.priceRange, min: e.target.value}
+                              })}
+                            />
+                            <Form.Control
+                              type="number"
+                              placeholder="Max"
+                              value={catalogFilters.priceRange.max}
+                              onChange={(e) => setCatalogFilters({
+                                ...catalogFilters,
+                                priceRange: {...catalogFilters.priceRange, max: e.target.value}
+                              })}
+                            />
+                          </div>
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Stock Status</Form.Label>
+                          <Form.Select
+                            value={catalogFilters.stockStatus}
+                            onChange={(e) => setCatalogFilters({...catalogFilters, stockStatus: e.target.value})}
+                          >
+                            <option value="">All</option>
+                            <option value="inStock">In Stock</option>
+                            <option value="lowStock">Low Stock</option>
+                            <option value="outOfStock">Out of Stock</option>
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    <div className="d-flex justify-content-end mt-2">
+                      <Button
+                        variant="outline-secondary"
+                        className="me-2"
+                        onClick={() => setCatalogFilters({
+                          search: '',
+                          category: '',
+                          genre: '',
+                          status: '',
+                          priceRange: { min: '', max: '' },
+                          stockStatus: ''
+                        })}
+                      >
+                        <FaTimes className="me-1" /> Clear
+                      </Button>
+                      <Button variant="primary">
+                        <FaFilter className="me-1" /> Apply Filters
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
 
                 {loading ? (
                   <div className="text-center py-4">
@@ -975,12 +1302,12 @@ const Admin = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {books.map(book => (
+                    {filteredBooks.map(book => (
                         <tr key={book.bookId}>
                           <td>{book.bookId.substring(0, 8)}...</td>
                         <td>{book.title}</td>
                           <td>{book.publisher}</td>
-                        <td>${book.price}</td>
+                        <td>${book.inventories?.[0]?.price || 0}</td>
                           <td>{book.filters?.[0] ? Category[book.filters[0].category] : 'N/A'}</td>
                           <td>{book.filters?.[0] ? Genre[book.filters[0].genre] : 'N/A'}</td>
                           <td>{book.inventories?.[0]?.quantity || 0}</td>
@@ -1022,22 +1349,96 @@ const Admin = () => {
                 <h5 className="mb-0">Orders Overview</h5>
               </Card.Header>
               <Card.Body>
-                <div className="mb-3 d-flex gap-3">
-                  <Form.Control
-                    type="date"
-                    className="w-25"
-                  />
-                  <Form.Select className="w-25">
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </Form.Select>
-                  <Button variant="outline-primary">
-                    <FaFilter className="me-2" />
-                    Apply Filters
-                  </Button>
-                </div>
+                <Card className="filter-card mb-3">
+                  <Card.Body>
+                    <h6 className="mb-3"><FaFilter className="me-2" /> Filter Orders</h6>
+                    <Row className="g-2">
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Search</Form.Label>
+                          <Form.Control
+                            type="search"
+                            placeholder="Search by order ID or customer..."
+                            value={orderFilters.search}
+                            onChange={(e) => setOrderFilters({...orderFilters, search: e.target.value})}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Date From</Form.Label>
+                          <Form.Control
+                            type="date"
+                            value={orderFilters.dateFrom}
+                            onChange={(e) => setOrderFilters({...orderFilters, dateFrom: e.target.value})}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Date To</Form.Label>
+                          <Form.Control
+                            type="date"
+                            value={orderFilters.dateTo}
+                            onChange={(e) => setOrderFilters({...orderFilters, dateTo: e.target.value})}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Status</Form.Label>
+                          <Form.Select
+                            value={orderFilters.status}
+                            onChange={(e) => setOrderFilters({...orderFilters, status: e.target.value})}
+                          >
+                            <option value="">All Status</option>
+                            <option value="0">Pending</option>
+                            <option value="1">Completed</option>
+                            <option value="2">Cancelled</option>
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group className="mb-2">
+                          <Form.Label>Amount Range</Form.Label>
+                          <div className="d-flex gap-2">
+                            <Form.Control
+                              type="number"
+                              placeholder="Min $"
+                              value={orderFilters.minAmount}
+                              onChange={(e) => setOrderFilters({...orderFilters, minAmount: e.target.value})}
+                            />
+                            <Form.Control
+                              type="number"
+                              placeholder="Max $"
+                              value={orderFilters.maxAmount}
+                              onChange={(e) => setOrderFilters({...orderFilters, maxAmount: e.target.value})}
+                            />
+                          </div>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    <div className="d-flex justify-content-end mt-2">
+                      <Button
+                        variant="outline-secondary"
+                        className="me-2"
+                        onClick={() => setOrderFilters({
+                          dateFrom: '',
+                          dateTo: '',
+                          status: '',
+                          search: '',
+                          minAmount: '',
+                          maxAmount: ''
+                        })}
+                      >
+                        <FaTimes className="me-1" /> Clear
+                      </Button>
+                      <Button variant="primary">
+                        <FaFilter className="me-1" /> Apply Filters
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
                 <Table responsive hover>
                   <thead>
                     <tr>
@@ -1050,10 +1451,20 @@ const Admin = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map(order => (
+                    {filteredOrders.map(order => (
                       <tr key={order.orderId || order.id}>
                         <td>{order.orderId ? order.orderId.substring(0, 8) : order.id}</td>
-                        <td>{order.userName || order.customer}</td>
+                        <td>
+                          {order.user ? (
+                            <>
+                              {order.user.firstName} {order.user.lastName}
+                              <br />
+                              <small className="text-muted">{order.user.email}</small>
+                            </>
+                          ) : (
+                            order.userName || order.customer || 'Unknown'
+                          )}
+                        </td>
                         <td>${order.totalAmount?.toFixed(2) || order.total}</td>
                         <td>
                           <Badge bg={
@@ -1208,9 +1619,9 @@ const Admin = () => {
                           </td>
                           <td>
                             {!notification.isRead && (
-                              <Button 
-                                variant="outline-success" 
-                                size="sm" 
+                              <Button
+                                variant="outline-success"
+                                size="sm"
                                 className="me-2"
                                 onClick={() => handleMarkAsRead(notification.notificationId)}
                               >
@@ -1631,27 +2042,27 @@ const Admin = () => {
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Title</Form.Label>
-              <Form.Control 
-                type="text" 
-                placeholder="Notification title" 
+              <Form.Control
+                type="text"
+                placeholder="Notification title"
                 value={notificationForm.title}
                 onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Message</Form.Label>
-              <Form.Control 
-                as="textarea" 
-                rows={3} 
-                placeholder="Notification message" 
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Notification message"
                 value={notificationForm.message}
                 onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Check 
-                type="checkbox" 
-                label="Send to all users" 
+              <Form.Check
+                type="checkbox"
+                label="Send to all users"
                 checked={notificationForm.isGlobal}
                 onChange={(e) => setNotificationForm({...notificationForm, isGlobal: e.target.checked})}
               />
@@ -1659,9 +2070,9 @@ const Admin = () => {
             {!notificationForm.isGlobal && (
               <Form.Group className="mb-3">
                 <Form.Label>User ID</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  placeholder="Enter specific user ID" 
+                <Form.Control
+                  type="text"
+                  placeholder="Enter specific user ID"
                   value={notificationForm.userId}
                   onChange={(e) => setNotificationForm({...notificationForm, userId: e.target.value})}
                 />
@@ -1700,7 +2111,18 @@ const Admin = () => {
                   <p><strong>Date:</strong> {selectedOrder.orderDate
                     ? new Date(selectedOrder.orderDate).toLocaleDateString()
                     : selectedOrder.date}</p>
-                  <p><strong>Customer:</strong> {selectedOrder.userName || selectedOrder.customer}</p>
+                  <p><strong>Customer:</strong> {selectedOrder.user ? (
+                    <>
+                      {selectedOrder.user.firstName} {selectedOrder.user.lastName} <br />
+                      <small className="text-muted">{selectedOrder.user.email}</small>
+                    </>
+                  ) : (
+                    selectedOrder.userName || selectedOrder.customer || 'Unknown'
+                  )}</p>
+                  <p><strong>Contact:</strong> {selectedOrder.user?.contact || 'N/A'}</p>
+                  <p><strong>Address:</strong> {selectedOrder.user ? (
+                    `${selectedOrder.user.street}, ${selectedOrder.user.city}`
+                  ) : 'N/A'}</p>
                   <p><strong>Total Amount:</strong> ${selectedOrder.totalAmount?.toFixed(2) || selectedOrder.total}</p>
                   <p><strong>Status:</strong>
                     <Badge

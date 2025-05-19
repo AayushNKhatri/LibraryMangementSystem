@@ -19,7 +19,6 @@ namespace server.Entities
         [Required]
         public BookLanguage Language { get; set; }
         [Required]
-        public double Price {get; set;}
 
         public string? Image {get; set; }
 

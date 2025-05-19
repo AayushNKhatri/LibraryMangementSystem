@@ -12,15 +12,17 @@ import {
   Alert,
   Toast,
   ToastContainer,
-  Spinner
+  Spinner,
+  Image
 } from "react-bootstrap";
-import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit, FaCheckCircle, FaTimes, FaTrash, FaCheck } from "react-icons/fa";
+import { FaUser, FaShoppingBag, FaBell, FaHeart, FaEdit, FaCheckCircle, FaTimes, FaTrash, FaCheck, FaBookOpen } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import "./UserProfile.css";
 import userService from "../api/userService";
 import orderService from "../api/OrderServer";
 import notificationService from "../api/notificationService";
 import signalRService from "../api/signalRService";
+import bookmarkService from "../api/bookmarkService";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -54,12 +56,14 @@ const UserProfile = () => {
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   // Helper function to get user ID from token using jwt-decode
   const getUserId = () => {
     const token = localStorage.getItem('authToken');
     if (!token) return null;
-    
+
     try {
       // Use jwt-decode to properly decode the token
       const decodedToken = jwtDecode(token);
@@ -79,7 +83,7 @@ const UserProfile = () => {
       setUnreadCount(updated.filter(n => !n.read).length);
       return updated;
     });
-    
+
     // Show toast notification
     showToastMessage(notification.message, "info");
   }, []);
@@ -87,7 +91,7 @@ const UserProfile = () => {
   // Handler for notification read events
   const handleNotificationRead = useCallback((notificationId) => {
     setNotifications(prev => {
-      const updated = prev.map(n => 
+      const updated = prev.map(n =>
         n.id === notificationId ? { ...n, read: true } : n
       );
       // Update unread count
@@ -105,7 +109,7 @@ const UserProfile = () => {
     const initializeSignalR = async () => {
       try {
         await signalRService.startConnection(token);
-        
+
         // Register callbacks
         signalRService.onNotification('userProfile-notification', handleNewNotification);
         signalRService.onNotification('userProfile-read', handleNotificationRead);
@@ -139,7 +143,7 @@ const UserProfile = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchUserData();
   }, []);
 
@@ -157,7 +161,7 @@ const UserProfile = () => {
         setIsLoading(false);
       }
     };
-    
+
     if (activeTab === 'orders') {
       fetchOrderData();
     }
@@ -182,6 +186,27 @@ const UserProfile = () => {
     };
 
     fetchNotifications();
+  }, [activeTab]);
+
+  // Fetch wishlist items
+  useEffect(() => {
+    const fetchWishlistItems = async () => {
+      if (activeTab === 'wishlist') {
+        try {
+          setWishlistLoading(true);
+          const data = await bookmarkService.getAllBookmarks();
+          setWishlistItems(data || []);
+        } catch (error) {
+          console.error("Error loading wishlist:", error);
+          setWishlistItems([]);
+          showToastMessage("Failed to load wishlist items", "danger");
+        } finally {
+          setWishlistLoading(false);
+        }
+      }
+    };
+
+    fetchWishlistItems();
   }, [activeTab]);
 
   // Handle form input changes
@@ -232,13 +257,13 @@ const UserProfile = () => {
     setIsUpdating(true);
     setUpdateError('');
     setUpdateSuccess(false);
-    
+
     try {
       // No need to get userId from token - backend identifies user from token
       if (!localStorage.getItem('authToken')) {
         throw new Error('You must be logged in to update your profile');
       }
-      
+
       // Prepare the update data according to the UpdateUserDto
       const updateData = {
         userName: formData.userName,
@@ -249,10 +274,10 @@ const UserProfile = () => {
         city: formData.city,
         street: formData.street
       };
-      
+
       // Make the API call to update the user - userId not needed as parameter
       await userService.updateUserProfile(updateData);
-      
+
       // Update was successful
       setUserProfile({
         ...userProfile,
@@ -307,21 +332,56 @@ const UserProfile = () => {
   const handleMarkAsRead = async (notificationId) => {
     try {
       await notificationService.markAsRead(notificationId);
-      
+
       // Update local state
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, isRead: true } 
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification.id === notificationId
+            ? { ...notification, isRead: true }
             : notification
         )
       );
-      
+
       // Update unread count
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Error marking notification as read:", error);
       showToastMessage("Failed to mark notification as read", "danger");
+    }
+  };
+
+  // Delete notification
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      await notificationService.deleteNotification(notificationId);
+
+      // Update local state by removing the deleted notification
+      setNotifications(prev => prev.filter(notification => notification.id !== notificationId));
+      
+      // If the deleted notification was unread, update the unread count
+      const deletedNotification = notifications.find(n => n.id === notificationId);
+      if (deletedNotification && !deletedNotification.isRead) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+
+      showToastMessage("Notification deleted successfully", "success");
+    } catch (error) {
+      console.error(`Error deleting notification:`, error);
+      showToastMessage("Failed to delete notification", "danger");
+    }
+  };
+
+  // Remove item from wishlist
+  const handleRemoveFromWishlist = async (bookmarkId) => {
+    try {
+      await bookmarkService.removeBookmark(bookmarkId);
+
+      // Update local state
+      setWishlistItems(prev => prev.filter(item => item.bookmarkId !== bookmarkId));
+      showToastMessage("Item removed from wishlist", "success");
+    } catch (error) {
+      console.error("Error removing item from wishlist:", error);
+      showToastMessage("Failed to remove item from wishlist", "danger");
     }
   };
 
@@ -340,10 +400,10 @@ const UserProfile = () => {
     <Container className="user-profile py-4">
       {/* Toast Notification for real-time updates */}
       <ToastContainer position="top-end" className="p-3">
-        <Toast 
-          onClose={() => setShowToast(false)} 
-          show={showToast} 
-          delay={3000} 
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={3000}
           autohide
           bg={toastType}
           text={toastType === 'danger' ? 'white' : 'dark'}
@@ -433,8 +493,8 @@ const UserProfile = () => {
                           <FaTimes className="me-2" />
                           Cancel
                         </Button>
-                        <Button 
-                          variant="success" 
+                        <Button
+                          variant="success"
                           onClick={handleSubmitProfile}
                           disabled={isUpdating}
                         >
@@ -453,20 +513,20 @@ const UserProfile = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {updateSuccess && (
                     <Alert variant="success" className="d-flex align-items-center mb-4">
                       <FaCheckCircle className="me-2" />
                       Profile updated successfully!
                     </Alert>
                   )}
-                  
+
                   {updateError && (
                     <Alert variant="danger" className="mb-4">
                       {updateError}
                     </Alert>
                   )}
-                  
+
                   <Form>
                     <Row>
                       <Col md={6}>
@@ -629,8 +689,8 @@ const UserProfile = () => {
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <h4 className="mb-0">Notifications</h4>
                     {unreadCount > 0 && (
-                      <Button 
-                        variant="outline-primary" 
+                      <Button
+                        variant="outline-primary"
                         size="sm"
                         onClick={() => {
                           // Mark all as read functionality would go here
@@ -642,7 +702,7 @@ const UserProfile = () => {
                       </Button>
                     )}
                   </div>
-                  
+
                   {notificationsLoading ? (
                     <div className="text-center py-4">
                       <Spinner animation="border" role="status" variant="primary">
@@ -658,7 +718,7 @@ const UserProfile = () => {
                   ) : (
                     <ListGroup variant="flush" className="notification-list">
                       {notifications.map((notification) => (
-                        <ListGroup.Item 
+                        <ListGroup.Item
                           key={notification.id}
                           className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
                         >
@@ -681,20 +741,21 @@ const UserProfile = () => {
                             </div>
                             <div className="notification-actions">
                               {!notification.isRead && (
-                                <Button 
-                                  variant="link" 
-                                  size="sm" 
+                                <Button
+                                  variant="link"
+                                  size="sm"
                                   onClick={() => handleMarkAsRead(notification.id)}
                                   title="Mark as read"
                                 >
                                   <FaCheck />
                                 </Button>
                               )}
-                              <Button 
-                                variant="link" 
-                                size="sm" 
+                              <Button
+                                variant="link"
+                                size="sm"
                                 className="text-danger"
                                 title="Delete"
+                                onClick={() => handleDeleteNotification(notification.id)}
                               >
                                 <FaTrash />
                               </Button>
@@ -710,9 +771,76 @@ const UserProfile = () => {
               {activeTab === "wishlist" && (
                 <div>
                   <h4 className="mb-4">My Wishlist</h4>
-                  <Alert variant="info">
-                    Your wishlist is empty. Browse our book collection and add items to your wishlist!
-                  </Alert>
+                  {wishlistLoading ? (
+                    <div className="text-center py-4">
+                      <Spinner animation="border" role="status" variant="primary">
+                        <span className="visually-hidden">Loading wishlist...</span>
+                      </Spinner>
+                      <p className="mt-3">Loading your wishlist items...</p>
+                    </div>
+                  ) : wishlistItems.length === 0 ? (
+                    <Alert variant="info">
+                      <FaHeart className="me-2" />
+                      Your wishlist is empty. Browse our book collection and add items to your wishlist!
+                    </Alert>
+                  ) : (
+                    <Row xs={1} md={2} className="g-4">
+                      {wishlistItems.map((item) => (
+                        <Col key={item.bookmarkId}>
+                          <Card className="h-100 wishlist-item">
+                            <Row className="g-0">
+                              <Col md={4} className="d-flex align-items-center justify-content-center p-2">
+                                {item.book && item.book.image ? (
+                                  <Image
+                                    src={item.book.image.startsWith('http') ? item.book.image : `http://localhost:5129/uploads/${item.book.image}`}
+                                    alt={item.book.title}
+                                    className="img-fluid rounded"
+                                    style={{ height: '150px', objectFit: 'cover' }}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="book-placeholder d-flex align-items-center justify-content-center bg-light rounded" style={{ height: '150px', width: '100px' }}>
+                                    <FaBookOpen size={32} className="text-secondary" />
+                                  </div>
+                                )}
+                              </Col>
+                              <Col md={8}>
+                                <Card.Body>
+                                  <Card.Title className="text-truncate">{item.book?.title || 'Unknown Title'}</Card.Title>
+                                  <Card.Subtitle className="mb-2 text-muted">{item.book?.authorNamePrimary || 'Unknown Author'}</Card.Subtitle>
+                                  <Card.Text className="small text-muted mb-2 text-truncate">
+                                    {item.book?.publisher || 'Unknown Publisher'}
+                                  </Card.Text>
+                                  <div className="d-flex justify-content-between align-items-center mt-3">
+                                    <Button
+                                      variant="primary"
+                                      size="sm"
+                                      href={`/book/${item.bookId}`}
+                                    >
+                                      View Details
+                                    </Button>
+                                    <div>
+                                      <Button
+                                        variant="outline-danger"
+                                        size="sm"
+                                        onClick={() => handleRemoveFromWishlist(item.bookmarkId)}
+                                        title="Remove from wishlist"
+                                      >
+                                        <FaTrash />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </Card.Body>
+                              </Col>
+                            </Row>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  )}
                 </div>
               )}
             </Card.Body>

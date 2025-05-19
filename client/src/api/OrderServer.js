@@ -66,6 +66,7 @@ const orderService = {
     try {
       const response = await axios.patch(
         `${API_URL}/Increase-cartitem/${bookId}`,
+        {},
         {
           headers: getAuthHeader(),
         }
@@ -73,7 +74,11 @@ const orderService = {
       return response.data;
     } catch (error) {
       console.error("Error Increasing cart items", error);
-      throw error;
+      // Extract the error message from the response if available
+      const errorMessage = error.response?.data?.message || 
+                           error.response?.data || 
+                           "Could not increase quantity due to insufficient stock";
+      throw new Error(errorMessage);
     }
   },
   decreaseCartItems: async (bookId) => {
@@ -166,7 +171,11 @@ const orderService = {
       return response.data;
     } catch (error) {
       console.error("Error adding item to cart", error);
-      throw error;
+      // Extract the error message from the response if available
+      const errorMessage = error.response?.data?.message || 
+                           error.response?.data || 
+                           "Could not add to cart due to insufficient stock";
+      throw new Error(errorMessage);
     }
   },
   addCartItems: async (bookId) => {
@@ -179,7 +188,11 @@ const orderService = {
       return response.data;
     } catch (error) {
       console.error("Error adding item to cart", error);
-      throw error;
+      // Extract the error message from the response if available
+      const errorMessage = error.response?.data?.message || 
+                           error.response?.data || 
+                           "Could not add to cart due to insufficient stock";
+      throw new Error(errorMessage);
     }
   },
 };

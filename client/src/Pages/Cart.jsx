@@ -32,7 +32,7 @@ const Cart = () => {
       setLoading(true);
       const data = await orderService.getCartItems();
       setCartItems(data || []);
-      
+
       // Fetch order history to calculate discount
       try {
         const orders = await orderService.getOrderById();
@@ -60,7 +60,8 @@ const Cart = () => {
       showNotification("Quantity updated successfully");
     } catch (error) {
       console.error("Error increasing cart item quantity:", error);
-      showNotification("Failed to update quantity", "danger");
+      // Display the specific error message from the server
+      showNotification(error.message || "Failed to update quantity", "danger");
     } finally {
       setProcessingItemId(null);
     }
@@ -76,7 +77,7 @@ const Cart = () => {
       showNotification("Quantity updated successfully");
     } catch (error) {
       console.error("Error decreasing cart item quantity:", error);
-      showNotification("Failed to update quantity", "danger");
+      showNotification(error.message || "Failed to update quantity", "danger");
     } finally {
       setProcessingItemId(null);
     }
@@ -104,27 +105,33 @@ const Cart = () => {
   const calculateDiscount = () => {
     // Get total number of books
     const totalBooks = cartItems.reduce((sum, item) => sum + item.count, 0);
-    
+
     let discountRate = 0;
-    
+
     // Apply 5% discount if 5 or more books
     if (totalBooks >= 5) {
       discountRate += 0.05;
     }
-    
+
     // Apply additional 10% discount if 10 or more completed orders
     if (completedOrders >= 10) {
       discountRate += 0.10;
     }
-    
+
     return discountRate;
   };
 
+  // We no longer need to fetch inventory data separately as it's included in the book object
+
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + (item.book?.price * item.count || 0),
+    (sum, item) => {
+      // Get price from the first inventory item in the book's inventories array
+      const price = item.book?.inventories?.[0]?.price || 0;
+      return sum + (price * item.count);
+    },
     0
   );
-  
+
   const discountRate = calculateDiscount();
   const discountAmount = subtotal * discountRate;
   const total = subtotal - discountAmount;
@@ -143,7 +150,11 @@ const Cart = () => {
       navigate("/order-confirmation", { state: { order: response } });
     } catch (error) {
       console.error("Error creating order:", error);
-      showNotification("Failed to create order. Please try again.", "danger");
+      const errorMessage = error.response?.data?.message || 
+                           error.message || 
+                           "Failed to create order. Please check item availability.";
+      showNotification(errorMessage, "danger");
+    } finally {
       setLoading(false);
     }
   };
@@ -152,10 +163,10 @@ const Cart = () => {
     <Container className="cart-page py-4">
       {/* Toast notification */}
       <ToastContainer position="top-end" className="p-3">
-        <Toast 
-          onClose={() => setShowToast(false)} 
-          show={showToast} 
-          delay={3000} 
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={3000}
           autohide
           bg={toastType}
           className="text-white"
@@ -191,7 +202,7 @@ const Cart = () => {
                         <td>
                           <div className="d-flex align-items-center">
                             <img
-                              src={item.book?.imageUrl || item.image}
+                              src={item.book?.image ? `http://localhost:5129/uploads/${item.book.image}` : "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=100"}
                               alt={item.book?.title}
                               className="cart-item-image me-3"
                               onError={(e) => {
@@ -200,25 +211,28 @@ const Cart = () => {
                               }}
                             />
                             <div>
-                              <p className="mb-0 fw-bold">{item.book?.title}</p>
+                              <h6 className="mb-0">{item.book?.title}</h6>
                               <small className="text-muted">
-                                {item.book?.author}
+                                {item.book?.authorNamePrimary}
                               </small>
                             </div>
                           </div>
                         </td>
-                        <td>${item.book?.price}</td>
                         <td>
-                          <div className="d-flex align-items-center">
+                          ${(item.book?.inventories?.[0]?.price || 0).toFixed(2)}
+                          {item.book?.inventories?.[0]?.isOnSale && (
+                            <span className="ms-2 badge bg-danger">Sale</span>
+                          )}
+                        </td>
+                        <td>
+                          <div className="quantity-controls d-flex align-items-center">
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() =>
-                                handleDecreaseChange(item.book?.bookId)
-                              }
-                              disabled={processingItemId === item.book?.bookId}
+                              onClick={() => handleDecreaseChange(item.bookId)}
+                              disabled={processingItemId === item.bookId || item.count <= 1}
                             >
-                              {processingItemId === item.book?.bookId ? (
+                              {processingItemId === item.bookId ? (
                                 <span className="spinner-border spinner-border-sm" />
                               ) : (
                                 <FaMinus />
@@ -228,12 +242,10 @@ const Cart = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() =>
-                                handleIncreaseChange(item.book?.bookId)
-                              }
-                              disabled={processingItemId === item.book?.bookId}
+                              onClick={() => handleIncreaseChange(item.bookId)}
+                              disabled={processingItemId === item.bookId}
                             >
-                              {processingItemId === item.book?.bookId ? (
+                              {processingItemId === item.bookId ? (
                                 <span className="spinner-border spinner-border-sm" />
                               ) : (
                                 <FaPlus />
@@ -241,15 +253,17 @@ const Cart = () => {
                             </Button>
                           </div>
                         </td>
-                        <td>${(item.book?.price * item.count).toFixed(2)}</td>
+                        <td>
+                          ${((item.book?.inventories?.[0]?.price || 0) * item.count).toFixed(2)}
+                        </td>
                         <td>
                           <Button
                             variant="outline-danger"
                             size="sm"
-                            onClick={() => handleRemoveItem(item.book?.bookId)}
-                            disabled={processingItemId === item.book?.bookId}
+                            onClick={() => handleRemoveItem(item.bookId)}
+                            disabled={processingItemId === item.bookId}
                           >
-                            {processingItemId === item.book?.bookId ? (
+                            {processingItemId === item.bookId ? (
                               <span className="spinner-border spinner-border-sm" />
                             ) : (
                               <FaTrash />

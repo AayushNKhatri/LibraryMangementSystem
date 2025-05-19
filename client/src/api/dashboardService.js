@@ -44,10 +44,13 @@ const dashboardService = {
           .slice(0, 5)
           .map(order => ({
             id: order.orderId,
-            customer: order.userName || 'Anonymous',
+            user: order.user,
+            customer: order.user ? `${order.user.firstName} ${order.user.lastName}` : (order.userName || 'Anonymous'),
+            email: order.user?.email,
             total: order.totalAmount,
-            status: order.orderStatus === 2 ? 'Completed' :
-                   order.orderStatus === 1 ? 'Pending' : 'Cancelled'
+            status: order.orderStatus === 1 ? 'Completed' :
+                   order.orderStatus === 0 ? 'Pending' : 'Cancelled',
+            orderStatus: order.orderStatus // Include the raw status code for reference
           })),
         lowStockBooks: books
           .filter(book => book.inventories &&

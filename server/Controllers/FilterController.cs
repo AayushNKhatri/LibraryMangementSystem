@@ -8,7 +8,7 @@ using server.Entities;
 using server.Services.Interface;
 using server.Entities.Enum;
 
-namespace server.Controllers 
+namespace server.Controllers
 {
     [Route("api/Books")]
     [ApiController]
@@ -26,92 +26,92 @@ namespace server.Controllers
         public async Task<IActionResult> FilterBooksByLanguage(BookLanguage language)
         {
             var books = await _filterService.FilterByLanguageAsync(language);
-            return books.Any() ? Ok(books) : NotFound("No books found for that language.");
+            return Ok(books);
         }
 
         [HttpGet("/filter/status/{status}")]
         public async Task<IActionResult> FilterBooksByStatus(Status status)
         {
             var books = await _filterService.FilterByStatusAsync(status);
-            return books.Any() ? Ok(books) : NotFound("No books found with the specified status.");
+            return Ok(books);
         }
 
         [HttpGet("/filter/category/{category}")]
         public async Task<IActionResult> FilterBooksByCategory(Category category)
         {
             var books = await _filterService.FilterByCategoryAsync(category);
-            return books.Any() ? Ok(books) : NotFound("No books found in that category.");
+            return Ok(books);
         }
 
         [HttpGet("/filter/genre/{genre}")]
         public async Task<IActionResult> FilterBooksByGenre(Genre genre)
         {
             var books = await _filterService.FilterByGenreAsync(genre);
-            return books.Any() ? Ok(books) : NotFound("No books found for that genre.");
+            return Ok(books);
         }
 
         [HttpGet("/filter/format/{format}")]
         public async Task<IActionResult> FilterBooksByFormat(Format format)
         {
             var books = await _filterService.FilterByFormatAsync(format);
-            return books.Any() ? Ok(books) : NotFound("No books found for that format.");
+            return Ok(books);
         }
-        
+
         [HttpGet("/filter/new-arrivals")]
         public async Task<IActionResult> FilterByNewArrivals(DateTime arrivalDate)
         {
             var newArrivals = await _filterService.FilterByNewArrivalAsync(arrivalDate);
-            return newArrivals.Any() ? Ok(newArrivals) : NotFound("No new arrivals found");
+            return Ok(newArrivals);
         }
 
         [HttpGet("/filter/collectors")]
         public async Task<IActionResult> FilterByCollectors()
         {
             var collectors = await _filterService.FilterByCollectorsAsync();
-            return collectors.Any() ? Ok(collectors) : NotFound("No collectors found");
+            return Ok(collectors);
         }
 
         [HttpGet("/filter/paperbacks")]
         public async Task<IActionResult> FilterByPaperbacks()
         {
             var paperbacks = await _filterService.FilterByPaperbacksAsync();
-            return paperbacks.Any() ? Ok(paperbacks) : NotFound("No paperbacks found");
+            return Ok(paperbacks);
         }
 
         [HttpGet("/filter/fantasy")]
         public async Task<IActionResult> FilterByFantasy()
         {
             var fantasy = await _filterService.FilterByFantasyAsync();
-            return fantasy.Any() ? Ok(fantasy) : NotFound("No fantasy books found");
+            return Ok(fantasy);
         }
 
         [HttpGet("/filter/adventure")]
         public async Task<IActionResult> FilterByAdventure()
         {
             var adventure = await _filterService.FilterByAdventureAsync();
-            return adventure.Any() ? Ok(adventure) : NotFound("No adventure books found");
+            return Ok(adventure);
         }
 
         [HttpGet("/filter/science")]
         public async Task<IActionResult> FilterByScience()
         {
             var science = await _filterService.FilterByScienceAsync();
-            return science.Any() ? Ok(science) : NotFound("No science books found");
+            return Ok(science);
         }
 
         [HttpGet("/filter/fiction")]
         public async Task<IActionResult> FilterByFiction()
         {
             var fiction = await _filterService.FilterByFictionAsync();
-            return fiction.Any() ? Ok(fiction) : NotFound("No fiction books found");
+            return Ok(fiction);
         }
 
         [HttpGet("/filter/nonfiction")]
         public async Task<IActionResult> FilterByNonFiction()
         {
             var nonfiction = await _filterService.FilterByNonFictionAsync();
-            return nonfiction.Any() ? Ok(nonfiction) : NotFound("No nonfiction books found");
+            return Ok(nonfiction);
         }
-        
+
     }
 }

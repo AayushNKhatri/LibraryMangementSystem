@@ -3,15 +3,12 @@ using server.Entities;
 using server.Database;
 using Microsoft.EntityFrameworkCore;
 using server.Dtos;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace server.Services
 {
     public class BookService(IImageService _imageservice, ApplicationDbContext _context, IHttpContextAccessor _httpContextAccessor) : IBookInterface
     {
-        public async Task AddBooks(Book book, BookFilters bookFilters, BookInventory bookInventory)
+        public async Task<Book> AddBooks(Book book, BookFilters bookFilters, BookInventory bookInventory)
         {
             try
             {
@@ -19,8 +16,9 @@ namespace server.Services
                 await _context.BookFilters.AddAsync(bookFilters);
                 await _context.BookInventories.AddAsync(bookInventory);
                 await _context.SaveChangesAsync();
+                return book;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("Book is not added" + ex.Message);
             }
@@ -33,7 +31,7 @@ namespace server.Services
                 {
                     if (!string.IsNullOrEmpty(book.Image))
                     {
-                        book.Image = baseUrl + book.Image; // e.g., uploads/books/...
+                        book.Image = baseUrl + book.Image;
                     }
                 }
 

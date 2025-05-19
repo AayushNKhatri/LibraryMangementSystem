@@ -28,7 +28,8 @@ namespace server.Controllers
             }
             catch(Exception ex)
             {
-                throw new Exception("Cart not created: " + ex.InnerException?.Message);
+                // Return a proper error response instead of throwing an exception
+                return BadRequest(ex.Message);
             }
         }
         [Authorize]
@@ -62,7 +63,8 @@ namespace server.Controllers
             }
             catch(Exception ex)
             {
-                throw new Exception("Cart not created: " + ex.InnerException?.Message);
+                // Return stock validation errors as BadRequest
+                return BadRequest(ex.Message);
             }
         }
 
@@ -73,7 +75,6 @@ namespace server.Controllers
             try
             {
                 var req = await orderService.GetOrder();
-                if(!req.Any()) return NotFound("Not orders to show");
                 return Ok(req);
             }
             catch(Exception ex)
@@ -103,14 +104,22 @@ namespace server.Controllers
 
 
         [Authorize]
-        [HttpPatch("Increase-cartitem/bookId")]
+        [HttpPatch("Increase-cartitem/{bookId}")]
         public async Task<IActionResult>IncreaseCartItem([FromRoute] Guid bookId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if(string.IsNullOrEmpty(userId)) return Unauthorized("user not found");
-            var req = await orderService.AddCartItem(userId, bookId);
-            if(req == false) return NotFound("Cart Item not incereased");
-            return Ok(req);
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if(string.IsNullOrEmpty(userId)) return Unauthorized("user not found");
+                var req = await orderService.AddCartItem(userId, bookId);
+                if(req == false) return NotFound("Cart Item not increased");
+                return Ok(req);
+            }
+            catch(Exception ex)
+            {
+                // Return a proper error response with the stock validation message
+                return BadRequest(ex.Message);
+            }
         }
         [Authorize]
         [HttpPatch("decrease-cartitem/{bookId}")]
@@ -135,10 +144,18 @@ namespace server.Controllers
         [HttpPatch("confirm-order")]
         public async Task<IActionResult>ConfirmOrder()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if(string.IsNullOrEmpty(userId)) return Unauthorized("User not found");
-            var req = await orderService.OrderConformation(userId);
-            return Ok(req);
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if(string.IsNullOrEmpty(userId)) return Unauthorized("User not found");
+                var req = await orderService.OrderConformation(userId);
+                return Ok(req);
+            }
+            catch(Exception ex)
+            {
+                // Return stock validation errors as BadRequest
+                return BadRequest(ex.Message);
+            }
         }
         [Authorize(Roles = "Admin")]
         [HttpPatch("complete-Order")]
@@ -150,7 +167,7 @@ namespace server.Controllers
             if(req == false) return NotFound("Order not completed");
             return Ok(req);
         }
-        
+
         [Authorize]
         [HttpPatch("cancel-order")]
         public async Task<IActionResult>ManageOrderCancelled(Guid orderId)

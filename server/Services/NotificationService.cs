@@ -47,13 +47,13 @@ public class NotificationService : INotificationService
             .OrderByDescending(n => n.NotificationDate)
             .ToListAsync();
     }
-    
+
     public async Task<Notification> GetNotificationById(Guid notificationId)
     {
         return await _context.Notifications
             .FirstOrDefaultAsync(n => n.Id == notificationId);
     }
-    
+
     public async Task MarkAsRead(Guid notificationId)
     {
         var notification = await _context.Notifications.FindAsync(notificationId);
@@ -61,12 +61,19 @@ public class NotificationService : INotificationService
         {
             notification.IsRead = true;
             await _context.SaveChangesAsync();
-            
+
             // Send real-time update to the user
             if (!string.IsNullOrEmpty(notification.UserId))
             {
                 await _hubContext.Clients.Group(notification.UserId).SendAsync("NotificationRead", notificationId);
             }
         }
+    }
+    public async Task<bool> DeleteNotification(Guid notificationId)
+    {
+        var nonfiction = await _context.Notifications.FindAsync(notificationId);
+        _context.Notifications.Remove(nonfiction);
+        _context.SaveChangesAsync();
+        return true;
     }
 }

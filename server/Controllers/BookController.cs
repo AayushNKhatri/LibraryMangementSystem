@@ -51,8 +51,8 @@ namespace server.Controllers
                 DiscoundEndDate = bookDto.DiscoundEndDate,
             };
 
-            await bookService.AddBooks(bookModel, filterModel, bookInventoryModel);
-            return Ok("Book Added");
+            var bookRes = await bookService.AddBooks(bookModel, filterModel, bookInventoryModel);
+            return Ok(bookRes);
         }
         [HttpGet]
         public async Task<IActionResult> GetAllBooks()

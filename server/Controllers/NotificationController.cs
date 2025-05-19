@@ -45,21 +45,21 @@ namespace server.Controllers
             {
                 // Get the notification from the database
                 var notification = await _notificationService.GetNotificationById(notificationId);
-                
+
                 // Check if notification exists and belongs to the user
                 if (notification == null)
                 {
                     return NotFound("Notification not found");
                 }
-                
+
                 if (notification.UserId != userId)
                 {
                     return Forbid("You do not have permission to mark this notification as read");
                 }
-                
+
                 // Mark notification as read
                 await _notificationService.MarkAsRead(notificationId);
-                
+
                 return Ok(new { success = true, message = "Notification marked as read" });
             }
             catch (Exception ex)
@@ -67,5 +67,20 @@ namespace server.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+        [HttpDelete("DeleteNotification/{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                var result = await _notificationService.DeleteNotification(id);
+                if (result) return Ok("Sucess delete");
+                return BadRequest("Cannot Delete sucesfully");
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error", e);
+            }
+
+        }
     }
-} 
+}

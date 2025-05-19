@@ -43,10 +43,10 @@ const IndividualBook = () => {
         if (storedUserId) {
             setUserId(storedUserId);
         }
-        
+
         // Check if user is admin
         // setIsUserAdmin(isAdmin());
-        
+
         fetchBookDetails();
         fetchSimilarBooks();
         fetchBookReviews();
@@ -65,16 +65,27 @@ const IndividualBook = () => {
             const data = await bookService.getBookById(bookId);
             // Since the API returns a list, we need to find the book with matching ID
             const bookData = Array.isArray(data) ? data.find(b => b.bookId === bookId) : data;
-            
-            // Checking for image url
-            if (bookData && bookData.imageUrl) {
-                // Check if the URL already has parameters
-                const separator = bookData.image.includes('?') ? '&' : '?';
-                bookData.image = `${bookData.image}${separator}t=${new Date().getTime()}`;
-                console.log(`The book does have imaage ${bookData.imageUrl}`);
+
+            if (bookData) {
+                // Ensure image URL is properly formatted
+                if (bookData.image) {
+                    // Add cache-busting parameter if needed
+                    const separator = bookData.image.includes('?') ? '&' : '?';
+                    bookData.image = `${bookData.image}${separator}t=${new Date().getTime()}`;
+                }
+
+                // Ensure inventory data is properly accessed
+                if (bookData.inventories && bookData.inventories.length > 0) {
+                    console.log('Book inventory data:', bookData.inventories[0]);
+                }
+
+                // Ensure filters data is properly accessed
+                if (bookData.filters && bookData.filters.length > 0) {
+                    console.log('Book filters data:', bookData.filters[0]);
+                }
             }
-            
-            console.log(bookData);
+
+            console.log('Full book data:', bookData);
             setBook(bookData);
             setLoading(false);
         } catch (error) {
@@ -116,7 +127,7 @@ const IndividualBook = () => {
                 // Just take any 4 books
                 filtered = filtered.slice(0, 4);
             }
-            
+
             // Add timestamp to image URLs to prevent caching
             filtered = filtered.map(book => {
                 if (book.imageUrl) {
@@ -125,7 +136,7 @@ const IndividualBook = () => {
                 }
                 return book;
             });
-            
+
 
             setSimilarBooks(filtered);
         } catch (error) {
@@ -138,13 +149,13 @@ const IndividualBook = () => {
             // Use the new endpoint to get reviews for this specific book
             const bookReviews = await reviewService.getReviewsByBook(bookId);
             console.log('Book reviews:', bookReviews);
-            
+
             // Ensure we're handling both array and single object responses correctly
             if (bookReviews) {
                 // If it's already an array, use it directly
                 if (Array.isArray(bookReviews)) {
                     setReviews(bookReviews);
-                } 
+                }
                 // If it's a single review object (not an array), convert to array
                 else if (bookReviews.reviewId) {
                     setReviews([bookReviews]);
@@ -285,7 +296,7 @@ const IndividualBook = () => {
     // Calculate average rating from reviews
     const calculateAverageRating = (reviews) => {
         if (!reviews || reviews.length === 0) return 'N/A';
-        
+
         // Check if reviews is an array or an object with rating property
         if (Array.isArray(reviews)) {
             const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -295,7 +306,7 @@ const IndividualBook = () => {
             // Handle case where reviews is an object with rating property
             return reviews.rating.toFixed(1);
         }
-        
+
         return 'N/A';
     };
 
@@ -305,17 +316,44 @@ const IndividualBook = () => {
             return;
         }
 
+        // Check if book has inventory and stock information
+        if (!book || !book.inventories || !book.inventories.length === 0) {
+            showToastNotification('Book inventory information not available', 'warning');
+            return;
+        }
+
+        const inventory = book.inventories[0];
+        if (!inventory) {
+            showToastNotification('Book inventory information not available', 'warning');
+            return;
+        }
+
+        // Check if the book is in stock
+        if (inventory.quantity <= 0) {
+            showToastNotification('This book is currently out of stock', 'warning');
+            return;
+        }
+
+        // Check if requested quantity exceeds available stock
+        const availableStock = inventory.quantity;
+        if (quantity > availableStock) {
+            showToastNotification(`Only ${availableStock} items available in stock`, 'warning');
+            return;
+        }
+
         setAddingToCart(true);
         try {
             const cartData = {
                 count: quantity
             };
-            
+
             await orderService.createCart(bookId, cartData);
-            showToastNotification('Book added to your cart successfully!', 'success');
+            showToastNotification(`Added ${quantity} ${quantity > 1 ? 'copies' : 'copy'} of "${book.title}" to your cart!`, 'success');
         } catch (error) {
             console.error('Error adding book to cart:', error);
-            showToastNotification('Failed to add book to cart. Please try again.', 'danger');
+            // Display specific error message from server
+            const errorMessage = error.message || 'Failed to add book to cart. Please try again.';
+            showToastNotification(errorMessage, 'danger');
         } finally {
             setAddingToCart(false);
         }
@@ -376,12 +414,12 @@ const IndividualBook = () => {
                 {/* Book Details Section */}
                 <div className="col-md-4">
                     <div className="book-image-container mb-4 position-relative">
-                        <img 
-                            src={book.image || book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"} 
-                            alt={book.title} 
+                        <img
+                            src={book.image || book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"}
+                            alt={book.title}
                             className="img-fluid rounded shadow"
                             onError={(e) => {
-                                e.target.onerror = null; 
+                                e.target.onerror = null;
                                 e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
                             }}
                         />
@@ -390,13 +428,16 @@ const IndividualBook = () => {
                 <div className="col-md-8">
                     <div className="book-details">
                         <h1 className="book-title mb-3">{book.title}</h1>
-                        <h4 className="book-author text-muted mb-4">by {book.author || 'Unknown Author'}</h4>
+                        <h4 className="book-author text-muted mb-4">by {book.authorNamePrimary || 'Unknown Author'}
+                            {book.authorNameSecondary && <span>, {book.authorNameSecondary}</span>}
+                            {book.additionalAuthorName && <span>, {book.additionalAuthorName}</span>}
+                        </h4>
 
                         <div className="book-meta mb-4">
                             <div className="d-flex align-items-center mb-2">
                                 <span className="price me-4">
-                                    ${book.inventories?.[0]?.price || book.price || 'N/A'}
-                                    {book.inventories?.[0]?.isOnSale && book.inventories?.[0]?.discountPercent > 0 && (
+                                    ${book.inventories && book.inventories[0] ? book.inventories[0].price.toFixed(2) : 'N/A'}
+                                    {book.inventories && book.inventories[0] && book.inventories[0].isOnSale && book.inventories[0].discountPercent > 0 && (
                                         <span className="ms-2 text-danger">
                                             ({book.inventories[0].discountPercent}% off)
                                         </span>
@@ -408,13 +449,21 @@ const IndividualBook = () => {
                                 </div>
                             </div>
                             <div className="book-info">
-                                {book.filters?.[0]?.genre !== undefined && (
+                                {book.filters && book.filters[0] && book.filters[0].genre !== undefined && (
                                     <p><strong>Genre:</strong> {Genre[book.filters[0].genre] || 'N/A'}</p>
                                 )}
-                                <p><strong>Published:</strong> {book.publicationDate ? new Date(book.publicationDate).getFullYear() : 'N/A'}</p>
+                                {book.filters && book.filters[0] && book.filters[0].category !== undefined && (
+                                    <p><strong>Category:</strong> {book.filters[0].category}</p>
+                                )}
+                                {book.filters && book.filters[0] && book.filters[0].format !== undefined && (
+                                    <p><strong>Format:</strong> {book.filters[0].format}</p>
+                                )}
+                                <p><strong>Publisher:</strong> {book.publisher || 'N/A'}</p>
+                                <p><strong>Published:</strong> {book.publicationDate ? new Date(book.publicationDate).toLocaleDateString() : 'N/A'}</p>
                                 <p><strong>Language:</strong> {BookLanguage[book.language] || 'N/A'}</p>
                                 <p><strong>ISBN:</strong> {book.isbn || 'N/A'}</p>
-                                <p><strong>Availability:</strong> {book.inventories?.[0]?.quantity > 0 ? `In Stock (${book.inventories[0].quantity} available)` : 'Out of Stock'}</p>
+                                <p><strong>Availability:</strong> {book.inventories && book.inventories[0] && book.inventories[0].quantity > 0 ?
+                                    `In Stock (${book.inventories[0].quantity} available)` : 'Out of Stock'}</p>
                             </div>
                         </div>
 
@@ -426,14 +475,14 @@ const IndividualBook = () => {
                         <div className="book-actions d-flex gap-3">
                             <div className="d-flex align-items-center">
                                 <div className="input-group me-2" style={{ width: '100px' }}>
-                                    <button 
-                                        className="btn btn-outline-secondary" 
+                                    <button
+                                        className="btn btn-outline-secondary"
                                         type="button"
                                         onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
                                     >-</button>
-                                    <input 
-                                        type="text" 
-                                        className="form-control text-center" 
+                                    <input
+                                        type="text"
+                                        className="form-control text-center"
                                         value={quantity}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value);
@@ -442,13 +491,13 @@ const IndividualBook = () => {
                                             }
                                         }}
                                     />
-                                    <button 
-                                        className="btn btn-outline-secondary" 
+                                    <button
+                                        className="btn btn-outline-secondary"
                                         type="button"
                                         onClick={() => setQuantity(prev => prev + 1)}
                                     >+</button>
                                 </div>
-                                <button 
+                                <button
                                     className="btn btn-primary"
                                     onClick={handleAddToCart}
                                     disabled={addingToCart || (book.inventories?.[0]?.quantity <= 0)}
@@ -612,11 +661,11 @@ const IndividualBook = () => {
                                 >
                                     <div className="book-image-container">
                                         <img
-                                            src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"}
+                                            src={book.image || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"}
                                             alt={book.title}
                                             className="book-image"
                                             onError={(e) => {
-                                                e.target.onerror = null; 
+                                                e.target.onerror = null;
                                                 e.target.src = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
                                             }}
                                         />

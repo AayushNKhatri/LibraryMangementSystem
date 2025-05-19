@@ -9,5 +9,6 @@ namespace server.Services.Interface
         Task<IEnumerable<Notification>> GetNotifications(string userId);
         Task<Notification> GetNotificationById(Guid notificationId);
         Task MarkAsRead(Guid notificationId);
+        Task<bool> DeleteNotification(Guid notificationId);
     }
 }

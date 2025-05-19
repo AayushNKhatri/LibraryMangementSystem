@@ -34,6 +34,19 @@ const notificationService = {
       console.error(`Error marking notification ${notificationId} as read:`, error);
       throw error;
     }
+  },
+
+  deleteNotification: async (notificationId) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/notification/DeleteNotification/${notificationId}`,
+        { headers: getAuthHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting notification ${notificationId}:`, error);
+      throw error;
+    }
   }
 };
 

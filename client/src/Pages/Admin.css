@@ -9,6 +9,52 @@
   max-width: 100%;
 }
 
+/* Filter Card Styles */
+.filter-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.filter-card:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.filter-card .card-body {
+  padding: 1.25rem;
+}
+
+.filter-card h6 {
+  color: #495057;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.filter-card .form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.filter-card .form-control,
+.filter-card .form-select {
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  padding: 0.4rem 0.75rem;
+}
+
+.filter-card .form-control:focus,
+.filter-card .form-select:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
 /* Sidebar Styles */
 .admin-sidebar {
   position: sticky;
