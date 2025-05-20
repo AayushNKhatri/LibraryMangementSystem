@@ -18,7 +18,6 @@ namespace server.Entities
         public string Publisher { get; set; }
         [Required]
         public BookLanguage Language { get; set; }
-        [Required]
 
         public string? Image {get; set; }
 

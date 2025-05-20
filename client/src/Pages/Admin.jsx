@@ -517,18 +517,45 @@ const Admin = () => {
 
         // Upload image if provided and book was created successfully
         if (bookImage && result) {
-          // Extract book ID from response - check for both camelCase and PascalCase properties
-          const bookId = result.bookId || result.BookId;
+          try {
+            // Extract book ID from response - check for all possible property names
+            let bookId = null;
+            
+            // Try to find the book ID in the response using different possible property names
+            if (result.bookId) bookId = result.bookId;
+            else if (result.BookId) bookId = result.BookId;
+            else if (result.bookID) bookId = result.bookID;
+            else if (result.BookID) bookId = result.BookID;
+            else if (result.id) bookId = result.id;
+            else if (result.Id) bookId = result.Id;
+            
+            // If we still don't have a book ID, try to fetch the newly created book by ISBN
+            if (!bookId) {
+              console.log('Book ID not found in response, attempting to fetch by ISBN');
+              // Fetch all books and find the one with matching ISBN
+              const allBooks = await bookService.getAllBooks();
+              const newBook = allBooks.find(book => book.isbn === bookForm.isbn);
+              
+              if (newBook && newBook.bookId) {
+                bookId = newBook.bookId;
+                console.log('Found book ID by ISBN lookup:', bookId);
+              } else {
+                throw new Error('Could not find the newly created book by ISBN');
+              }
+            }
 
-          if (!bookId) {
-            console.error('Book ID is missing from the response:', result);
-            throw new Error('Could not get book ID from the response');
+            if (!bookId) {
+              throw new Error('Could not determine book ID from response or lookup');
+            }
+
+            console.log('Using book ID for image upload:', bookId);
+            const formData = new FormData();
+            formData.append('image', bookImage);
+            await bookService.addBookImage(bookId, formData);
+          } catch (imageError) {
+            console.error('Error uploading book image:', imageError);
+            alert(`Book was created successfully, but image upload failed: ${imageError.message}`);
           }
-
-          console.log('Using book ID for image upload:', bookId);
-          const formData = new FormData();
-          formData.append('image', bookImage);
-          await bookService.addBookImage(bookId, formData);
         }
       }
 
@@ -853,16 +880,102 @@ const Admin = () => {
 
   // Handle marking notification as read
   const handleMarkAsRead = async (notificationId) => {
+    // Validate notification ID
+    if (!notificationId) {
+      console.error('Invalid notification ID:', notificationId);
+      alert('Cannot mark as read: Invalid notification ID');
+      return;
+    }
+    
     try {
+      // Show loading state
+      setLoadingNotifications(true);
+      
+      console.log(`Marking notification ${notificationId} as read`);
+      
+      // Call the API to mark notification as read
       await notificationService.markAsRead(notificationId);
-      // Update the notifications list
-      setNotifications(notifications.map(notification =>
-        notification.notificationId === notificationId
-          ? {...notification, isRead: true}
-          : notification
-      ));
+      
+      // Find the notification in the current state to determine its structure
+      const targetNotification = notifications.find(n => 
+        (n.notificationId === notificationId) || (n.id === notificationId)
+      );
+      
+      if (targetNotification) {
+        console.log('Found notification to update:', targetNotification);
+        
+        // Update the local state to reflect the change
+        // This handles both notificationId and id property names
+        setNotifications(prevNotifications => prevNotifications.map(notification => {
+          if ((notification.notificationId === notificationId) || 
+              (notification.id === notificationId)) {
+            // Create a new object with isRead set to true
+            return {
+              ...notification,
+              isRead: true
+            };
+          }
+          return notification;
+        }));
+        
+        console.log(`Successfully marked notification ${notificationId} as read`);
+      } else {
+        console.warn(`Notification with ID ${notificationId} not found in state`);
+        // Refresh the notifications list from the server
+        const updatedNotifications = await notificationService.getNotifications();
+        setNotifications(updatedNotifications);
+      }
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      if (error.response) {
+        console.error('Server response:', error.response.data);
+      }
+    } finally {
+      // Reset loading state
+      setLoadingNotifications(false);
+    }
+  };
+  
+  // Handle deleting a notification
+  const handleDeleteNotification = async (notificationId) => {
+    // Validate notification ID
+    if (!notificationId) {
+      console.error('Invalid notification ID for deletion:', notificationId);
+      alert('Cannot delete: Invalid notification ID');
+      return;
+    }
+    
+    // Confirm deletion with user
+    if (!window.confirm('Are you sure you want to delete this notification?')) {
+      return;
+    }
+    
+    try {
+      // Show loading state
+      setLoadingNotifications(true);
+      
+      console.log(`Deleting notification ${notificationId}`);
+      
+      // Call the API to delete the notification
+      await notificationService.deleteNotification(notificationId);
+      
+      // Update the local state by removing the deleted notification
+      setNotifications(prevNotifications => 
+        prevNotifications.filter(notification => 
+          notification.notificationId !== notificationId && notification.id !== notificationId
+        )
+      );
+      
+      console.log(`Successfully deleted notification ${notificationId}`);
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      if (error.response) {
+        console.error('Server response:', error.response.data);
+      }
+      alert(`Failed to delete notification: ${error.message}`);
+    } finally {
+      // Reset loading state
+      setLoadingNotifications(false);
     }
   };
 
@@ -1623,12 +1736,30 @@ const Admin = () => {
                                 variant="outline-success"
                                 size="sm"
                                 className="me-2"
-                                onClick={() => handleMarkAsRead(notification.notificationId)}
+                                onClick={() => {
+                                  // Debug log to check notification object
+                                  console.log('Notification object:', notification);
+                                  // Use id property if notificationId is not available
+                                  const id = notification.notificationId || notification.id;
+                                  console.log('Using notification ID:', id);
+                                  handleMarkAsRead(id);
+                                }}
                               >
                                 <FaCheck />
                               </Button>
                             )}
-                            <Button variant="outline-danger" size="sm">
+                            <Button 
+                              variant="outline-danger" 
+                              size="sm"
+                              onClick={() => {
+                                // Debug log to check notification object
+                                console.log('Deleting notification:', notification);
+                                // Use id property if notificationId is not available
+                                const id = notification.notificationId || notification.id;
+                                console.log('Using notification ID for deletion:', id);
+                                handleDeleteNotification(id);
+                              }}
+                            >
                               <FaTrash />
                             </Button>
                           </td>
