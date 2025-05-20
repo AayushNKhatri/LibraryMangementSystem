@@ -10,7 +10,7 @@ namespace server.Entities
         [Required]
         public string Title { get; set; }
         [Required]
-        [StringLength(13, ErrorMessage =("The ISBN number cannot be greater than 13"))]
+        [StringLength(13, ErrorMessage ="The ISBN number cannot be greater than 13")]
         public string ISBN { get; set; }
         [Required]
         public string Description { get; set; }

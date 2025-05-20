@@ -9277,24 +9277,25 @@
     ]
   },
   "packageFolders": {
-    "/home/midas/.nuget/packages/": {}
+    "C:\\Users\\aryan\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
+      "projectUniqueName": "D:\\LibraryMangementSystem\\server\\server.csproj",
       "projectName": "server",
-      "projectPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/server.csproj",
-      "packagesPath": "/home/midas/.nuget/packages/",
-      "outputPath": "/home/midas/Code/Clz/AppDev/LibraryMangementSystem/server/obj/",
+      "projectPath": "D:\\LibraryMangementSystem\\server\\server.csproj",
+      "packagesPath": "C:\\Users\\aryan\\.nuget\\packages\\",
+      "outputPath": "D:\\LibraryMangementSystem\\server\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/midas/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\aryan\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -9307,6 +9308,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -9397,7 +9403,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.310/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

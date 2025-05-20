@@ -71,7 +71,6 @@ namespace server.Services
                     Count = existingCartItem.Count
                 };
             }
-
             var newCartItem = new Cart
             {
                 CartId = Guid.NewGuid(),
@@ -79,7 +78,6 @@ namespace server.Services
                 BookId = book.BookId,
                 Count = createCart.Count
             };
-
             _context.Carts.Add(newCartItem);
             await _context.SaveChangesAsync();
 
@@ -162,7 +160,7 @@ namespace server.Services
                 UserId = userId,
                 OrderDate = DateTime.UtcNow,
                 BookCount = cartItems.Sum(c => c.Count),
-                TotalAmount = (double)originalTotal,
+                TotalAmount = (double)discountedTotal,
                 OrderStatus = OrderStatus.Pending,
                 DiscountApplied = (int)discount*100,
                 ClaimsCode = Guid.NewGuid()
@@ -382,16 +380,16 @@ namespace server.Services
         {
             if (cartItems == null || !cartItems.Any())
                 return 0m;
-
-            int totalBooks = cartItems.Sum(c => c.Count);
-            int pastOrderCount = await _context.Orders.CountAsync(o => o.UserId == userId && o.OrderStatus == OrderStatus.Completed);
-
+            var userCount = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (userCount == null)
+                throw new Exception("User not found");
+        
             decimal discount = 0;
 
-            if (totalBooks >= 5)
+            if (userCount.succesfullOrderCount == 5)
                 discount += 0.05m; // 5% discount
 
-            if (pastOrderCount >= 10)
+            if (userCount.succesfullOrderCount == 10)
                 discount += 0.10m; // Additional 10% discount
 
             return discount;

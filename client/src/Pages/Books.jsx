@@ -158,14 +158,14 @@ const BookPage = () => {
     const getCurrentPrice = (book) => {
         if (!book.inventories || book.inventories.length === 0) return 'N/A';
 
-        const inventory = book.inventories[0];
-        if (inventory.isOnSale && inventory.discountPercent > 0) {
+        const inventory = book.inventories.price;
+        if (inventory.isOnSale && inventory.DiscountPercent > 0) {
             const currentDate = new Date();
             const startDate = new Date(inventory.discoundStartDate);
             const endDate = new Date(inventory.discoundEndDate);
 
             if (currentDate >= startDate && currentDate <= endDate) {
-                const discountedPrice = inventory.price * (1 - inventory.discountPercent / 100);
+                const discountedPrice = inventory.price * (1 - inventory.DiscountPercent / 100);
                 return discountedPrice.toFixed(2);
             }
         }
@@ -480,10 +480,10 @@ const BookPage = () => {
                                             )}
                                             <div className="d-flex justify-content-between align-items-center mt-3">
                                                 <div className="price">
-                                                    ${book.price || 'N/A'}
+                                                    ${book.inventories[0].price * (1 - book.inventories[0].discountPercent / 100) || 'N/A'}
                                                     {book.inventories?.[0]?.isOnSale && book.inventories?.[0]?.discountPercent > 0 && (
                                                         <span className="original-price ms-2">
-                                                            ${book.inventories[0].price.toFixed(2)}
+                                                            ${book.price}
                                                         </span>
                                                     )}
                                                 </div>
